@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle, ChevronRight, Check,
   TrendingUp as TrendIcon, X, Info, Users, Zap, Lightbulb,
   ChevronDown
 } from 'lucide-react';
+import { useToast } from './ToastContext';
 
 /* ===== PREMIUM COLORS ===== */
 const TERRACOTTA = '#C9706A';
@@ -132,6 +134,8 @@ function Tooltip({ children, text }: { children: React.ReactNode; text: string }
 
 /* ===== COMPONENT ===== */
 export default function LeaderConsoleMain() {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
   const [showPulseModal, setShowPulseModal] = useState(false);
   const [showWhyId, setShowWhyId] = useState<number | null>(null);
   const [advisorHidden, setAdvisorHidden] = useState(false);
@@ -148,7 +152,7 @@ export default function LeaderConsoleMain() {
         <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
 
           {/* ===== HEADER ===== */}
-          <div className="px-6 md:px-8 pt-8 pb-6">
+          <div className="px-6 md:px-8 pt-8 pb-6 section-fade-in">
             <div className="flex items-center gap-2 text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
               <span>Консоль лидера</span><ChevronRight className="w-3 h-3" />
               <span style={{ color: 'var(--text-secondary)' }}>Главное сейчас</span>
@@ -168,7 +172,7 @@ export default function LeaderConsoleMain() {
           <div className="px-6 md:px-8"><GradientDivider /></div>
 
           {/* ===== HUMAN SUMMARY ===== */}
-          <div className="px-6 md:px-8 py-5">
+          <div className="px-6 md:px-8 py-5 section-fade-in" style={{ animationDelay: '50ms' }}>
             <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               Среда стабильна. Есть три точки внимания: один доступ нужно проверить, трём новичкам нужна первая связь, а часть нагрузки уже можно передать участникам.
             </p>
@@ -177,7 +181,7 @@ export default function LeaderConsoleMain() {
           <div className="px-6 md:px-8"><GradientDivider /></div>
 
           {/* ===== PULSE ===== */}
-          <div className="px-6 md:px-8 py-6">
+          <div className="px-6 md:px-8 py-6 section-fade-in" style={{ animationDelay: '100ms' }}>
             <div className="flex items-center gap-1.5 mb-3">
               <p className="section-heading mb-0">Пульс сообщества</p>
               <Tooltip text="Пульс — это общая оценка состояния среды: первая связь, запросы, Вклад, взаимопомощь, доступ и оплата, настройки. Это не рейтинг людей, а ориентир для лидера.">
@@ -199,7 +203,7 @@ export default function LeaderConsoleMain() {
           <div className="px-6 md:px-8"><GradientDivider /></div>
 
           {/* ===== YOUR ATTENTION TODAY ===== */}
-          <div className="px-6 md:px-8 py-6">
+          <div className="px-6 md:px-8 py-6 section-fade-in" style={{ animationDelay: '150ms' }}>
             <h2 className="section-heading">Ваше внимание сегодня</h2>
             <div className="space-y-4">
               {attentionCards.map((card) => (
@@ -222,12 +226,34 @@ export default function LeaderConsoleMain() {
                   <p className="text-sm leading-relaxed mb-2 pl-8" style={{ color: 'var(--text-secondary)' }}>{card.text}</p>
                   {card.extra && <p className="text-sm leading-relaxed mb-3 pl-8" style={{ color: 'var(--text-muted)' }}>{card.extra}</p>}
                   <div className="flex flex-wrap gap-2 pl-8">
-                    <button className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90"
+                    <button
+                      onClick={() => {
+                        if (card.primary === 'Открыть Вступление' || card.primary === 'Рассмотреть заявки') {
+                          navigate('/leader/entry');
+                        } else if (card.primary === 'Открыть доступ вручную') {
+                          showToast('Доступ открыт. Участник получил уведомление.', 'success');
+                        } else if (card.primary === 'Подобрать опору') {
+                          showToast('Открываю раздел подбора опоры для новичков...', 'info');
+                        } else {
+                          showToast('Функция в разработке', 'info');
+                        }
+                      }}
+                      className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90"
                       style={card.accent === 'terracotta' ? { backgroundColor: TERRACOTTA, color: '#fff' } : { backgroundColor: 'var(--gold)', color: '#fff' }}>
                       {card.primary}
                     </button>
                     {card.secondary && (
-                      <button className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                      <button
+                        onClick={() => {
+                          if (card.secondary === 'Открыть Вступление') {
+                            navigate('/leader/entry');
+                          } else if (card.secondary === 'Открыть Монетизацию') {
+                            showToast('Открываю Монетизацию...', 'info');
+                          } else {
+                            showToast('Функция в разработке', 'info');
+                          }
+                        }}
+                        className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
                         {card.secondary}
                       </button>
                     )}
@@ -250,7 +276,7 @@ export default function LeaderConsoleMain() {
           <div className="px-6 md:px-8"><GradientDivider /></div>
 
           {/* ===== SELF-MANAGING COMMUNITY ===== */}
-          <div className="px-6 md:px-8 py-6">
+          <div className="px-6 md:px-8 py-6 section-fade-in" style={{ animationDelay: '200ms' }}>
             <h2 className="section-heading">Сообщество справляется само</h2>
             <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Здесь видно, где участники уже поддерживают друг друга, а нагрузка не держится только на лидере.</p>
             <div className="space-y-3">
@@ -269,7 +295,7 @@ export default function LeaderConsoleMain() {
           <div className="px-6 md:px-8"><GradientDivider /></div>
 
           {/* ===== DELEGATE TO COMMUNITY ===== */}
-          <div className="px-6 md:px-8 py-6">
+          <div className="px-6 md:px-8 py-6 section-fade-in" style={{ animationDelay: '250ms' }}>
             <h2 className="section-heading">Что можно передать сообществу</h2>
             <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Здесь участники, которым можно доверить задачу. Это снимает нагрузку с лидера и развивает людей.</p>
             <div className="space-y-4">
@@ -287,11 +313,15 @@ export default function LeaderConsoleMain() {
                   </div>
                   <p className="text-sm leading-relaxed mb-4 pl-8" style={{ color: 'var(--text-secondary)' }}>{card.text}</p>
                   <div className="flex flex-wrap gap-2 pl-8">
-                    <button className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>
+                    <button
+                      onClick={() => showToast(card.primary === 'Предложить функцию' ? 'Предложение отправлено Анне Морозовой' : card.primary === 'Предложить ответить' ? 'Запрос отправлен Сергею' : 'Инсайт сохранён' , 'success')}
+                      className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>
                       {card.primary}
                     </button>
                     {card.secondary && (
-                      <button className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                      <button
+                        onClick={() => showToast('Функция в разработке', 'info')}
+                        className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
                         {card.secondary}
                       </button>
                     )}
@@ -304,7 +334,7 @@ export default function LeaderConsoleMain() {
           <div className="px-6 md:px-8"><GradientDivider /></div>
 
           {/* ===== RISKS ===== */}
-          <div className="px-6 md:px-8 py-6">
+          <div className="px-6 md:px-8 py-6 section-fade-in" style={{ animationDelay: '300ms' }}>
             <h2 className="section-heading">Риски, которые лучше не откладывать</h2>
             <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Здесь видно, где не хватает защиты: лимитов, ролей, доступов. Если не настроить заранее — проблема вырастет.</p>
             <div className="space-y-4">
@@ -323,7 +353,9 @@ export default function LeaderConsoleMain() {
                   </div>
                   <p className="text-sm leading-relaxed mb-4 pl-8" style={{ color: 'var(--text-secondary)' }}>{risk.text}</p>
                   <div className="pl-8">
-                    <button className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>
+                    <button
+                      onClick={() => showToast('Настройки открыты. Лимит можно задать в разделе ролей.', 'info')}
+                      className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>
                       {risk.action}
                     </button>
                   </div>
@@ -426,9 +458,9 @@ export default function LeaderConsoleMain() {
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-2 mb-6">
-                <button className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Проверить доступ</button>
-                <button className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Подобрать опору новичкам</button>
-                <button className="px-4 py-2 rounded-lg text-xs transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Настроить лимит Помощника на старте</button>
+                <button onClick={() => { showToast('Доступ открыт. Участник получил уведомление.', 'success'); }} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Проверить доступ</button>
+                <button onClick={() => { showToast('Открываю раздел подбора опоры...', 'info'); }} className="px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Подобрать опору новичкам</button>
+                <button onClick={() => { showToast('Функция в разработке', 'info'); }} className="px-4 py-2 rounded-lg text-xs transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Настроить лимит Помощника на старте</button>
               </div>
 
               {/* How it's calculated - collapsed by default */}
@@ -501,7 +533,7 @@ export default function LeaderConsoleMain() {
             )}
 
             <div className="flex flex-wrap gap-2 mb-2">
-              <button className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Предложить Анне</button>
+              <button onClick={() => showToast('Предложение отправлено Анне Морозовой', 'success')} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Предложить Анне</button>
             </div>
           </div>
         )}

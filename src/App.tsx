@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import LeaderConsoleMain from './LeaderConsoleMain';
 import LeaderConsoleEntry from './LeaderConsoleEntry';
+import { ToastProvider } from './ToastContext';
 
 /* ===== DATA ===== */
 const navItems = [
@@ -137,6 +138,7 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
   const sectionSpacing = "py-6 md:py-8";
 
   return (
+    <ToastProvider>
     <div className={darkMode ? 'dark' : ''}>
       <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-main)' }}>
 
@@ -840,6 +842,7 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
         <div className="lg:hidden h-20" />
       </div>
     </div>
+    </ToastProvider>
   );
 }
 
