@@ -11,6 +11,11 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<App />} />
         <Route path="/leader" element={<App leaderMode />} />
         <Route path="/leader/entry" element={<App leaderMode leaderTab="entry" />} />
+        <Route path="/leader/requests" element={<App leaderMode leaderTab="requests" />} />
+        <Route path="/leader/connections" element={<App leaderMode leaderTab="connections" />} />
+        <Route path="/leader/contribution" element={<App leaderMode leaderTab="contribution" />} />
+        <Route path="/leader/monetization" element={<App leaderMode leaderTab="monetization" />} />
+        <Route path="/leader/settings" element={<App leaderMode leaderTab="settings" />} />
       </Routes>
     </HashRouter>
   </StrictMode>,

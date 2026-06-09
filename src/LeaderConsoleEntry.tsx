@@ -830,9 +830,58 @@ export default function LeaderConsoleEntry() {
             {/* Applications by active filter */}
             {applicationsByFilter[activeFilter].length === 0 ? (
               <div className="rounded-xl p-6 text-center" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                <FileText className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
-                <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Заявок пока нет</p>
-                <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>В этой группе пока нет заявок.</p>
+                {activeFilter === 'waiting' && (
+                  <>
+                    <Check className="w-8 h-8 mx-auto mb-3" style={{ color: SAGE }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Сейчас нет заявок, где нужен ваш ответ</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Хороший знак: все новые заявки уже рассмотрены, уточнения отправлены, а решения не ждут внимания. Когда появится новая заявка или кандидат ответит на уточнение, она появится здесь.
+                    </p>
+                    <button onClick={() => { setActiveFilter('history'); setHistorySubFilter('all'); }} className="pill-link inline-flex">
+                      <span>Посмотреть все заявки</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+                {activeFilter === 'clarify' && (
+                  <>
+                    <Info className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Сейчас никто не ждёт уточнения</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Здесь появятся заявки, по которым вы уже задали кандидату дополнительный вопрос. Когда кандидат ответит, заявка вернётся в список «Требуют ответа» со статусом «Ответил».
+                    </p>
+                    <button onClick={() => setActiveFilter('waiting')} className="pill-link inline-flex">
+                      <span>Посмотреть заявки</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+                {activeFilter === 'approved' && (
+                  <>
+                    <Check className="w-8 h-8 mx-auto mb-3" style={{ color: SAGE }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Нет одобренных заявок с незавершённым входом</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Здесь появляются одобренные заявки, где вход ещё не завершён: оплата не завершена или доступ не открылся автоматически. Если список пустой, значит после одобрения сейчас ничего не зависло.
+                    </p>
+                    <button onClick={() => { setActiveFilter('history'); setHistorySubFilter('all'); }} className="pill-link inline-flex">
+                      <span>Посмотреть историю</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+                {activeFilter === 'history' && (
+                  <>
+                    <Clock className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>История входа пока пустая</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Здесь будут завершённые заявки: доступ открыт, кандидат отменил заявку, срок ответа истёк или вход сейчас не открываем. Когда появятся первые завершённые решения, они сохранятся здесь.
+                    </p>
+                    <button onClick={() => setActiveFilter('waiting')} className="pill-link inline-flex">
+                      <span>Вернуться к заявкам</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
               </div>
             ) : (<>
 
@@ -977,8 +1026,86 @@ export default function LeaderConsoleEntry() {
             </div>
             {filteredNewcomers.length === 0 && (
               <div className="rounded-xl p-6 text-center" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                <Users className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
-                <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>В этой группе пока нет новичков</p>
+                {newcomerFilter === 'all' && (
+                  <>
+                    <Users className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Пока нет новичков в первые 7 дней</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Когда участник получит доступ к сообществу, он появится здесь. В первые дни будет видно, есть ли у него цель, первый шаг, первая связь и опора.
+                    </p>
+                    <button
+                      onClick={() => { setActiveSection('applications'); setActiveFilter('waiting'); }}
+                      className="pill-link inline-flex"
+                    >
+                      <span>Открыть заявки</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+                {newcomerFilter === 'ждёт первой связи' && (
+                  <>
+                    <Check className="w-8 h-8 mx-auto mb-3" style={{ color: SAGE }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Сейчас никто не ждёт первой связи</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Хороший знак: у новичков уже появился первый живой контакт — ответ, встреча, Помощник на старте, участник рядом или другой отклик.
+                    </p>
+                    <button
+                      onClick={() => setNewcomerFilter('all')}
+                      className="pill-link inline-flex"
+                    >
+                      <span>Посмотреть всех новичков</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+                {newcomerFilter === 'Без цели' && (
+                  <>
+                    <Check className="w-8 h-8 mx-auto mb-3" style={{ color: SAGE }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>У всех новичков указана цель</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Это помогает точнее подобрать первый шаг, встречу, разбор или человека рядом. Если цель изменится, её можно будет обновить в карточке новичка.
+                    </p>
+                    <button
+                      onClick={() => setNewcomerFilter('all')}
+                      className="pill-link inline-flex"
+                    >
+                      <span>Посмотреть всех новичков</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+                {newcomerFilter === 'нужен первый шаг' && (
+                  <>
+                    <Check className="w-8 h-8 mx-auto mb-3" style={{ color: SAGE }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>У всех новичков есть первый шаг</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Хороший старт: каждому понятно, с чего начать после входа. Дальше важно смотреть, появился ли живой отклик и не нужна ли дополнительная опора.
+                    </p>
+                    <button
+                      onClick={() => setNewcomerFilter('all')}
+                      className="pill-link inline-flex"
+                    >
+                      <span>Посмотреть всех новичков</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+                {newcomerFilter === 'нужна опора' && (
+                  <>
+                    <Check className="w-8 h-8 mx-auto mb-3" style={{ color: SAGE }} />
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Сейчас нет новичков, которым срочно нужна опора</p>
+                    <p className="text-xs text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Похоже, у новичков уже есть первый контакт или достаточно понятный старт. Если кто-то начнёт теряться, система снова покажет его здесь.
+                    </p>
+                    <button
+                      onClick={() => setNewcomerFilter('all')}
+                      className="pill-link inline-flex"
+                    >
+                      <span>Посмотреть всех новичков</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
               </div>
             )}
             {filteredNewcomers.length > 3 && !showAllNewcomers && (

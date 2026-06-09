@@ -12,6 +12,11 @@ import {
 } from 'lucide-react';
 import LeaderConsoleMain from './LeaderConsoleMain';
 import LeaderConsoleEntry from './LeaderConsoleEntry';
+import LeaderConsoleRequests from './LeaderConsoleRequests';
+import LeaderConsoleConnections from './LeaderConsoleConnections';
+import LeaderConsoleContribution from './LeaderConsoleContribution';
+import LeaderConsoleMonetization from './LeaderConsoleMonetization';
+import LeaderConsoleSettings from './LeaderConsoleSettings';
 import { ToastProvider } from './ToastContext';
 
 /* ===== DATA ===== */
@@ -113,7 +118,7 @@ const faqItems = [
 ];
 
 /* ===== COMPONENT ===== */
-function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' }) {
+function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings' }) {
   const navigate = useNavigate();
   const location = useLocation();
   const leaderConsoleMode = leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry';
@@ -350,7 +355,17 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
             <div className="flex-1 min-w-0 flex flex-col lg:flex-row gap-4 md:gap-6">
               {/* ===== LEADER CONSOLE ===== */}
               {leaderConsoleMode && (
-                activeConsoleTab === 'entry' ? <LeaderConsoleEntry /> : <LeaderConsoleMain />
+                (() => {
+                  switch (activeConsoleTab) {
+                    case 'entry': return <LeaderConsoleEntry />;
+                    case 'requests': return <LeaderConsoleRequests />;
+                    case 'connections': return <LeaderConsoleConnections />;
+                    case 'contribution': return <LeaderConsoleContribution />;
+                    case 'monetization': return <LeaderConsoleMonetization />;
+                    case 'settings': return <LeaderConsoleSettings />;
+                    default: return <LeaderConsoleMain />;
+                  }
+                })()
               )}
 
               {/* ===== COMMUNITY PAGE ===== */}
