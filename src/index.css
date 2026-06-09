@@ -465,3 +465,42 @@
   animation: fillBar 600ms ease-out;
   animation-delay: 100ms;
 }
+
+/* ===== PREMIUM SCROLLBAR ===== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201,169,110,0.6); }
+
+/* ===== SMOOTH COLLAPSE ===== */
+.collapse-content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.2s ease-out, margin 0.2s ease;
+}
+.collapse-content.open {
+  max-height: 800px;
+  opacity: 1;
+}
+
+/* ===== PREMIUM SCROLLBAR ===== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.3); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201,169,110,0.6); }
+
+/* Firefox */
+* { scrollbar-width: thin; scrollbar-color: rgba(201,169,110,0.3) transparent; }
+
+/* ===== SMOOTH COLLAPSE ===== */
+.collapse-content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.2s ease-out, margin 0.2s ease;
+}
+.collapse-content.open {
+  max-height: 800px;
+  opacity: 1;
+}
