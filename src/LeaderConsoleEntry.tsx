@@ -3883,7 +3883,6 @@ export default function LeaderConsoleEntry() {
                   }[f7MaterialId];
                   return <><p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{current.title}</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{current.desc}</p></>;
                 })()}
-              </div>
                 </div>
               </div>
 
@@ -3922,6 +3921,7 @@ export default function LeaderConsoleEntry() {
                   <li className="flex gap-2"><span>—</span><span>Лидер всё равно сможет выбрать другой шаг в карточке конкретного новичка</span></li>
                 </ul>
               </div>
+            </div>
             </div>
 
             {/* Sticky footer */}
