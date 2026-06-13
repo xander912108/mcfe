@@ -618,6 +618,9 @@ export default function LeaderConsoleEntry() {
 
   /* ===== FIRST 7 DAYS MODAL STATE ===== */
   const [showFirst7DaysModal, setShowFirst7DaysModal] = useState(false);
+  const [showPickMaterialModal, setShowPickMaterialModal] = useState(false);
+  type MaterialId = 'guide_community' | 'guide_backend' | 'guide_frontend' | 'guide_first_question' | 'meeting_newcomers';
+  const [f7MaterialId, setF7MaterialId] = useState<MaterialId>('guide_community');
   const [f7SuggestGuide, setF7SuggestGuide] = useState(true);
   const [f7SignalDay3, setF7SignalDay3] = useState(true);
   const [f7SignalNoAction, setF7SignalNoAction] = useState(true);
@@ -630,6 +633,7 @@ export default function LeaderConsoleEntry() {
   const [f7GoalTool, setF7GoalTool] = useState(true);
   const [f7GoalInterview, setF7GoalInterview] = useState(true);
   const [f7GoalOther, setF7GoalOther] = useState(true);
+  const [f7GoalOtherLabel, setF7GoalOtherLabel] = useState('');
   const [f7PrepareDraft, setF7PrepareDraft] = useState(true);
   const [f7DraftTitle, setF7DraftTitle] = useState('{Имя}, давай спокойно начнём с первого шага');
   const [f7DraftBody, setF7DraftBody] = useState('{Имя}, привет! Рады, что ты с нами.\n\nВижу, что тебе важно: {Цель}. Чтобы не перегружаться в первые дни, лучше начать с одного понятного действия: {Первый шаг}.\n\nЕсли появится вопрос, можно написать в сообщество — рядом будут участники и команда, которые помогут сориентироваться.');
@@ -641,6 +645,8 @@ export default function LeaderConsoleEntry() {
   const [f7SigSupportUnconfirmed, setF7SigSupportUnconfirmed] = useState(true);
   const [showF7RestoreConfirm, setShowF7RestoreConfirm] = useState(false);
   const [showF7DiscardConfirm, setShowF7DiscardConfirm] = useState(false);
+  const [pickMatDiscardConfirm, setPickMatDiscardConfirm] = useState(false);
+  const [pickMatSelected, setPickMatSelected] = useState<MaterialId>('guide_community');
 
   /* ===== COLLAPSE STATES ===== */
   const [showDraftFull, setShowDraftFull] = useState(false);
@@ -675,13 +681,13 @@ export default function LeaderConsoleEntry() {
 
   /* ===== BODY SCROLL LOCK ===== */
   useEffect(() => {
-    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm) {
+    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm || showPickMaterialModal || pickMatDiscardConfirm) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm, showFirst7DaysModal, showF7RestoreConfirm, showF7DiscardConfirm]);
+  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm, showFirst7DaysModal, showF7RestoreConfirm, showF7DiscardConfirm, showPickMaterialModal, pickMatDiscardConfirm]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
@@ -3647,33 +3653,54 @@ export default function LeaderConsoleEntry() {
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-              {/* Basic first step */}
+              {/* Starter material */}
               <div>
                 <label className="flex items-start gap-3 cursor-pointer mb-3">
                   <input type="checkbox" checked={f7SuggestGuide} onChange={(e) => setF7SuggestGuide(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
-                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Предлагать стартовый гайд, если персональный первый шаг ещё не выбран</p>
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Предлагать стартовый материал, если персональный первый шаг ещё не выбран</p>
                 </label>
-                <div className="rounded-lg p-4 ml-7" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                  <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Первый шаг по умолчанию</p>
-                  <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Стартовый гайд по сообществу</p>
-                  <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Помогает понять, как устроено сообщество, где задавать вопросы, где искать материалы и с чего начать.</p>
-                  <button className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Выбрать другой материал</button>
-                </div>
-                <div className="mt-3 ml-7 space-y-2">
-                  <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Когда показывать сигнал лидеру</p>
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input type="checkbox" checked={f7SignalDay3} onChange={(e) => setF7SignalDay3(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
-                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Если к 3-му дню первый шаг не выбран</p>
-                  </label>
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input type="checkbox" checked={f7SignalNoAction} onChange={(e) => setF7SignalNoAction(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
-                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Если новичок открыл гайд, но не сделал ни одного действия</p>
-                  </label>
-                  <label className="flex items-start gap-2 cursor-pointer">
-                    <input type="checkbox" checked={f7SignalNoVisit} onChange={(e) => setF7SignalNoVisit(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
-                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Если новичок не заходил в сообщество больше суток после открытия доступа</p>
-                  </label>
-                </div>
+                {f7SuggestGuide && (
+                  <div className="ml-7">
+                    <div className="rounded-lg p-4 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                      <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Стартовый материал по умолчанию</p>
+                      {(() => {
+                        const materials: Record<MaterialId, { title: string; desc: string; type: string; duration: string; audience: string }> = {
+                          guide_community: { title: 'Стартовый гайд по сообществу', desc: 'Как всё устроено, где задавать вопросы, где искать материалы и как получить первый живой отклик.', type: 'гайд', duration: '10–15 минут', audience: 'подходит всем новичкам' },
+                          guide_backend: { title: 'Гайд: первый backend pet-проект', desc: 'Как выбрать идею, настроить окружение и собрать первый небольшой API.', type: 'гайд', duration: '30–40 минут', audience: 'лучше подходит backend-новичкам' },
+                          guide_frontend: { title: 'Гайд: первый frontend pet-проект', desc: 'Как выбрать простую идею, собрать первый экран и подготовить проект к разбору.', type: 'гайд', duration: '30–40 минут', audience: 'лучше подходит frontend-новичкам' },
+                          guide_first_question: { title: 'Как задать первый вопрос', desc: 'Короткая инструкция: как описать задачу, показать контекст и получить полезный ответ от сообщества.', type: 'инструкция', duration: '5–7 минут', audience: 'подходит большинству новичков' },
+                          meeting_newcomers: { title: 'Встреча для новичков', desc: 'Мягкое знакомство с сообществом: куда обращаться, как задавать вопросы и как получить первую поддержку.', type: 'встреча', duration: 'ближайшая: четверг · 18:30', audience: 'подходит новичкам, которым важен живой вход' },
+                        };
+                        const m = materials[f7MaterialId];
+                        return (
+                          <>
+                            <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{m.title}</p>
+                            <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>{m.desc}</p>
+                            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Тип: {m.type} · {m.duration} · {m.audience}</p>
+                          </>
+                        );
+                      })()}
+                    </div>
+                    <button onClick={() => setShowPickMaterialModal(true)} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80 mb-2" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Выбрать другой материал</button>
+                    <p className="text-[11px] mb-2" style={{ color: 'var(--text-muted)' }}>Этот материал будет предлагаться новым новичкам, если персональный первый шаг ещё не выбран.</p>
+                    <p className="text-[11px] mb-3 font-medium" style={{ color: 'var(--gold)' }}>Материал выбран. Не забудьте сохранить настройки.</p>
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Когда показывать сигнал лидеру</p>
+                      <label className="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" checked={f7SignalDay3} onChange={(e) => setF7SignalDay3(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Если к 3-му дню персональный первый шаг не выбран</p>
+                      </label>
+                      <label className="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" checked={f7SignalNoAction} onChange={(e) => setF7SignalNoAction(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Если новичок открыл стартовый материал, но не сделал ни одного действия</p>
+                      </label>
+                      <label className="flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" checked={f7SignalNoVisit} onChange={(e) => setF7SignalNoVisit(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Если новичок не заходил в сообщество больше суток после открытия доступа</p>
+                      </label>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
@@ -3703,13 +3730,27 @@ export default function LeaderConsoleEntry() {
                         { key: 'f7GoalReview', label: 'Получить разбор проекта или кода', state: f7GoalReview, setter: setF7GoalReview },
                         { key: 'f7GoalTool', label: 'Освоить конкретный инструмент', state: f7GoalTool, setter: setF7GoalTool },
                         { key: 'f7GoalInterview', label: 'Подготовиться к собеседованию', state: f7GoalInterview, setter: setF7GoalInterview },
-                        { key: 'f7GoalOther', label: 'Другая цель — написать своими словами', state: f7GoalOther, setter: setF7GoalOther },
                       ].map((opt) => (
                         <label key={opt.key} className="flex items-start gap-2 cursor-pointer">
                           <input type="checkbox" checked={opt.state} onChange={(e) => opt.setter(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
                           <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{opt.label}</p>
                         </label>
                       ))}
+                      <div>
+                        <label className="flex items-start gap-2 cursor-pointer">
+                          <input type="checkbox" checked={f7GoalOther} onChange={(e) => setF7GoalOther(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Другая цель — написать своими словами</p>
+                        </label>
+                        {f7GoalOther && (
+                          <div className="mt-3 ml-6">
+                            <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Название варианта цели</label>
+                            <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Напишите вариант, который новичок сможет выбрать при уточнении цели.</p>
+                            <input type="text" maxLength={120} value={f7GoalOtherLabel} onChange={(e) => setF7GoalOtherLabel(e.target.value)} placeholder="Например: Понять, куда двигаться дальше" className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                            <TitleCounter count={f7GoalOtherLabel.length} />
+                            <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>Этот вариант появится рядом с готовыми целями. Новичок сможет выбрать его или написать цель своими словами.</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -3769,7 +3810,7 @@ export default function LeaderConsoleEntry() {
               <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что изменится</p>
                 <ul className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  <li className="flex gap-2"><span>—</span><span>Новые карточки новичков будут получать базовый первый шаг, если персональный шаг ещё не выбран</span></li>
+                  <li className="flex gap-2"><span>—</span><span>Новые карточки новичков будут получать стартовый материал, если персональный шаг ещё не выбран</span></li>
                   <li className="flex gap-2"><span>—</span><span>При отсутствии цели система предложит сценарий уточнения</span></li>
                   <li className="flex gap-2"><span>—</span><span>Для первого отклика будет готовиться черновик</span></li>
                   <li className="flex gap-2"><span>—</span><span>Сигналы первых дней будут попадать в соответствующие срезы раздела «Новички»</span></li>
@@ -3806,6 +3847,100 @@ export default function LeaderConsoleEntry() {
                 setShowF7RestoreConfirm(false);
                 showToast('Исходные настройки первых 7 дней восстановлены.', 'success');
               }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Восстановить настройки</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== PICK MATERIAL MODAL ===== */}
+      {showPickMaterialModal && (
+        <div className="modal-backdrop fixed inset-0 z-[65] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setPickMatDiscardConfirm(true)}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full max-h-[90vh] relative overflow-hidden flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="shrink-0 flex items-start justify-between p-6 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+              <div>
+                <h2 className="text-xl font-bold heading-accent mb-1" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Выбрать другой материал</h2>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Выберите материал, который будет предлагаться новичкам как стартовый первый шаг, если персональный шаг ещё не выбран.</p>
+                <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>Материал должен быть коротким, понятным и безопасным для старта: без перегруза, сложных условий и обязательного участия в разборе.</p>
+              </div>
+              <button onClick={() => setPickMatDiscardConfirm(true)} className="p-1 rounded transition-colors shrink-0 ml-4" style={{ color: 'var(--text-muted)' }}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Current material */}
+            <div className="shrink-0 px-6 pt-4 pb-0">
+              <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Текущий материал</p>
+              <div className="rounded-lg p-3 mb-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                {(() => {
+                  const current = {
+                    guide_community: { title: 'Стартовый гайд по сообществу', desc: 'Помогает понять, как устроено сообщество, где задавать вопросы, где искать материалы и с чего начать.' },
+                    guide_backend: { title: 'Гайд: первый backend pet-проект', desc: 'Как выбрать идею, настроить окружение и собрать первый небольшой API.' },
+                    guide_frontend: { title: 'Гайд: первый frontend pet-проект', desc: 'Как выбрать простую идею, собрать первый экран и подготовить проект к разбору.' },
+                    guide_first_question: { title: 'Как задать первый вопрос', desc: 'Короткая инструкция о том, как описать задачу, показать контекст и получить полезный ответ.' },
+                    meeting_newcomers: { title: 'Встреча для новичков', desc: 'Мягкое знакомство с сообществом: куда обращаться, как задавать вопросы и как получить первую поддержку.' },
+                  }[f7MaterialId];
+                  return <><p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{current.title}</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{current.desc}</p></>;
+                })()}
+              </div>
+            </div>
+
+            {/* Material options */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+              <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Доступные материалы</p>
+              {[
+                { id: 'guide_community' as MaterialId, title: 'Стартовый гайд по сообществу', desc: 'Как всё устроено, где задавать вопросы, где искать материалы и как получить первый живой отклик.', type: 'гайд', duration: '10–15 минут', audience: 'Подходит всем новичкам', universal: true },
+                { id: 'guide_backend' as MaterialId, title: 'Гайд: первый backend pet-проект', desc: 'Как выбрать идею, настроить окружение и собрать первый небольшой API.', type: 'гайд', duration: '30–40 минут', audience: 'Подходит новичкам с технической целью', universal: false },
+                { id: 'guide_frontend' as MaterialId, title: 'Гайд: первый frontend pet-проект', desc: 'Как выбрать простую идею, собрать первый экран и подготовить проект к разбору.', type: 'гайд', duration: '30–40 минут', audience: 'Подходит новичкам, которые хотят развиваться во frontend', universal: false },
+                { id: 'guide_first_question' as MaterialId, title: 'Как задать первый вопрос', desc: 'Короткий материал о том, как описать задачу, показать контекст и получить полезный ответ от сообщества.', type: 'инструкция', duration: '5–7 минут', audience: 'Подходит новичкам без понятного первого шага', universal: true },
+                { id: 'meeting_newcomers' as MaterialId, title: 'Встреча для новичков', desc: 'Мягкое знакомство с сообществом: куда обращаться, как задавать вопросы и как получить первую поддержку.', type: 'встреча', duration: 'ближайшая: четверг · 18:30', audience: 'Подходит новичкам, которым важен живой вход', universal: true },
+              ].map((mat) => (
+                <label key={mat.id} className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${pickMatSelected === mat.id ? 'ring-1' : ''}`} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', ...(pickMatSelected === mat.id ? { ringColor: 'var(--gold)' } : {}) }}>
+                  <input type="radio" name="starterMaterial" checked={pickMatSelected === mat.id} onChange={() => setPickMatSelected(mat.id)} className="w-4 h-4 accent-gold mt-0.5 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{mat.title}</p>
+                    <p className="text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>{mat.desc}</p>
+                    <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Тип: {mat.type} · {mat.duration} · {mat.audience}</p>
+                    {!mat.universal && pickMatSelected === mat.id && (
+                      <div className="mt-2 rounded-lg p-3" style={{ backgroundColor: 'rgba(192,119,87,0.08)', border: '1px solid rgba(192,119,87,0.3)' }}>
+                        <p className="text-xs font-medium mb-1" style={{ color: TERRACOTTA }}>Этот материал подходит не всем новичкам</p>
+                        <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Гайд связан с {mat.id === 'guide_backend' ? 'backend' : 'frontend'}-разработкой. Если в сообщество приходят участники с разными целями, лучше оставить универсальный стартовый гайд, а {mat.id === 'guide_backend' ? 'backend' : 'frontend'}-гайд назначать персонально.</p>
+                      </div>
+                    )}
+                  </div>
+                </label>
+              ))}
+
+              {/* What changes */}
+              <div className="rounded-lg p-4 mt-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что изменится</p>
+                <ul className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>Выбранный материал станет базовым первым шагом для новых новичков</span></li>
+                  <li className="flex gap-2"><span>—</span><span>Он будет подставляться только там, где персональный первый шаг ещё не выбран</span></li>
+                  <li className="flex gap-2"><span>—</span><span>Уже назначенные первые шаги у текущих новичков не изменятся</span></li>
+                  <li className="flex gap-2"><span>—</span><span>Лидер всё равно сможет выбрать другой шаг в карточке конкретного новичка</span></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Sticky footer */}
+            <div className="shrink-0 flex flex-wrap items-center gap-3 p-6 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setF7MaterialId(pickMatSelected); setShowPickMaterialModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Выбрать материал</button>
+              <button onClick={() => setPickMatDiscardConfirm(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к настройкам</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== PICK MATERIAL: DISCARD CONFIRM ===== */}
+      {pickMatDiscardConfirm && (
+        <div className="modal-backdrop fixed inset-0 z-[75] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={() => setPickMatDiscardConfirm(false)}>
+          <div className="modal-enter rounded-2xl max-w-md w-full p-6 relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Выйти без сохранения?</h3>
+            <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Выбранный материал не станет базовым первым шагом.</p>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button onClick={() => setPickMatDiscardConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>Продолжить выбор</button>
+              <button onClick={() => { setPickMatDiscardConfirm(false); setShowPickMaterialModal(false); setPickMatSelected(f7MaterialId); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ color: TERRACOTTA }}>Выйти без сохранения</button>
             </div>
           </div>
         </div>
