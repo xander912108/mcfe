@@ -619,7 +619,7 @@ export default function LeaderConsoleEntry() {
   /* ===== FIRST 7 DAYS MODAL STATE ===== */
   const [showFirst7DaysModal, setShowFirst7DaysModal] = useState(false);
   const [showPickMaterialModal, setShowPickMaterialModal] = useState(false);
-  type MaterialId = 'guide_community' | 'guide_backend' | 'guide_frontend' | 'guide_first_question' | 'meeting_newcomers';
+  type MaterialId = 'guide_community' | 'guide_backend' | 'guide_frontend' | 'guide_first_question';
   const [f7MaterialId, setF7MaterialId] = useState<MaterialId>('guide_community');
   const [f7SuggestGuide, setF7SuggestGuide] = useState(true);
   const [f7SignalDay3, setF7SignalDay3] = useState(true);
@@ -3669,7 +3669,6 @@ export default function LeaderConsoleEntry() {
                           guide_backend: { title: 'Гайд: первый backend pet-проект', desc: 'Как выбрать идею, настроить окружение и собрать первый небольшой API.', type: 'гайд', duration: '30–40 минут', audience: 'лучше подходит backend-новичкам' },
                           guide_frontend: { title: 'Гайд: первый frontend pet-проект', desc: 'Как выбрать простую идею, собрать первый экран и подготовить проект к разбору.', type: 'гайд', duration: '30–40 минут', audience: 'лучше подходит frontend-новичкам' },
                           guide_first_question: { title: 'Как задать первый вопрос', desc: 'Короткая инструкция: как описать задачу, показать контекст и получить полезный ответ от сообщества.', type: 'инструкция', duration: '5–7 минут', audience: 'подходит большинству новичков' },
-                          meeting_newcomers: { title: 'Встреча для новичков', desc: 'Мягкое знакомство с сообществом: куда обращаться, как задавать вопросы и как получить первую поддержку.', type: 'встреча', duration: 'ближайшая: четверг · 18:30', audience: 'подходит новичкам, которым важен живой вход' },
                         };
                         const m = materials[f7MaterialId];
                         return (
@@ -3707,11 +3706,12 @@ export default function LeaderConsoleEntry() {
 
               {/* Goal help */}
               <div>
-                <label className="flex items-start gap-3 cursor-pointer mb-3">
+                <label className="flex items-start gap-3 cursor-pointer">
                   <input type="checkbox" checked={f7HelpGoal} onChange={(e) => setF7HelpGoal(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
                   <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Помогать новичку уточнить цель</p>
                 </label>
-                <div className="ml-7 space-y-4">
+                {f7HelpGoal && (
+                  <div className="ml-7 mt-3 space-y-4">
                   <div>
                     <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</label>
                     <input type="text" maxLength={120} value={f7GoalTitle} onChange={(e) => setF7GoalTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
@@ -3754,20 +3754,19 @@ export default function LeaderConsoleEntry() {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
 
               <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
 
               {/* First response draft */}
               <div>
-                <label className="flex items-start gap-3 cursor-pointer mb-3">
+                <label className="flex items-start gap-3 cursor-pointer">
                   <input type="checkbox" checked={f7PrepareDraft} onChange={(e) => setF7PrepareDraft(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Подготавливать черновик первого отклика для новичка</p>
-                    <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Черновик учитывает имя, цель, первый шаг и день участия. Он сохраняется в карточке новичка и не отправляется автоматически.</p>
-                  </div>
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Подготавливать черновик первого отклика для новичка</p>
                 </label>
-                <div className="ml-7 space-y-4">
+                {f7PrepareDraft && (
+                  <div className="ml-7 mt-3 space-y-4">
                   <div>
                     <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</label>
                     <input type="text" maxLength={120} value={f7DraftTitle} onChange={(e) => setF7DraftTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
@@ -3779,6 +3778,7 @@ export default function LeaderConsoleEntry() {
                     <div className="mt-1"><MessageCounter count={f7DraftBody.length} /></div>
                   </div>
                 </div>
+                )}
               </div>
 
               <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
@@ -3868,32 +3868,33 @@ export default function LeaderConsoleEntry() {
               </button>
             </div>
 
-            {/* Current material */}
-            <div className="shrink-0 px-6 pt-4 pb-0">
-              <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Текущий материал</p>
-              <div className="rounded-lg p-3 mb-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+              {/* Current material */}
+              <div>
+                <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Текущий материал</p>
+                <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 {(() => {
                   const current = {
                     guide_community: { title: 'Стартовый гайд по сообществу', desc: 'Помогает понять, как устроено сообщество, где задавать вопросы, где искать материалы и с чего начать.' },
                     guide_backend: { title: 'Гайд: первый backend pet-проект', desc: 'Как выбрать идею, настроить окружение и собрать первый небольшой API.' },
                     guide_frontend: { title: 'Гайд: первый frontend pet-проект', desc: 'Как выбрать простую идею, собрать первый экран и подготовить проект к разбору.' },
                     guide_first_question: { title: 'Как задать первый вопрос', desc: 'Короткая инструкция о том, как описать задачу, показать контекст и получить полезный ответ.' },
-                    meeting_newcomers: { title: 'Встреча для новичков', desc: 'Мягкое знакомство с сообществом: куда обращаться, как задавать вопросы и как получить первую поддержку.' },
                   }[f7MaterialId];
                   return <><p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{current.title}</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{current.desc}</p></>;
                 })()}
               </div>
-            </div>
+                </div>
+              </div>
 
-            {/* Material options */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+              {/* Material options */}
+              <div className="space-y-3">
               <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Доступные материалы</p>
               {[
                 { id: 'guide_community' as MaterialId, title: 'Стартовый гайд по сообществу', desc: 'Как всё устроено, где задавать вопросы, где искать материалы и как получить первый живой отклик.', type: 'гайд', duration: '10–15 минут', audience: 'Подходит всем новичкам', universal: true },
                 { id: 'guide_backend' as MaterialId, title: 'Гайд: первый backend pet-проект', desc: 'Как выбрать идею, настроить окружение и собрать первый небольшой API.', type: 'гайд', duration: '30–40 минут', audience: 'Подходит новичкам с технической целью', universal: false },
                 { id: 'guide_frontend' as MaterialId, title: 'Гайд: первый frontend pet-проект', desc: 'Как выбрать простую идею, собрать первый экран и подготовить проект к разбору.', type: 'гайд', duration: '30–40 минут', audience: 'Подходит новичкам, которые хотят развиваться во frontend', universal: false },
                 { id: 'guide_first_question' as MaterialId, title: 'Как задать первый вопрос', desc: 'Короткий материал о том, как описать задачу, показать контекст и получить полезный ответ от сообщества.', type: 'инструкция', duration: '5–7 минут', audience: 'Подходит новичкам без понятного первого шага', universal: true },
-                { id: 'meeting_newcomers' as MaterialId, title: 'Встреча для новичков', desc: 'Мягкое знакомство с сообществом: куда обращаться, как задавать вопросы и как получить первую поддержку.', type: 'встреча', duration: 'ближайшая: четверг · 18:30', audience: 'Подходит новичкам, которым важен живой вход', universal: true },
               ].map((mat) => (
                 <label key={mat.id} className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${pickMatSelected === mat.id ? 'ring-1' : ''}`} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', ...(pickMatSelected === mat.id ? { ringColor: 'var(--gold)' } : {}) }}>
                   <input type="radio" name="starterMaterial" checked={pickMatSelected === mat.id} onChange={() => setPickMatSelected(mat.id)} className="w-4 h-4 accent-gold mt-0.5 shrink-0" />
