@@ -24,7 +24,7 @@ export function useToast() {
 let toastIdCounter = 0;
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toasts, setToasts] = useState<(Toast & { exiting?: boolean })[]>([]);
   const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const removeToast = useCallback((id: string) => {
@@ -36,12 +36,19 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const dismissToast = useCallback((id: string) => {
+    // Start exit animation
+    setToasts(prev => prev.map(t => t.id === id ? { ...t, exiting: true } : t));
+    // Actually remove after animation completes
+    setTimeout(() => removeToast(id), 200);
+  }, [removeToast]);
+
   const showToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = `toast-${++toastIdCounter}`;
     setToasts(prev => [...prev, { id, message, type }]);
-    const timer = setTimeout(() => removeToast(id), 4000);
+    const timer = setTimeout(() => dismissToast(id), 4000);
     timersRef.current.set(id, timer);
-  }, [removeToast]);
+  }, [dismissToast]);
 
   const iconMap = {
     success: <Check className="w-3.5 h-3.5" style={{ color: '#6B9E7C' }} />,
@@ -65,7 +72,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map(toast => (
           <div
             key={toast.id}
-            className="toast-enter pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium min-w-[280px] max-w-[400px]"
+            className={`${toast.exiting ? 'toast-exit' : 'toast-enter'} pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium min-w-[280px] max-w-[400px]`}
             style={{
               backgroundColor: 'var(--bg-card)',
               border: `1px solid ${borderMap[toast.type]}`,
@@ -77,7 +84,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             {iconMap[toast.type]}
             <span className="flex-1">{toast.message}</span>
             <button
-              onClick={() => removeToast(toast.id)}
+              onClick={() => dismissToast(toast.id)}
               className="p-0.5 rounded transition-colors"
               style={{ color: 'var(--text-muted)' }}
             >

@@ -148,7 +148,7 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
       <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-main)' }}>
 
         {/* ===== HEADER ===== */}
-        <header className="sticky top-0 z-50 backdrop-blur-xl" style={{ backgroundColor: darkMode ? 'rgba(20,20,23,0.88)' : 'rgba(252,251,248,0.88)', borderBottom: '1px solid var(--border-color)' }}>
+        <header className="sticky top-0 z-50 backdrop-blur-xl" style={{ backgroundColor: 'var(--bg-header)', borderBottom: '1px solid var(--border-color)' }}>
           <div className="max-w-[1440px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
 
             {/* Community Selector — UPDATED */}
@@ -808,7 +808,11 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
                     Пригласить участника
                   </button>
                   {/* Mini-link: Подробнее о сообществе */}
-                  <button className="hover-text-primary w-full flex items-center justify-center gap-1.5 py-2 text-[11px] rounded-lg" style={{ color: 'var(--text-muted)' }}>
+                  <button
+                    onClick={() => navigate('/community')}
+                    className="hover-text-primary w-full flex items-center justify-center gap-1.5 py-2 text-[11px] rounded-lg transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
                     <InfoIcon className="w-3 h-3" />
                     <span>Подробнее о сообществе</span>
                     <ArrowRight className="w-3 h-3" />

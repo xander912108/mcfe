@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import {
   AlertTriangle, ChevronRight, Check,
   X, Info, Users, Zap, Lightbulb,
-  UserPlus, MessageSquare, Calendar,
   BookOpen, Pause, Clock, ArrowRight,
   FileText, Search
 } from 'lucide-react';
+import { useToast } from './ToastContext';
 
 /* ===== PREMIUM COLORS ===== */
 const TERRACOTTA = '#C9706A';
@@ -14,32 +14,7 @@ const TERRACOTTA_BORDER = 'rgba(201,112,106,0.15)';
 const SAGE = '#6B9E7C';
 const SAGE_LIGHT = 'rgba(107,158,124,0.08)';
 const SAGE_BORDER = 'rgba(107,158,124,0.15)';
-/* ===== CUSTOM TOOLTIP ===== */
-function Tooltip({ children, text }: { children: React.ReactNode; text: string }) {
-  const [visible, setVisible] = useState(false);
-  return (
-    <span className="relative inline-flex items-center" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
-      {children}
-      {visible && (
-        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 rounded-lg text-xs max-w-[280px] z-50 whitespace-normal"
-          style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', color: 'var(--text-secondary)' }}>
-          {text}
-          <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent" style={{ borderTopColor: 'var(--border-color)' }} />
-        </span>
-      )}
-    </span>
-  );
-}
-
-/* ===== DATA: METRICS ===== */
-const metrics = [
-  { label: 'заявок', value: 5, sub: 'ждут ответа', tooltip: 'Заявки — это люди, которые хотят вступить в сообщество и ждут решения, уточнения или следующего шага.' },
-  { label: 'заявки', value: 2, sub: 'ждут больше суток', tooltip: 'Если заявка долго остаётся без ответа, кандидат может потерять интерес. Лучше дать решение или задать уточнение, пока запрос тёплый.' },
-  { label: 'новичков', value: 8, sub: 'в первые 7 дней', tooltip: 'Новички — участники в первые 7 дней после входа. В этот период особенно важны цель, первый шаг и первая связь.' },
-  { label: 'новичка', value: 3, sub: 'ждут первой связи', tooltip: 'Первая связь — первый живой контакт новичка с человеком в сообществе: ответ, встреча, благодарность, Помощник на старте или участник рядом.' },
-  { label: 'помощника', value: 2, sub: 'готовы поддержать', tooltip: 'Помощник на старте — участник, который временно помогает новичку освоиться в первые дни. Это не администратор и не команда управления.' },
-];
-
+/* ===== DATA (placeholder for future metrics if needed) ===== */
 /* ===== DATA: ATTENTION CARDS ===== */
 const attentionCards = [
   {
@@ -53,17 +28,16 @@ const attentionCards = [
   {
     id: 2,
     title: '3 новичкам нужна первая связь',
-    text: 'Они уже вошли в сообщество, но пока не получили живого отклика: ответа, встречи, благодарности или Помощника на старте.',
-    primary: 'Подобрать опору',
-    secondary: 'Показать новичков',
+    text: 'Один ждёт ответа на вопрос, двум ещё нужен первый живой отклик.',
+    primary: 'Посмотреть новичков',
     accent: 'gold' as const,
     why: 'Эти участники находятся в первые 7 дней после вступления. Первая связь помогает новичку почувствовать, что он не один, и повышает шанс, что он начнёт путь в сообществе.',
   },
   {
     id: 3,
-    title: 'Опоры для новичков сейчас мало',
-    text: 'Можно предложить временную функцию участнику с повторяемым Вкладом или подобрать первую связь вручную.',
-    primary: 'Посмотреть кандидатов',
+    title: 'Для двух новичков пока не найдена опора',
+    text: 'Можно посмотреть подходящих Помощников на старте и участников рядом.',
+    primary: 'Посмотреть новичков',
     accent: 'gold' as const,
     why: 'Если опоры не хватает, лидер снова становится единственной точкой входа. Лучше подключить участников, которые уже помогали другим и готовы взять небольшую нагрузку.',
   },
@@ -559,15 +533,17 @@ export default function LeaderConsoleEntry() {
   const [archivePeriod, setArchivePeriod] = useState<'6m' | '1y' | 'all'>('6m');
   const [archiveStatusFilter, setArchiveStatusFilter] = useState<string>('all');
 
+  /* ===== TOAST ===== */
+  const { showToast } = useToast();
+
   /* ===== SECTIONS STATE ===== */
-  type SectionKey = 'attention' | 'applications' | 'newcomers' | 'connection' | 'progress' | 'settings';
+  type SectionKey = 'attention' | 'applications' | 'newcomers' | 'progress' | 'settings';
   const [activeSection, setActiveSection] = useState<SectionKey>('attention');
 
   const sections: { key: SectionKey; label: string; count: string }[] = [
     { key: 'attention', label: 'Ваше внимание', count: `${attentionCards.length} точки требуют заботы` },
     { key: 'applications', label: 'Заявки', count: `${applicationsByFilter.waiting.length} ждут ответа` },
     { key: 'newcomers', label: 'Новички', count: `${newcomers.length} в первые 7 дней` },
-    { key: 'connection', label: 'Первая связь', count: `4 способа помочь` },
     { key: 'progress', label: 'Что получается', count: `${selfManaging.length} хороших сигнала` },
     { key: 'settings', label: 'Настройки входа', count: `${settingsRisks.length} настройка мешает входу` },
   ];
@@ -626,6 +602,20 @@ export default function LeaderConsoleEntry() {
   const [goalHelpKeepGuide, setGoalHelpKeepGuide] = useState(false);
   const [goalHelpSuggestSupport, setGoalHelpSuggestSupport] = useState(true);
 
+  /* ===== APP MESSAGE TEMPLATES MODAL STATE ===== */
+  const [showAppMessageModal, setShowAppMessageModal] = useState(false);
+  const [appMsgTab, setAppMsgTab] = useState<'approve' | 'clarify' | 'reject'>('approve');
+  const [appMsgApproveTitle, setAppMsgApproveTitle] = useState('Заявка одобрена: следующий шаг');
+  const [appMsgApproveBody, setAppMsgApproveBody] = useState('{Имя}, привет!\n\nВаша заявка в «{Сообщество}» одобрена.\n\n{Следующий шаг}\n\nПосле входа вы появитесь в разделе для новичков. Там будет видно, с чего начать и где можно получить первый живой отклик.');
+  const [appMsgClarifyTitle, setAppMsgClarifyTitle] = useState('Нужно уточнить вашу заявку');
+  const [appMsgClarifyBody, setAppMsgClarifyBody] = useState('{Имя}, привет!\n\nСпасибо за заявку в «{Сообщество}». Хочу чуть лучше понять ваш запрос, чтобы честно подсказать, подойдёт ли вам формат сообщества.\n\n{Уточняющий вопрос}\n\nМожно ответить своими словами — после ответа заявка снова появится у команды на рассмотрении.');
+  const [appMsgRejectTitle, setAppMsgRejectTitle] = useState('По вашей заявке в «{Сообщество}»');
+  const [appMsgRejectBody, setAppMsgRejectBody] = useState('{Имя}, спасибо за заявку.\n\nСейчас формат сообщества может не полностью совпасть с вашим запросом, поэтому мы пока не открываем доступ.\n\nЕсли ваш запрос изменится, вы сможете подать новую заявку позже.');
+  const [appMsgAllowReapply, setAppMsgAllowReapply] = useState(true);
+  const [appMsgAddLink, setAppMsgAddLink] = useState(false);
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
   /* ===== COLLAPSE STATES ===== */
   const [showDraftFull, setShowDraftFull] = useState(false);
   const [showContextCollapse, setShowContextCollapse] = useState(false);
@@ -644,19 +634,28 @@ export default function LeaderConsoleEntry() {
     </div>
   );
 
+  const TitleCounter = ({ count }: { count: number }) => (
+    <div className="text-right">
+      <span className="text-[11px]" style={{ color: count > 100 ? TERRACOTTA : 'var(--text-muted)' }}>{count} / 120</span>
+      {count > 100 && (
+        <p className="text-[11px] mt-0.5" style={{ color: TERRACOTTA }}>Заголовок слишком длинный. Лучше сделать его короче, чтобы в письме отображалось полностью.</p>
+      )}
+    </div>
+  );
+
   const GradientDivider = () => (
     <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
   );
 
   /* ===== BODY SCROLL LOCK ===== */
   useEffect(() => {
-    if (newcomerSidePanel || archivePanelOpen || sidePanelApp) {
+    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp]);
+  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
@@ -678,35 +677,6 @@ export default function LeaderConsoleEntry() {
             <div className="flex items-center gap-2 mt-2">
               <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Обновлено 4 минуты назад</p>
               <button className="text-[11px] font-medium transition-colors hover:opacity-80" style={{ color: 'var(--gold)' }}>Обновить</button>
-            </div>
-          </div>
-
-          <div className="px-6 md:px-8"><GradientDivider /></div>
-
-          {/* ===== HUMAN SUMMARY ===== */}
-          <div className="px-6 md:px-8 py-5">
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-              Сейчас 5 заявок ждут решения, а 3 новичкам нужна первая связь. Хороший момент подключить Помощников на старте или участников рядом.
-            </p>
-          </div>
-
-          <div className="px-6 md:px-8"><GradientDivider /></div>
-
-          {/* ===== METRICS ===== */}
-          <div className="px-6 md:px-8 py-6">
-            <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-              {metrics.map((m, i) => (
-                <div key={i} className="rounded-xl p-4 text-center" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                  <p className={`text-2xl font-bold ${m.label === 'заявки' || m.label === 'новичка' ? 'gold-glow-terracotta' : 'gold-glow'}`} style={{ color: m.label === 'заявки' || m.label === 'новичка' ? TERRACOTTA : 'var(--gold)' }}>{m.value}</p>
-                  <div className="flex items-center justify-center gap-1 mt-1">
-                    <p className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>{m.label}</p>
-                    <Tooltip text={m.tooltip}>
-                      <Info className="w-3 h-3 cursor-help" style={{ color: 'var(--text-muted)' }} />
-                    </Tooltip>
-                  </div>
-                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{m.sub}</p>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -769,21 +739,12 @@ export default function LeaderConsoleEntry() {
                       onClick={() => {
                         if (card.id === 1) { setActiveSection('applications'); setActiveFilter('waiting'); }
                         if (card.id === 2) { setActiveSection('newcomers'); setNewcomerFilter('ждёт первой связи'); }
-                        if (card.id === 3) { setActiveSection('connection'); setShowSupportModal(true); }
+                        if (card.id === 3) { setActiveSection('newcomers'); setNewcomerFilter('ждёт первой связи'); }
                       }}
                       className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90"
                       style={card.accent === 'terracotta' ? { backgroundColor: TERRACOTTA, color: '#fff' } : { backgroundColor: 'var(--gold)', color: '#fff' }}>
                       {card.primary}
                     </button>
-                    {card.secondary && (
-                      <button
-                        onClick={() => {
-                          if (card.id === 2) { setActiveSection('newcomers'); setNewcomerFilter('ждёт первой связи'); }
-                        }}
-                        className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
-                        {card.secondary}
-                      </button>
-                    )}
                     {card.why && (
                       <button onClick={() => setShowWhyId(showWhyId === card.id ? null : card.id)} className="px-3 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
                         {showWhyId === card.id ? 'Скрыть' : 'Почему?'}
@@ -1357,57 +1318,6 @@ export default function LeaderConsoleEntry() {
             </>
           )}
 
-          {activeSection === 'connection' && (<>{/* ===== FIRST CONNECTION ===== */}
-          <div className="section-fade-in px-6 md:px-8 py-6">
-            <h2 className="section-heading">Первая связь и опора</h2>
-            <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
-              Первая связь помогает новичку почувствовать, что он не один. Её может дать не только лидер: Помощник на старте, участник рядом, встреча или первый ответ.
-            </p>
-            <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>
-              Выберите способ, а система подскажет, кого можно подключить без перегруза.
-            </p>
-            {newcomers.filter(n => !n.hasConnection).length === 0 ? (
-              <div className="rounded-xl p-6 text-center" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                <Check className="w-8 h-8 mx-auto mb-3" style={{ color: SAGE }} />
-                <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Новичков без первой связи сейчас нет</p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Это хороший знак: люди получают первые живые контакты и не остаются одни после вступления.</p>
-              </div>
-            ) : (
-            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-color)' }}>
-              {[
-                { icon: UserPlus, label: 'Назначить Помощника на старте', desc: 'Участник временно помогает новичку освоиться', modal: 'mentorAssign' },
-                { icon: Users, label: 'Предложить участника рядом', desc: 'Участник с похожей целью или опытом', modal: 'connect' },
-                { icon: Calendar, label: 'Пригласить на ближайшую встречу', desc: 'Живой контакт в формате сообщества', modal: 'meeting' },
-                { icon: MessageSquare, label: 'Написать первый отклик', desc: 'Короткий отклик и понятный следующий шаг', modal: 'reply' },
-              ].map((item, i) => (
-                <button
-                  key={i}
-                  onClick={() => { if (item.modal === 'mentorAssign') setShowMentorAssignModal(true); if (item.modal === 'connect') setShowConnectModal(true); if (item.modal === 'meeting') setShowMeetingInviteModal(true); if (item.modal === 'reply') setShowFirstReplyModal(true); }}
-                  className="w-full flex items-center gap-4 px-5 py-4 text-left transition-all duration-200 hover:opacity-90"
-                  style={{
-                    backgroundColor: 'var(--bg-card)',
-                    borderBottom: i < 3 ? '1px solid var(--border-color)' : 'none',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--hover-bg)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-card)'; }}
-                >
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(212,175,55,0.1)' }}>
-                    <item.icon className="w-4 h-4" style={{ color: 'var(--gold)' }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{item.label}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.desc}</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
-                </button>
-              ))}
-            </div>
-            )}
-          </div>
-
-          <div className="px-6 md:px-8"><GradientDivider /></div>
-
-          {/* CONNECTION end */}</>)}
 
           {activeSection === 'progress' && (<>{/* ===== WHAT WORKS ===== */}
           <div className="section-fade-in px-6 md:px-8 py-6">
@@ -2781,71 +2691,250 @@ export default function LeaderConsoleEntry() {
         </div>
       )}
 
-      {/* ===== RIGHT PANEL: ADVISOR ===== */}
+      {/* ===== RIGHT PANEL: DYNAMIC ADVISOR & TIPS ===== */}
       <aside className="w-full lg:w-[240px] shrink-0 space-y-5 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto right-scrollbar">
-        {!advisorHidden && (
-          <div className="p-1">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
-                <h3 className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Советник</h3>
-              </div>
-              <button onClick={() => setAdvisorHidden(true)} className="p-0.5 rounded transition-colors" style={{ color: 'var(--text-muted)' }}>
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-            <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
-              Сейчас важнее всего дать первую связь трём новичкам. Начните с подбора опоры — система подскажет, кого можно подключить без перегруза.
-            </p>
-            <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
-              {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'}
-            </button>
-            {showAdvisorWhy && (
-              <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                  Эти новички находятся в первые 7 дней после вступления и пока не получили живого отклика. Первая связь помогает человеку почувствовать, что он не один, и повышает шанс, что он начнёт путь в сообществе.
-                </p>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2 mb-2">
-              <button onClick={() => setShowSupportModal(true)} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Подобрать опору</button>
-            </div>
-          </div>
-        )}
+        {/* ===== Ваше внимание — правую колонку скрываем полностью ===== */}
+        {/* ===== Что получается — правую колонку скрываем полностью ===== */}
+        {(() => {
+          /* ---- DYNAMIC ADVISOR LOGIC ---- */
+          /* Заявки: приоритеты */
+          const staleApp = applicationsByFilter.waiting.find(a => a.badge === 'больше суток');
+          const repliedApp = applicationsByFilter.waiting.find(a => a.badge === 'ответил');
+          const stuckApp = applicationsByFilter.approved.find(a => a.badge === 'доступ не открылся');
+          /* Новички: приоритеты */
+          const unansweredNc = newcomers.find(n => n.hasFirstQuestion && !n.firstResponseReceived);
+          const draftNc = newcomers.find(n => n.hasDraft);
+          const noConnectionNc = newcomers.find(n => n.day.includes('5') && !n.hasConnection);
+          /* Показываем ли правую колонку */
+          const showColumn = activeSection === 'applications' || activeSection === 'newcomers' || activeSection === 'settings';
+          const hasAdvisorContent = activeSection === 'applications' || activeSection === 'newcomers' || activeSection === 'settings';
+          if (!showColumn) return null;
+          return (
+            <>
+              {/* ===== СОВЕТНИК ===== */}
+              {hasAdvisorContent && !advisorHidden && (
+                <div className="p-1">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Lightbulb className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
+                      <h3 className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Советник</h3>
+                    </div>
+                    <button onClick={() => setAdvisorHidden(true)} className="p-0.5 rounded transition-colors" style={{ color: 'var(--text-muted)' }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
 
-        {!advisorHidden && <div className="h-px mx-1" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />}
+                  {/* --- РАЗДЕЛ: ЗАЯВКИ --- */}
+                  {activeSection === 'applications' && (
+                    <>
+                      {staleApp ? (
+                        <>
+                          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>Одна заявка ждёт ответа больше суток</p>
+                          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Начните с неё, пока запрос кандидата ещё актуален. Остальные заявки можно рассмотреть следом.</p>
+                          <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                            {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'}
+                          </button>
+                          {showAdvisorWhy && (
+                            <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Система учитывает время ожидания, ответы на уточнения и ситуации, где после одобрения не завершились оплата или открытие доступа.</p>
+                            </div>
+                          )}
+                          <button onClick={() => { setSidePanelApp(staleApp); setApproveDirty(false); }} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Показать эту заявку</button>
+                        </>
+                      ) : repliedApp ? (
+                        <>
+                          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>Кандидат ответил на уточнение</p>
+                          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Теперь можно принять решение по заявке или задать ещё один вопрос, если контекста пока недостаточно.</p>
+                          <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                            {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'}
+                          </button>
+                          {showAdvisorWhy && (
+                            <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Система учитывает время ожидания, ответы на уточнения и ситуации, где после одобрения не завершились оплата или открытие доступа.</p>
+                            </div>
+                          )}
+                          <button onClick={() => { setSidePanelApp(repliedApp); setApproveDirty(false); }} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Показать эту заявку</button>
+                        </>
+                      ) : stuckApp ? (
+                        <>
+                          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>Оплата прошла, но доступ не открылся</p>
+                          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Человек прошёл вход, но ещё не может попасть в сообщество. Ситуацию лучше проверить сразу.</p>
+                          <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                            {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'}
+                          </button>
+                          {showAdvisorWhy && (
+                            <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Система учитывает время ожидания, ответы на уточнения и ситуации, где после одобрения не завершились оплата или открытие доступа.</p>
+                            </div>
+                          )}
+                          <button onClick={() => { setActiveFilter('approved'); setSidePanelApp(stuckApp); setApproveDirty(false); }} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Показать эту заявку</button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>Сейчас срочных ситуаций нет</p>
+                          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Все заявки обработаны, ожидают решения в обычном порядке.</p>
+                        </>
+                      )}
+                    </>
+                  )}
 
-        {/* ===== МОЖЕТ ПРИГОДИТЬСЯ ===== */}
-        {!advisorHidden && (
-          <div className="p-1">
-            <p className="text-[10px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Может пригодиться</p>
-            <div className="space-y-3">
-              <button onClick={() => setShowSettingsModal(true)} className="w-full text-left group flex items-start gap-2.5">
-                <FileText className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
-                <div>
-                  <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Форма заявки</p>
-                  <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Вопросы, цель и сообщение после заявки</p>
+                  {/* --- РАЗДЕЛ: НОВИЧКИ --- */}
+                  {activeSection === 'newcomers' && (
+                    <>
+                      {unansweredNc ? (
+                        <>
+                          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>Сначала ответьте на первый вопрос</p>
+                          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Один новичок уже задал вопрос и ждёт живого ответа.{draftNc ? ' Ещё по одному ответу сохранён черновик — его можно завершить следом.' : ''}</p>
+                          <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                            {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'}
+                          </button>
+                          {showAdvisorWhy && (
+                            <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Система учитывает день участия, вопросы без ответа, незавершённые черновики, первую связь и состояние опоры.</p>
+                            </div>
+                          )}
+                          <button onClick={() => setNewcomerSidePanel(unansweredNc)} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Показать вопрос</button>
+                        </>
+                      ) : draftNc ? (
+                        <>
+                          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>Есть неотправленный черновик ответа</p>
+                          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Лучше завершить и отправить ответ, пока вопрос ещё свежий.</p>
+                          <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                            {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'}
+                          </button>
+                          {showAdvisorWhy && (
+                            <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Система учитывает день участия, вопросы без ответа, незавершённые черновики, первую связь и состояние опоры.</p>
+                            </div>
+                          )}
+                          <button onClick={() => setNewcomerSidePanel(draftNc)} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Показать черновик</button>
+                        </>
+                      ) : noConnectionNc ? (
+                        <>
+                          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>Пятый день без первой связи</p>
+                          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Новичок уже почти неделю в сообществе, но живого контакта пока не было. Стоит подключить опору или пригласить на встречу.</p>
+                          <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                            {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'}
+                          </button>
+                          {showAdvisorWhy && (
+                            <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Система учитывает день участия, вопросы без ответа, незавершённые черновики, первую связь и состояние опоры.</p>
+                            </div>
+                          )}
+                          <button onClick={() => setNewcomerSidePanel(noConnectionNc)} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Показать новичка</button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>Сейчас срочных ситуаций нет</p>
+                          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>У новичков нет вопросов без ответа.</p>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {/* --- РАЗДЕЛ: НАСТРОЙКИ ВХОДА --- */}
+                  {activeSection === 'settings' && (
+                    <>
+                      <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>После одобрения не указан понятный следующий шаг</p>
+                      <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Кандидат получает решение, но может не понять, что делать дальше: войти сразу, перейти к оплате или дождаться открытия доступа.</p>
+                      <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                        {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'}
+                      </button>
+                      {showAdvisorWhy && (
+                        <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                          <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Система проверяет форму заявки, сообщения после решений, условия оплаты и правила открытия доступа.</p>
+                        </div>
+                      )}
+                      <button onClick={() => setShowSettingsModal(true)} className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80" style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}>Настроить следующий шаг</button>
+                    </>
+                  )}
                 </div>
-              </button>
-              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
-              <button onClick={() => setShowLimitsModal(true)} className="w-full text-left group flex items-start gap-2.5">
-                <BookOpen className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
-                <div>
-                  <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Лимиты Помощника</p>
-                  <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Срок, нагрузка и условия функции</p>
+              )}
+
+              {/* ===== РАЗДЕЛИТЕЛЬ ===== */}
+              {hasAdvisorContent && !advisorHidden && <div className="h-px mx-1" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />}
+
+              {/* ===== МОЖЕТ ПРИГОДИТЬСЯ (динамический) ===== */}
+              {hasAdvisorContent && !advisorHidden && (
+                <div className="p-1">
+                  <p className="text-[10px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Может пригодиться</p>
+                  <div className="space-y-3">
+                    {/* --- ЗАЯВКИ --- */}
+                    {activeSection === 'applications' && (
+                      <>
+                        <button onClick={() => setShowSettingsModal(true)} className="w-full text-left group flex items-start gap-2.5">
+                          <FileText className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
+                          <div>
+                            <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Форма заявки</p>
+                            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Вопросы, цель и сообщение, которое человек увидит после отправки заявки</p>
+                          </div>
+                        </button>
+                        <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+                        <button onClick={() => setShowAppMessageModal(true)} className="w-full text-left group flex items-start gap-2.5">
+                          <FileText className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
+                          <div>
+                            <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Сообщения по заявке</p>
+                            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Заголовки и тексты для одобрения, уточнения и решения «Не принимать сейчас»</p>
+                          </div>
+                        </button>
+                      </>
+                    )}
+                    {/* --- НОВИЧКИ --- */}
+                    {activeSection === 'newcomers' && (
+                      <>
+                        <button onClick={() => setShowSettingsModal(true)} className="w-full text-left group flex items-start gap-2.5">
+                          <FileText className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
+                          <div>
+                            <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Первые 7 дней</p>
+                            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Базовый первый шаг, запрос цели и сценарий первого сообщения новичку</p>
+                          </div>
+                        </button>
+                        <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+                        <button onClick={() => setShowLimitsModal(true)} className="w-full text-left group flex items-start gap-2.5">
+                          <BookOpen className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
+                          <div>
+                            <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Лимиты Помощника</p>
+                            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Срок функции, допустимая нагрузка, темы помощи и возможность поставить поддержку на паузу</p>
+                          </div>
+                        </button>
+                      </>
+                    )}
+                    {/* --- НАСТРОЙКИ ВХОДА --- */}
+                    {activeSection === 'settings' && (
+                      <>
+                        <button onClick={() => setShowSettingsModal(true)} className="w-full text-left group flex items-start gap-2.5">
+                          <FileText className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
+                          <div>
+                            <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Форма заявки</p>
+                            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Вопросы, цель и сообщение после отправки заявки</p>
+                          </div>
+                        </button>
+                        <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+                        <button onClick={() => setShowLimitsModal(true)} className="w-full text-left group flex items-start gap-2.5">
+                          <BookOpen className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
+                          <div>
+                            <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Оплата и открытие доступа</p>
+                            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Что происходит после одобрения, успешной оплаты и автоматического открытия доступа</p>
+                          </div>
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </button>
-            </div>
-          </div>
-        )}
-        {advisorHidden && (
-          <button onClick={() => setAdvisorHidden(false)} className="w-full text-left p-1 transition-all duration-200 hover:-translate-y-0.5">
-            <div className="flex items-center gap-2">
-              <Lightbulb className="w-4 h-4" style={{ color: 'var(--gold)' }} />
-              <span className="text-sm font-medium" style={{ color: 'var(--gold)' }}>Показать Советника</span>
-            </div>
-          </button>
-        )}
+              )}
+
+              {/* ===== КНОПКА ПОКАЗАТЬ (если скрыт) ===== */}
+              {advisorHidden && (
+                <button onClick={() => setAdvisorHidden(false)} className="w-full text-left p-1 transition-all duration-200 hover:-translate-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4" style={{ color: 'var(--gold)' }} />
+                    <span className="text-sm font-medium" style={{ color: 'var(--gold)' }}>Показать Советника</span>
+                  </div>
+                </button>
+              )}
+            </>
+          );
+        })()}
       </aside>
 
       {/* ===== SIDE PANEL for applications ===== */}
@@ -3303,6 +3392,224 @@ export default function LeaderConsoleEntry() {
             </div>
           </div>
         </>
+      )}
+
+      {/* ===== APP MESSAGE TEMPLATES MODAL ===== */}
+      {showAppMessageModal && (
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowDiscardConfirm(true)}>
+          <div className="modal-enter rounded-2xl max-w-2xl w-full max-h-[90vh] relative overflow-hidden flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="shrink-0 flex items-start justify-between p-6 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+              <div>
+                <h2 className="text-xl font-bold heading-accent mb-1" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Сообщения по заявке</h2>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Настройте стандартные сообщения для решений по заявке. Перед отправкой конкретному кандидату текст можно будет изменить.</p>
+                <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>Изменения применятся только к новым сообщениям. Уже отправленные сообщения не изменятся.</p>
+              </div>
+              <button onClick={() => setShowDiscardConfirm(true)} className="p-1 rounded transition-colors shrink-0 ml-4" style={{ color: 'var(--text-muted)' }}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="shrink-0 flex gap-1 px-6 pt-4 pb-0">
+              {([
+                { key: 'approve' as const, label: 'Одобрение' },
+                { key: 'clarify' as const, label: 'Уточнение' },
+                { key: 'reject' as const, label: 'Не принимаем сейчас' },
+              ]).map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setAppMsgTab(t.key)}
+                  className="px-4 py-2 text-sm font-medium transition-all duration-200 rounded-t-lg"
+                  style={{
+                    color: appMsgTab === t.key ? 'var(--gold)' : 'var(--text-muted)',
+                    borderBottom: appMsgTab === t.key ? '2px solid var(--gold)' : '2px solid transparent',
+                  }}
+                >{t.label}</button>
+              ))}
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              {/* ===== TAB: APPROVE ===== */}
+              {appMsgTab === 'approve' && (
+                <div className="space-y-5">
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Это сообщение получит кандидат после одобрения заявки. Следующий шаг система подставит автоматически с учётом режима входа: открыть доступ, перейти к оплате или дождаться ручного подтверждения.</p>
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</label>
+                    <input type="text" maxLength={120} value={appMsgApproveTitle} onChange={(e) => setAppMsgApproveTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                    <TitleCounter count={appMsgApproveTitle.length} />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение</label>
+                    <textarea maxLength={1000} value={appMsgApproveBody} onChange={(e) => setAppMsgApproveBody(e.target.value)} className="w-full px-3 py-3 rounded-xl text-sm resize-none leading-relaxed" rows={8} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content' }} />
+                    <div className="mt-1"><MessageCounter count={appMsgApproveBody.length} /></div>
+                  </div>
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                    <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Переменные в сообщении</p>
+                    <div className="space-y-1.5">
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><code className="text-[11px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--gold)' }}>{'{Имя}'}</code> — имя кандидата</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><code className="text-[11px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--gold)' }}>{'{Сообщество}'}</code> — название сообщества</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><code className="text-[11px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--gold)' }}>{'{Следующий шаг}'}</code> — автоматически зависит от условий входа</p>
+                    </div>
+                    <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border-color)' }}>
+                      <p className="text-[11px] font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Как система подставит следующий шаг</p>
+                      <div className="space-y-2">
+                        <div><p className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>Бесплатный вход</p><p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Доступ уже открыт — можно войти в сообщество.</p></div>
+                        <div><p className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>Платный вход</p><p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Чтобы войти в сообщество, завершите оплату. После подтверждения платежа доступ откроется автоматически.</p></div>
+                        <div><p className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>Ручное открытие доступа</p><p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Заявка одобрена. Мы сообщим, когда доступ будет открыт.</p></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ===== TAB: CLARIFY ===== */}
+              {appMsgTab === 'clarify' && (
+                <div className="space-y-5">
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Это сообщение получит кандидат, когда для решения не хватает информации. Сам уточняющий вопрос лидер добавит при рассмотрении заявки.</p>
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</label>
+                    <input type="text" maxLength={120} value={appMsgClarifyTitle} onChange={(e) => setAppMsgClarifyTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                    <TitleCounter count={appMsgClarifyTitle.length} />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение</label>
+                    <textarea maxLength={1000} value={appMsgClarifyBody} onChange={(e) => setAppMsgClarifyBody(e.target.value)} className="w-full px-3 py-3 rounded-xl text-sm resize-none leading-relaxed" rows={8} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content' }} />
+                    <div className="mt-1"><MessageCounter count={appMsgClarifyBody.length} /></div>
+                  </div>
+                  <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                    <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Переменные в сообщении</p>
+                    <div className="space-y-1.5">
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><code className="text-[11px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--gold)' }}>{'{Имя}'}</code> — имя кандидата</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><code className="text-[11px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--gold)' }}>{'{Сообщество}'}</code> — название сообщества</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><code className="text-[11px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--gold)' }}>{'{Уточняющий вопрос}'}</code> — вопрос, который лидер добавит перед отправкой</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ===== TAB: REJECT ===== */}
+              {appMsgTab === 'reject' && (
+                <div className="space-y-5">
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Это сообщение получит кандидат, если доступ пока не открывается. Причина для команды хранится отдельно и кандидату не показывается автоматически.</p>
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</label>
+                    <input type="text" maxLength={120} value={appMsgRejectTitle} onChange={(e) => setAppMsgRejectTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                    <TitleCounter count={appMsgRejectTitle.length} />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение</label>
+                    <textarea maxLength={1000} value={appMsgRejectBody} onChange={(e) => setAppMsgRejectBody(e.target.value)} className="w-full px-3 py-3 rounded-xl text-sm resize-none leading-relaxed" rows={8} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content' }} />
+                    <div className="mt-1"><MessageCounter count={appMsgRejectBody.length} /></div>
+                  </div>
+                  <div className="space-y-3">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked={appMsgAllowReapply} onChange={(e) => setAppMsgAllowReapply(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Оставить возможность подать новую заявку</p>
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Кандидат увидит, что решение не окончательное и сможет вернуться с другим запросом.</p>
+                      </div>
+                    </label>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked={appMsgAddLink} onChange={(e) => setAppMsgAddLink(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Добавить ссылку на описание формата сообщества</p>
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Поможет человеку лучше понять, какие виды поддержки доступны внутри.</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* ===== PREVIEW (all tabs) ===== */}
+              <div className="mt-6 pt-5" style={{ borderTop: '1px solid var(--border-color)' }}>
+                <p className="text-[10px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Как кандидат увидит сообщение</p>
+                <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                  {appMsgTab === 'approve' && (
+                    <>
+                      <p className="text-sm font-bold mb-3" style={{ color: 'var(--text-primary)' }}>{appMsgApproveTitle}</p>
+                      <div className="text-sm leading-relaxed space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                        <p>Алексей, привет!</p>
+                        <p>Ваша заявка в «IT Технологии» одобрена.</p>
+                        <p>Чтобы войти в сообщество, завершите оплату. После подтверждения платежа доступ откроется автоматически.</p>
+                        <p>После входа вы появитесь в разделе для новичков. Там будет видно, с чего начать и где можно получить первый живой отклик.</p>
+                      </div>
+                    </>
+                  )}
+                  {appMsgTab === 'clarify' && (
+                    <>
+                      <p className="text-sm font-bold mb-3" style={{ color: 'var(--text-primary)' }}>{appMsgClarifyTitle}</p>
+                      <div className="text-sm leading-relaxed space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                        <p>Алексей, привет!</p>
+                        <p>Спасибо за заявку в «IT Технологии». Хочу чуть лучше понять ваш запрос, чтобы честно подсказать, подойдёт ли вам формат сообщества.</p>
+                        <p><span style={{ color: 'var(--gold)' }}>Расскажите подробнее о вашем текущем опыте с Docker и CI/CD — что уже пробовали и что хотели бы освоить первым?</span></p>
+                        <p>Можно ответить своими словами — после ответа заявка снова появится у команды на рассмотрении.</p>
+                      </div>
+                    </>
+                  )}
+                  {appMsgTab === 'reject' && (
+                    <>
+                      <p className="text-sm font-bold mb-3" style={{ color: 'var(--text-primary)' }}>{appMsgRejectTitle.replace('{Сообщество}', 'IT Технологии')}</p>
+                      <div className="text-sm leading-relaxed space-y-2" style={{ color: 'var(--text-secondary)' }}>
+                        <p>Алексей, спасибо за заявку.</p>
+                        <p>Сейчас формат сообщества может не полностью совпасть с вашим запросом, поэтому мы пока не открываем доступ.</p>
+                        {appMsgAllowReapply && <p>Если ваш запрос изменится, вы сможете подать новую заявку позже.</p>}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sticky footer */}
+            <div className="shrink-0 flex flex-wrap items-center gap-3 p-6 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setShowAppMessageModal(false); showToast('Сообщения по заявке обновлены. Изменения применятся к новым отправлениям.', 'success'); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Сохранить сообщения</button>
+              <button onClick={() => setShowRestoreConfirm(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Восстановить исходные тексты</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== RESTORE CONFIRM MODAL ===== */}
+      {showRestoreConfirm && (
+        <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={() => setShowRestoreConfirm(false)}>
+          <div className="modal-enter rounded-2xl max-w-md w-full p-6 relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Восстановить исходные тексты?</h3>
+            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Все изменения в шаблонах одобрения, уточнения и решения «Не принимаем сейчас» будут заменены исходными текстами.</p>
+            <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Уже отправленные сообщения не изменятся.</p>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button onClick={() => setShowRestoreConfirm(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к настройке</button>
+              <button onClick={() => {
+                setAppMsgApproveTitle('Заявка одобрена: следующий шаг');
+                setAppMsgApproveBody('{Имя}, привет!\n\nВаша заявка в «{Сообщество}» одобрена.\n\n{Следующий шаг}\n\nПосле входа вы появитесь в разделе для новичков. Там будет видно, с чего начать и где можно получить первый живой отклик.');
+                setAppMsgClarifyTitle('Нужно уточнить вашу заявку');
+                setAppMsgClarifyBody('{Имя}, привет!\n\nСпасибо за заявку в «{Сообщество}». Хочу чуть лучше понять ваш запрос, чтобы честно подсказать, подойдёт ли вам формат сообщества.\n\n{Уточняющий вопрос}\n\nМожно ответить своими словами — после ответа заявка снова появится у команды на рассмотрении.');
+                setAppMsgRejectTitle('По вашей заявке в «{Сообщество}»');
+                setAppMsgRejectBody('{Имя}, спасибо за заявку.\n\nСейчас формат сообщества может не полностью совпасть с вашим запросом, поэтому мы пока не открываем доступ.\n\nЕсли ваш запрос изменится, вы сможете подать новую заявку позже.');
+                setAppMsgAllowReapply(true);
+                setAppMsgAddLink(false);
+                setShowRestoreConfirm(false);
+                showToast('Исходные тексты восстановлены.', 'success');
+              }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Восстановить тексты</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== DISCARD CONFIRM MODAL ===== */}
+      {showDiscardConfirm && (
+        <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={() => setShowDiscardConfirm(false)}>
+          <div className="modal-enter rounded-2xl max-w-md w-full p-6 relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Выйти без сохранения?</h3>
+            <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Изменения в сообщениях будут потеряны.</p>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button onClick={() => setShowDiscardConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>Остаться</button>
+              <button onClick={() => { setShowDiscardConfirm(false); setShowAppMessageModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ color: TERRACOTTA }}>Выйти без сохранения</button>
+            </div>
+          </div>
+
+        </div>
       )}
 
     </div>
