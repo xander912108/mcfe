@@ -618,6 +618,7 @@ export default function LeaderConsoleEntry() {
 
   /* ===== FIRST 7 DAYS MODAL STATE ===== */
   const [showFirst7DaysModal, setShowFirst7DaysModal] = useState(false);
+  const [showMetricsModal, setShowMetricsModal] = useState(false);
   const [showPickMaterialModal, setShowPickMaterialModal] = useState(false);
   type MaterialId = 'guide_community' | 'guide_backend' | 'guide_frontend' | 'guide_first_question';
   const [f7MaterialId, setF7MaterialId] = useState<MaterialId>('guide_community');
@@ -681,13 +682,13 @@ export default function LeaderConsoleEntry() {
 
   /* ===== BODY SCROLL LOCK ===== */
   useEffect(() => {
-    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm || showPickMaterialModal || pickMatDiscardConfirm) {
+    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm || showPickMaterialModal || pickMatDiscardConfirm || showMetricsModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm, showFirst7DaysModal, showF7RestoreConfirm, showF7DiscardConfirm, showPickMaterialModal, pickMatDiscardConfirm]);
+  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm, showFirst7DaysModal, showF7RestoreConfirm, showF7DiscardConfirm, showPickMaterialModal, pickMatDiscardConfirm, showMetricsModal]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
@@ -1354,7 +1355,8 @@ export default function LeaderConsoleEntry() {
           {activeSection === 'progress' && (<>{/* ===== WHAT WORKS ===== */}
           <div className="section-fade-in px-6 md:px-8 py-6">
             <h2 className="section-heading">Что уже получается</h2>
-            <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Здесь видно, где вход уже работает без постоянного участия лидера.</p>
+            <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>Здесь видно, где вход в сообщество уже работает хорошо: заявки не зависают, новички получают первые шаги, связь и поддержку.</p>
+            <button onClick={() => setShowMetricsModal(true)} className="text-[11px] mb-5 transition-colors hover:opacity-80" style={{ color: 'var(--gold)' }}>Как считаются показатели</button>
             <div className="space-y-3">
               {selfManaging.map((item, i) => (
                 <div key={i} className="flex items-start gap-3 py-2">
@@ -3942,6 +3944,186 @@ export default function LeaderConsoleEntry() {
             <div className="flex flex-wrap gap-2 justify-end">
               <button onClick={() => setPickMatDiscardConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>Продолжить выбор</button>
               <button onClick={() => { setPickMatDiscardConfirm(false); setShowPickMaterialModal(false); setPickMatSelected(f7MaterialId); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ color: TERRACOTTA }}>Выйти без сохранения</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== HOW METRICS ARE CALCULATED MODAL ===== */}
+      {showMetricsModal && (
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowMetricsModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-2xl w-full max-h-[90vh] relative overflow-hidden flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="shrink-0 flex items-start justify-between p-6 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+              <div>
+                <h2 className="text-xl font-bold heading-accent mb-1" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Как считаются показатели</h2>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Показатели помогают понять, как люди проходят вход в сообщество. Они не оценивают участников и не используются как публичный рейтинг.</p>
+              </div>
+              <button onClick={() => setShowMetricsModal(false)} className="p-1 rounded transition-colors shrink-0 ml-4" style={{ color: 'var(--text-muted)' }}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+              {/* Application answered */}
+              <div>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Заявка получила ответ</h3>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Считается, когда по заявке было сделано одно из действий:</p>
+                <ul className="space-y-1 text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>заявка одобрена</span></li>
+                  <li className="flex gap-2"><span>—</span><span>кандидату отправлено уточнение</span></li>
+                  <li className="flex gap-2"><span>—</span><span>принято решение «Не принимаем сейчас»</span></li>
+                </ul>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Не считается ответом:</p>
+                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <li className="flex gap-2"><span>—</span><span>заявка просто открыта лидером</span></li>
+                  <li className="flex gap-2"><span>—</span><span>заявка просмотрена без действия</span></li>
+                  <li className="flex gap-2"><span>—</span><span>черновик сообщения сохранён, но не отправлен</span></li>
+                </ul>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Access opened */}
+              <div>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Доступ открыт</h3>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Считается, когда участник действительно получил доступ к сообществу.</p>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Это может произойти:</p>
+                <ul className="space-y-1 text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>автоматически после одобрения</span></li>
+                  <li className="flex gap-2"><span>—</span><span>автоматически после успешной оплаты</span></li>
+                  <li className="flex gap-2"><span>—</span><span>вручную, если лидер открыл доступ сам</span></li>
+                </ul>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Не считается открытым доступом:</p>
+                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <li className="flex gap-2"><span>—</span><span>заявка одобрена, но оплата не завершена</span></li>
+                  <li className="flex gap-2"><span>—</span><span>оплата прошла, но доступ не открылся</span></li>
+                  <li className="flex gap-2"><span>—</span><span>кандидат получил сообщение, но ещё не вошёл</span></li>
+                </ul>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Goal specified */}
+              <div>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Цель указана</h3>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Считается, когда у новичка есть понятная цель входа: что он хочет получить в сообществе или к какому результату хочет прийти.</p>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Цель может быть:</p>
+                <ul className="space-y-1 text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>указана в заявке</span></li>
+                  <li className="flex gap-2"><span>—</span><span>выбрана новичком после входа</span></li>
+                  <li className="flex gap-2"><span>—</span><span>уточнена через сообщение</span></li>
+                  <li className="flex gap-2"><span>—</span><span>временно задана командой, если новичок пока не ответил</span></li>
+                </ul>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Если цель временно задана командой, система показывает пометку: <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>временная цель · ждём подтверждение</span></p>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* First step selected */}
+              <div>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Первый шаг выбран</h3>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Считается, когда за новичком закреплено конкретное действие, с которого он может начать.</p>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Например:</p>
+                <ul className="space-y-1 text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>открыть подходящий гайд</span></li>
+                  <li className="flex gap-2"><span>—</span><span>загрузить проект на разбор</span></li>
+                  <li className="flex gap-2"><span>—</span><span>задать первый вопрос</span></li>
+                  <li className="flex gap-2"><span>—</span><span>прийти на встречу для новичков</span></li>
+                  <li className="flex gap-2"><span>—</span><span>начать трек</span></li>
+                  <li className="flex gap-2"><span>—</span><span>выполнить другой небольшой шаг</span></li>
+                </ul>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Стартовый материал по умолчанию сам по себе не всегда считается персональным первым шагом. Если персональный шаг ещё не выбран, новичок может оставаться в списке «Без первого шага».</p>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* First step done */}
+              <div>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Первый шаг сделан</h3>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Считается, когда новичок выполнил выбранное действие.</p>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Например:</p>
+                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>открыл или завершил материал</span></li>
+                  <li className="flex gap-2"><span>—</span><span>загрузил работу</span></li>
+                  <li className="flex gap-2"><span>—</span><span>задал вопрос</span></li>
+                  <li className="flex gap-2"><span>—</span><span>пришёл на встречу</span></li>
+                  <li className="flex gap-2"><span>—</span><span>отметил шаг выполненным</span></li>
+                  <li className="flex gap-2"><span>—</span><span>отправил первый результат на разбор</span></li>
+                </ul>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* First connection */}
+              <div>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Первая связь появилась</h3>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Считается, когда новичок получил живой контакт с сообществом.</p>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Первая связь появляется, если:</p>
+                <ul className="space-y-1 text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>лидер или участник отправил первый отклик</span></li>
+                  <li className="flex gap-2"><span>—</span><span>новичок получил ответ на первый вопрос</span></li>
+                  <li className="flex gap-2"><span>—</span><span>участник рядом согласился помочь и создан мини-чат</span></li>
+                  <li className="flex gap-2"><span>—</span><span>Помощник на старте подтвердил готовность</span></li>
+                  <li className="flex gap-2"><span>—</span><span>новичок пришёл на встречу или получил живой отклик на ней</span></li>
+                </ul>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Не считается первой связью:</p>
+                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <li className="flex gap-2"><span>—</span><span>сохранённый черновик</span></li>
+                  <li className="flex gap-2"><span>—</span><span>отправленное приглашение на встречу без реакции новичка</span></li>
+                  <li className="flex gap-2"><span>—</span><span>запрос Помощнику без подтверждения</span></li>
+                  <li className="flex gap-2"><span>—</span><span>предложение участнику рядом, на которое ещё нет ответа</span></li>
+                </ul>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Support confirmed */}
+              <div>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Опора подтверждена</h3>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Считается, когда человек рядом действительно согласился помочь новичку.</p>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-secondary)' }}>Опорой может быть:</p>
+                <ul className="space-y-1 text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>Помощник на старте</span></li>
+                  <li className="flex gap-2"><span>—</span><span>участник рядом</span></li>
+                  <li className="flex gap-2"><span>—</span><span>куратор</span></li>
+                  <li className="flex gap-2"><span>—</span><span>другой участник, который согласился помочь с первым шагом</span></li>
+                </ul>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Не считается подтверждённой опорой:</p>
+                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <li className="flex gap-2"><span>—</span><span>рекомендация системы</span></li>
+                  <li className="flex gap-2"><span>—</span><span>отправленный запрос без ответа</span></li>
+                  <li className="flex gap-2"><span>—</span><span>сохранённый черновик предложения</span></li>
+                  <li className="flex gap-2"><span>—</span><span>человек отказался или не ответил</span></li>
+                </ul>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Successful start */}
+              <div>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Успешный старт</h3>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Считается, когда у новичка есть три базовые опоры входа:</p>
+                <ul className="space-y-1 text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>понятная цель</span></li>
+                  <li className="flex gap-2"><span>—</span><span>выбран первый шаг</span></li>
+                  <li className="flex gap-2"><span>—</span><span>появилась первая связь</span></li>
+                </ul>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Опора в виде Помощника или участника рядом не обязательна для каждого новичка. Она учитывается отдельно и предлагается там, где действительно нужна.</p>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Important note */}
+              <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Показатели нужны не для контроля людей, а для заботы о входе. Они помогают лидеру увидеть, где человек может потеряться, и вовремя дать понятный следующий шаг.</p>
+              </div>
+            </div>
+
+            {/* Sticky footer */}
+            <div className="shrink-0 flex items-center justify-end p-6 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowMetricsModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Понятно</button>
             </div>
           </div>
         </div>
