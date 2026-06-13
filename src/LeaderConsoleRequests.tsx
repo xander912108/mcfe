@@ -6,6 +6,7 @@ import {
   ChevronDown, Star, Zap
 } from 'lucide-react';
 import { useToast } from './ToastContext';
+import { images } from './assets/images';
 
 /* ===== PREMIUM COLORS ===== */
 const TERRACOTTA = '#C9706A';
@@ -47,7 +48,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 1,
       author: 'Дмитрий Коваль',
-      avatar: '/avatar-1.jpg',
+      avatar: images.avatar1,
       topic: 'Помощь с Docker-контейнеризацией',
       content: 'Не получается настроить docker-compose для микросервиса. База не подключается при сборке. Кто-то сталкивался?',
       type: 'help',
@@ -61,7 +62,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 2,
       author: 'Марина Соколова',
-      avatar: '/avatar-2.jpg',
+      avatar: images.avatar2,
       topic: 'Разбор pet-проекта на React',
       content: 'Собрала приложение для отслеживания задач. Хочу понять, правильно ли организована архитектура и стоит ли добавить state-manager.',
       type: 'review',
@@ -74,7 +75,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 3,
       author: 'Алексей Петров',
-      avatar: '/avatar-3.jpg',
+      avatar: images.avatar3,
       topic: 'Срочно: проблема с деплоем',
       content: 'После обновления CI/CD pipeline падает на этапе сборки. Логи прикрепил, нужна помощь — завтра дедлайн.',
       type: 'help',
@@ -88,7 +89,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 4,
       author: 'Елена Васильева',
-      avatar: '/avatar-4.jpg',
+      avatar: images.avatar4,
       topic: 'Обратная связь по треку Backend',
       content: 'Прошла трек "Go для начинающих". Хотелось бы больше практики с concurrency. Остальное — отлично!',
       type: 'feedback',
@@ -103,7 +104,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 5,
       author: 'Анна Морозова',
-      avatar: '/avatar-5.jpg',
+      avatar: images.avatar5,
       topic: 'Помощь с Kubernetes',
       content: 'Подскажите, как правильно настроить ingress для нескольких сервисов? Документацию читала, но не хватает практического примера.',
       type: 'help',
@@ -117,7 +118,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 6,
       author: 'Сергей Иванов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       topic: 'Ревью архитектуры микросервисов',
       content: 'Планирую разделить монолит на 3 сервиса. Подготовил схему — посмотрите, пожалуйста, не переусложнил ли?',
       type: 'review',
@@ -132,7 +133,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 7,
       author: 'Дмитрий Коваль',
-      avatar: '/avatar-1.jpg',
+      avatar: images.avatar1,
       topic: 'Помощь с Docker-контейнеризацией',
       content: 'Не получается настроить docker-compose для микросервиса. База не подключается при сборке. Кто-то сталкивался?',
       type: 'help',
@@ -148,7 +149,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 8,
       author: 'Никита Орлов',
-      avatar: '/team-1.jpg',
+      avatar: images.team1,
       topic: 'Проблема с CORS в API',
       content: 'Не работают запросы с фронтенда на локальном хосте. Как правильно настроить CORS для development?',
       type: 'help',
@@ -161,7 +162,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 9,
       author: 'Ольга Романова',
-      avatar: '/team-2.jpg',
+      avatar: images.team2,
       topic: 'Выбор ORM для Node.js',
       content: 'Сравниваю Prisma и TypeORM. Какой опыт у сообщества? Нужно для среднего проекта с ~20 таблицами.',
       type: 'question',
@@ -174,7 +175,7 @@ const requestsByFilter: Record<RequestFilterKey, RequestData[]> = {
     {
       id: 10,
       author: 'Павел Миронов',
-      avatar: '/team-3.jpg',
+      avatar: images.team3,
       topic: 'Обратная связь: встреча по разборам',
       content: 'Отличный формат! Хотелось бы больше времени на разбор каждого проекта. Может, сделать более частые, но короткие сессии?',
       type: 'feedback',
@@ -662,9 +663,9 @@ export default function LeaderConsoleRequests() {
           <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Топ отвечающих</h3>
           <div className="space-y-2.5">
             {[
-              { name: 'Сергей Иванов', avatar: '/avatar-founder.jpg', count: 8 },
-              { name: 'Анна Морозова', avatar: '/avatar-5.jpg', count: 5 },
-              { name: 'Мария Козлова', avatar: '/team-4.jpg', count: 4 },
+              { name: 'Сергей Иванов', avatar: images.avatarFounder, count: 8 },
+              { name: 'Анна Морозова', avatar: images.avatar5, count: 5 },
+              { name: 'Мария Козлова', avatar: images.team4, count: 4 },
             ].map((user, i) => (
               <div key={i} className="flex items-center gap-2.5">
                 <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover" style={{ border: '1px solid var(--border-color)' }} />

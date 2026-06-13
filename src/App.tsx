@@ -18,6 +18,7 @@ import LeaderConsoleContribution from './LeaderConsoleContribution';
 import LeaderConsoleMonetization from './LeaderConsoleMonetization';
 import LeaderConsoleSettings from './LeaderConsoleSettings';
 import { ToastProvider } from './ToastContext';
+import { images, avatars, previews, teams } from './assets/images';
 
 /* ===== DATA ===== */
 const navItems = [
@@ -38,15 +39,8 @@ const myCommunitiesList = [
   { name: 'DevOps', icon: Workflow, members: '634', role: 'участник' },
 ];
 
-const teamAvatars = [
-  '/team-1.jpg', '/team-2.jpg', '/team-3.jpg', '/team-4.jpg',
-  '/team-5.jpg', '/team-6.jpg', '/team-7.jpg',
-];
-
-const memberAvatars = [
-  '/avatar-1.jpg', '/avatar-2.jpg', '/avatar-3.jpg',
-  '/avatar-4.jpg', '/avatar-5.jpg', '/avatar-founder.jpg',
-];
+const teamAvatars = teams;
+const memberAvatars = avatars;
 
 const quickLinks = [
   { icon: CrownIcon, label: 'Перейти на Premium', gold: true },
@@ -226,7 +220,7 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
               <button className="theme-toggle relative hidden sm:flex"><MessageCircle className="w-5 h-5" /><span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1" style={{ background: 'linear-gradient(135deg, var(--gold-dark), var(--gold))' }}>7</span></button>
               <div className="relative ml-1" ref={avatarRef}>
                 <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden cursor-pointer" style={{ border: '2px solid var(--gold)' }} onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}>
-                  <img src="/avatar-founder.jpg" alt="Profile" className="w-full h-full object-cover" />
+                  <img src={images.avatarFounder} alt="Profile" className="w-full h-full object-cover" />
                 </div>
                 {avatarMenuOpen && (
                   <div className="absolute right-0 top-11 md:top-12 w-56 rounded-2xl py-2 z-50" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: darkMode ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 32px rgba(0,0,0,0.12)' }}>
@@ -378,11 +372,11 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
                   <div className="px-4 md:px-5 pt-4 md:pt-5 pb-3 md:pb-4">
                     {/* Main hero — full width, equal left/right padding */}
                     <div className="relative rounded-xl overflow-hidden mb-5" style={{ height: 'clamp(200px, 30vw, 360px)' }}>
-                      <img src="/hero-cover.jpg" alt="IT технологии" className="w-full h-full object-cover" />
+                      <img src={images.heroCover} alt="IT технологии" className="w-full h-full object-cover" />
                     </div>
                     {/* 6 thumbnails — increased gap and border-radius */}
                     <div className="grid grid-cols-6 gap-3 md:gap-4">
-                      {['/preview-1.jpg','/preview-2.jpg','/preview-3.jpg','/preview-4.jpg','/preview-5.jpg','/preview-6.jpg'].map((src, i) => (
+                      {previews.map((src, i) => (
                         <div key={i} className="relative rounded-xl overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.03]" style={{ aspectRatio: '1/1' }}>
                           <img src={src} alt={`Preview ${i+1}`} className="w-full h-full object-cover" />
                         </div>
@@ -766,7 +760,7 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
                 <div className="sidebar-section overflow-hidden">
                   {/* Cover — different from hero, taller */}
                   <div className="mx-[-20px] mt-[-20px] mb-4" style={{ height: '140px' }}>
-                    <img src="/card-cover.jpg" alt="IT технологии" className="w-full h-full object-cover" style={{ borderRadius: '0.75rem 0.75rem 0 0' }} />
+                    <img src={images.cardCover} alt="IT технологии" className="w-full h-full object-cover" style={{ borderRadius: '0.75rem 0.75rem 0 0' }} />
                   </div>
                   <h3 className="font-semibold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>IT технологии</h3>
                   <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>

@@ -5,6 +5,7 @@ import {
   Clock, AlertTriangle, Shield
 } from 'lucide-react';
 import { useToast } from './ToastContext';
+import { images } from './assets/images';
 
 /* ===== PREMIUM COLORS ===== */
 const TERRACOTTA = '#C9706A';
@@ -24,20 +25,20 @@ const statsCards = [
 ];
 
 const transactions = [
-  { id: 1, user: 'Мария Козлова', avatar: '/team-4.jpg', amount: 2500, status: 'success', date: '2 часа назад', method: 'Карта ·••• 4242' },
-  { id: 2, user: 'Дмитрий Коваль', avatar: '/avatar-1.jpg', amount: 2500, status: 'success', date: '5 часов назад', method: 'Карта ·••• 8888' },
-  { id: 3, user: 'Елена Васильева', avatar: '/avatar-4.jpg', amount: 2500, status: 'pending', date: '1 день назад', method: 'Ожидает подтверждения' },
-  { id: 4, user: 'Алексей Новиков', avatar: '/team-3.jpg', amount: 5000, status: 'success', date: '2 дня назад', method: 'Карта ·••• 1234' },
-  { id: 5, user: 'Ольга Романова', avatar: '/team-2.jpg', amount: 2500, status: 'failed', date: '2 дня назад', method: 'Ошибка оплаты' },
-  { id: 6, user: 'Павел Миронов', avatar: '/avatar-3.jpg', amount: 2500, status: 'success', date: '3 дня назад', method: 'Карта ·••• 7777' },
+  { id: 1, user: 'Мария Козлова', avatar: images.team4, amount: 2500, status: 'success', date: '2 часа назад', method: 'Карта ·••• 4242' },
+  { id: 2, user: 'Дмитрий Коваль', avatar: images.avatar1, amount: 2500, status: 'success', date: '5 часов назад', method: 'Карта ·••• 8888' },
+  { id: 3, user: 'Елена Васильева', avatar: images.avatar4, amount: 2500, status: 'pending', date: '1 день назад', method: 'Ожидает подтверждения' },
+  { id: 4, user: 'Алексей Новиков', avatar: images.team3, amount: 5000, status: 'success', date: '2 дня назад', method: 'Карта ·••• 1234' },
+  { id: 5, user: 'Ольга Романова', avatar: images.team2, amount: 2500, status: 'failed', date: '2 дня назад', method: 'Ошибка оплаты' },
+  { id: 6, user: 'Павел Миронов', avatar: images.avatar3, amount: 2500, status: 'success', date: '3 дня назад', method: 'Карта ·••• 7777' },
 ];
 
 const subscribers = [
-  { id: 1, name: 'Мария Козлова', avatar: '/team-4.jpg', plan: 'Базовый', since: '2 месяца', nextPayment: '15 июня', status: 'active' },
-  { id: 2, name: 'Дмитрий Коваль', avatar: '/avatar-1.jpg', plan: 'Базовый', since: '1 месяц', nextPayment: '18 июня', status: 'active' },
-  { id: 3, name: 'Елена Васильева', avatar: '/avatar-4.jpg', plan: 'Премиум', since: '3 месяца', nextPayment: '10 июня', status: 'pending' },
-  { id: 4, name: 'Алексей Новиков', avatar: '/team-3.jpg', plan: 'Премиум', since: '2 недели', nextPayment: '20 июня', status: 'active' },
-  { id: 5, name: 'Павел Миронов', avatar: '/avatar-3.jpg', plan: 'Базовый', since: '1 неделя', nextPayment: '22 июня', status: 'active' },
+  { id: 1, name: 'Мария Козлова', avatar: images.team4, plan: 'Базовый', since: '2 месяца', nextPayment: '15 июня', status: 'active' },
+  { id: 2, name: 'Дмитрий Коваль', avatar: images.avatar1, plan: 'Базовый', since: '1 месяц', nextPayment: '18 июня', status: 'active' },
+  { id: 3, name: 'Елена Васильева', avatar: images.avatar4, plan: 'Премиум', since: '3 месяца', nextPayment: '10 июня', status: 'pending' },
+  { id: 4, name: 'Алексей Новиков', avatar: images.team3, plan: 'Премиум', since: '2 недели', nextPayment: '20 июня', status: 'active' },
+  { id: 5, name: 'Павел Миронов', avatar: images.avatar3, plan: 'Базовый', since: '1 неделя', nextPayment: '22 июня', status: 'active' },
 ];
 
 const pricingPlans = [

@@ -6,6 +6,7 @@ import {
   Mail, Pause
 } from 'lucide-react';
 import { useToast } from './ToastContext';
+import { images } from './assets/images';
 
 /* ===== PREMIUM COLORS ===== */
 const TERRACOTTA = '#C9706A';
@@ -45,7 +46,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 1,
       name: 'Анна Морозова',
-      avatar: '/avatar-5.jpg',
+      avatar: images.avatar5,
       role: 'Frontend-разработчик',
       level: 'Пламя',
       status: 'active',
@@ -57,7 +58,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 2,
       name: 'Сергей Иванов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Tech Lead',
       level: 'Созвездие',
       status: 'active',
@@ -69,7 +70,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 3,
       name: 'Марина Соколова',
-      avatar: '/avatar-2.jpg',
+      avatar: images.avatar2,
       role: 'Backend-разработчик',
       level: 'Искра',
       status: 'active',
@@ -81,7 +82,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 4,
       name: 'Дмитрий Коваль',
-      avatar: '/avatar-1.jpg',
+      avatar: images.avatar1,
       role: 'Fullstack-разработчик',
       level: 'Пламя',
       status: 'active',
@@ -93,7 +94,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 5,
       name: 'Елена Васильева',
-      avatar: '/avatar-4.jpg',
+      avatar: images.avatar4,
       role: 'ML Engineer',
       level: 'Искра',
       status: 'active',
@@ -105,7 +106,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 6,
       name: 'Павел Миронов',
-      avatar: '/avatar-3.jpg',
+      avatar: images.avatar3,
       role: 'DevOps Engineer',
       level: 'Свет',
       status: 'active',
@@ -119,7 +120,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 7,
       name: 'Анна Морозова',
-      avatar: '/avatar-5.jpg',
+      avatar: images.avatar5,
       role: 'Frontend-разработчик',
       level: 'Пламя',
       status: 'active',
@@ -131,7 +132,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 8,
       name: 'Сергей Иванов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Tech Lead',
       level: 'Созвездие',
       status: 'active',
@@ -143,7 +144,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 9,
       name: 'Марина Соколова',
-      avatar: '/avatar-2.jpg',
+      avatar: images.avatar2,
       role: 'Backend-разработчик',
       level: 'Искра',
       status: 'active',
@@ -155,7 +156,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 10,
       name: 'Павел Миронов',
-      avatar: '/avatar-3.jpg',
+      avatar: images.avatar3,
       role: 'DevOps Engineer',
       level: 'Свет',
       status: 'active',
@@ -169,7 +170,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 11,
       name: 'Ольга Романова',
-      avatar: '/team-2.jpg',
+      avatar: images.team2,
       role: 'Junior Frontend',
       level: 'Заря',
       status: 'pending',
@@ -183,7 +184,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 12,
       name: 'Алексей Новиков',
-      avatar: '/team-3.jpg',
+      avatar: images.team3,
       role: 'Backend-разработчик',
       level: 'Искра',
       status: 'pending',
@@ -199,7 +200,7 @@ const connectionsByFilter: Record<ConnectionFilterKey, ConnectionData[]> = {
     {
       id: 13,
       name: 'Никита Орлов',
-      avatar: '/team-1.jpg',
+      avatar: images.team1,
       role: 'Mobile Developer',
       level: 'Пламя',
       status: 'paused',
@@ -617,9 +618,9 @@ export default function LeaderConsoleConnections() {
           <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Топ коннекторы</h3>
           <div className="space-y-2.5">
             {[
-              { name: 'Сергей Иванов', avatar: '/avatar-founder.jpg', count: 12 },
-              { name: 'Анна Морозова', avatar: '/avatar-5.jpg', count: 9 },
-              { name: 'Павел Миронов', avatar: '/avatar-3.jpg', count: 7 },
+              { name: 'Сергей Иванов', avatar: images.avatarFounder, count: 12 },
+              { name: 'Анна Морозова', avatar: images.avatar5, count: 9 },
+              { name: 'Павел Миронов', avatar: images.avatar3, count: 7 },
             ].map((user, i) => (
               <div key={i} className="flex items-center gap-2.5">
                 <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover" style={{ border: '1px solid var(--border-color)' }} />

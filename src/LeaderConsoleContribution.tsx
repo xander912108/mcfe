@@ -6,6 +6,7 @@ import {
   MessageSquareQuote, Zap, UserPlus
 } from 'lucide-react';
 import { useToast } from './ToastContext';
+import { images } from './assets/images';
 
 /* ===== PREMIUM COLORS ===== */
 const TERRACOTTA = '#C9706A';
@@ -45,7 +46,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 1,
       author: 'Сергей Иванов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Tech Lead',
       type: 'review',
       title: 'Разбор архитектуры pet-проекта',
@@ -60,7 +61,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 2,
       author: 'Анна Морозова',
-      avatar: '/avatar-5.jpg',
+      avatar: images.avatar5,
       role: 'Frontend-разработчик',
       type: 'help',
       title: 'Помощь с TypeScript generics',
@@ -75,7 +76,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 3,
       author: 'Павел Миронов',
-      avatar: '/avatar-3.jpg',
+      avatar: images.avatar3,
       role: 'DevOps Engineer',
       type: 'insight',
       title: 'Инсайт: настройка CI/CD для монорепозитория',
@@ -90,7 +91,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 4,
       author: 'Марина Соколова',
-      avatar: '/avatar-2.jpg',
+      avatar: images.avatar2,
       role: 'Backend-разработчик',
       type: 'mentor',
       title: 'Менторинг новичка: первые шаги в Go',
@@ -104,7 +105,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 5,
       author: 'Елена Васильева',
-      avatar: '/avatar-4.jpg',
+      avatar: images.avatar4,
       role: 'ML Engineer',
       type: 'support',
       title: 'Поддержка в обсуждении ML-трека',
@@ -119,7 +120,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 6,
       author: 'Дмитрий Коваль',
-      avatar: '/avatar-1.jpg',
+      avatar: images.avatar1,
       role: 'Fullstack-разработчик',
       type: 'help',
       title: 'Помощь с Docker Compose',
@@ -133,7 +134,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 7,
       author: 'Алексей Новиков',
-      avatar: '/team-3.jpg',
+      avatar: images.team3,
       role: 'Backend-разработчик',
       type: 'review',
       title: 'Code review для 4 проектов',
@@ -148,7 +149,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 8,
       author: 'Сергей Иванов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Tech Lead',
       type: 'insight',
       title: 'Инсайт: выбор технологий для стартапа',
@@ -163,7 +164,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 9,
       author: 'Ольга Романова',
-      avatar: '/team-2.jpg',
+      avatar: images.team2,
       role: 'Junior Frontend',
       type: 'support',
       title: 'Помощь в организации встречи',
@@ -179,7 +180,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 10,
       author: 'Сергей Иванов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Tech Lead',
       type: 'insight',
       title: 'Инсайт: выбор технологий для стартапа',
@@ -194,7 +195,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 11,
       author: 'Павел Миронов',
-      avatar: '/avatar-3.jpg',
+      avatar: images.avatar3,
       role: 'DevOps Engineer',
       type: 'insight',
       title: 'Инсайт: настройка CI/CD для монорепозитория',
@@ -209,7 +210,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 12,
       author: 'Марина Соколова',
-      avatar: '/avatar-2.jpg',
+      avatar: images.avatar2,
       role: 'Backend-разработчик',
       type: 'mentor',
       title: 'Менторинг новичка: первые шаги в Go',
@@ -223,7 +224,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 13,
       author: 'Алексей Новиков',
-      avatar: '/team-3.jpg',
+      avatar: images.team3,
       role: 'Backend-разработчик',
       type: 'review',
       title: 'Code review для 4 проектов',
@@ -238,7 +239,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 14,
       author: 'Елена Васильева',
-      avatar: '/avatar-4.jpg',
+      avatar: images.avatar4,
       role: 'ML Engineer',
       type: 'support',
       title: 'Поддержка в обсуждении ML-трека',
@@ -253,7 +254,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 15,
       author: 'Анна Морозова',
-      avatar: '/avatar-5.jpg',
+      avatar: images.avatar5,
       role: 'Frontend-разработчик',
       type: 'help',
       title: 'Помощь с TypeScript generics',
@@ -270,7 +271,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 16,
       author: 'Марина Соколова',
-      avatar: '/avatar-2.jpg',
+      avatar: images.avatar2,
       role: 'Backend-разработчик',
       type: 'mentor',
       title: 'Менторинг новичка: первые шаги в Go',
@@ -284,7 +285,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 17,
       author: 'Дмитрий Коваль',
-      avatar: '/avatar-1.jpg',
+      avatar: images.avatar1,
       role: 'Fullstack-разработчик',
       type: 'help',
       title: 'Помощь с Docker Compose',
@@ -298,7 +299,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 18,
       author: 'Ольга Романова',
-      avatar: '/team-2.jpg',
+      avatar: images.team2,
       role: 'Junior Frontend',
       type: 'support',
       title: 'Помощь в организации встречи',
@@ -314,7 +315,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 19,
       author: 'Александр Шилов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Лидер сообщества',
       type: 'review',
       title: 'Разбор стратегии роста сообщества',
@@ -328,7 +329,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 20,
       author: 'Александр Шилов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Лидер сообщества',
       type: 'mentor',
       title: 'Менторинг 2 новичков',
@@ -342,7 +343,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 21,
       author: 'Александр Шилов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Лидер сообщества',
       type: 'insight',
       title: 'Инсайт: структура обратной связи',
@@ -357,7 +358,7 @@ const contributionsByFilter: Record<ContributionFilterKey, ContributionData[]> =
     {
       id: 22,
       author: 'Александр Шилов',
-      avatar: '/avatar-founder.jpg',
+      avatar: images.avatarFounder,
       role: 'Лидер сообщества',
       type: 'support',
       title: 'Модерация обсуждения по Backend',
@@ -757,9 +758,9 @@ export default function LeaderConsoleContribution() {
           <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Топ авторов</h3>
           <div className="space-y-3">
             {[
-              { name: 'Сергей Иванов', avatar: '/avatar-founder.jpg', impact: 47 },
-              { name: 'Павел Миронов', avatar: '/avatar-3.jpg', impact: 25 },
-              { name: 'Марина Соколова', avatar: '/avatar-2.jpg', impact: 15 },
+              { name: 'Сергей Иванов', avatar: images.avatarFounder, impact: 47 },
+              { name: 'Павел Миронов', avatar: images.avatar3, impact: 25 },
+              { name: 'Марина Соколова', avatar: images.avatar2, impact: 15 },
             ].map((user, i) => (
               <div key={i} className="flex items-center gap-2.5">
                 <span className="text-xs font-bold w-4" style={{ color: 'var(--gold)' }}>#{i + 1}</span>
