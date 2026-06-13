@@ -636,6 +636,31 @@ export default function LeaderConsoleEntry() {
   const [nextStepDelayTitle, setNextStepDelayTitle] = useState('Доступ временно проверяется');
   const [showNextStepRestoreConfirm, setShowNextStepRestoreConfirm] = useState(false);
   const [showNextStepDiscardConfirm, setShowNextStepDiscardConfirm] = useState(false);
+  /* ===== PAYMENT & ACCESS MODAL ===== */
+  const [showPaymentAccessModal, setShowPaymentAccessModal] = useState(false);
+  const [paScenario, setPaScenario] = useState<NextStepScenario>('immediate');
+  const [paTitle, setPaTitle] = useState('Заявка одобрена: следующий шаг');
+  const [paBody, setPaBody] = useState('{Имя}, привет!\n\nВаша заявка в «{Сообщество}» одобрена.\n\n{Следующий шаг}\n\nПосле входа вы появитесь в разделе для новичков. Там будет видно, с чего начать, где задать первый вопрос и как получить первый живой отклик.');
+  const [paBtnText, setPaBtnText] = useState('Войти в сообщество');
+  const [paNotifyTitle, setPaNotifyTitle] = useState('Доступ к сообществу открыт');
+  const [paNotifyBody, setPaNotifyBody] = useState('{Имя}, привет!\n\nДоступ к «{Сообщество}» открыт. Теперь можно войти в сообщество и начать со стартового шага.\n\nВ первые дни мы поможем сориентироваться: выбрать понятный первый шаг, задать вопрос и найти людей рядом.');
+  const [paNotifyBtn, setPaNotifyBtn] = useState('Войти в сообщество');
+  const [paAutoOpen, setPaAutoOpen] = useState(true);
+  const [paAddNewcomers, setPaAddNewcomers] = useState(true);
+  const [paSendNotify, setPaSendNotify] = useState(true);
+  const [paCreateHistory, setPaCreateHistory] = useState(true);
+  const [paRemindHours, setPaRemindHours] = useState(24);
+  const [paCloseDays, setPaCloseDays] = useState(7);
+  const [paRemindTitle, setPaRemindTitle] = useState('Следующий шаг для входа в «{Сообщество}»');
+  const [paRemindBody, setPaRemindBody] = useState('{Имя}, привет!\n\nВаша заявка одобрена. Чтобы войти в сообщество, завершите оплату участия.\n\nПосле успешной оплаты доступ откроется автоматически.\n\nЕсли возникнут сложности с оплатой, напишите нам — поможем разобраться.');
+  const [paSigNoAccess, setPaSigNoAccess] = useState(true);
+  const [paSigShowList, setPaSigShowList] = useState(true);
+  const [paAllowManual, setPaAllowManual] = useState(true);
+  const [paShowCalmMsg, setPaShowCalmMsg] = useState(true);
+  const [paDelayTitle, setPaDelayTitle] = useState('Доступ временно проверяется');
+  const [paDelayBody, setPaDelayBody] = useState('Оплата прошла, но доступ пока не открылся. Мы уже видим ситуацию и проверяем её. Повторно оплачивать не нужно.');
+  const [showPaRestoreConfirm, setShowPaRestoreConfirm] = useState(false);
+  const [showPaDiscardConfirm, setShowPaDiscardConfirm] = useState(false);
   const [showPickMaterialModal, setShowPickMaterialModal] = useState(false);
   type MaterialId = 'guide_community' | 'guide_backend' | 'guide_frontend' | 'guide_first_question';
   const [f7MaterialId, setF7MaterialId] = useState<MaterialId>('guide_community');
@@ -699,13 +724,13 @@ export default function LeaderConsoleEntry() {
 
   /* ===== BODY SCROLL LOCK ===== */
   useEffect(() => {
-    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm || showPickMaterialModal || pickMatDiscardConfirm || showMetricsModal || showNextStepModal || showNextStepRestoreConfirm || showNextStepDiscardConfirm) {
+    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm || showPickMaterialModal || pickMatDiscardConfirm || showMetricsModal || showNextStepModal || showNextStepRestoreConfirm || showNextStepDiscardConfirm || showPaymentAccessModal || showPaRestoreConfirm || showPaDiscardConfirm) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm, showFirst7DaysModal, showF7RestoreConfirm, showF7DiscardConfirm, showPickMaterialModal, pickMatDiscardConfirm, showMetricsModal, showNextStepModal, showNextStepRestoreConfirm, showNextStepDiscardConfirm]);
+  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm, showFirst7DaysModal, showF7RestoreConfirm, showF7DiscardConfirm, showPickMaterialModal, pickMatDiscardConfirm, showMetricsModal, showNextStepModal, showNextStepRestoreConfirm, showNextStepDiscardConfirm, showPaymentAccessModal, showPaRestoreConfirm, showPaDiscardConfirm]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
@@ -2967,7 +2992,7 @@ export default function LeaderConsoleEntry() {
                           </div>
                         </button>
                         <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
-                        <button onClick={() => setShowLimitsModal(true)} className="w-full text-left group flex items-start gap-2.5">
+                        <button onClick={() => setShowPaymentAccessModal(true)} className="w-full text-left group flex items-start gap-2.5">
                           <BookOpen className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
                           <div>
                             <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Оплата и открытие доступа</p>
@@ -3966,6 +3991,279 @@ export default function LeaderConsoleEntry() {
         </div>
       )}
 
+
+      {/* ===== PAYMENT & ACCESS MODAL ===== */}
+      {showPaymentAccessModal && (
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowPaDiscardConfirm(true)}>
+          <div className="modal-enter rounded-2xl max-w-2xl w-full max-h-[90vh] relative overflow-hidden flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="shrink-0 flex items-start justify-between p-6 pb-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
+              <div>
+                <h2 className="text-xl font-bold heading-accent mb-1" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Оплата и открытие доступа</h2>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Настройте, что происходит после одобрения заявки: когда кандидат получает доступ, когда переходит к оплате и какие сообщения видит, если доступ не открылся автоматически.</p>
+                <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>Изменения применятся к новым одобрениям и новым платежам. Уже отправленные сообщения не изменятся.</p>
+              </div>
+              <button onClick={() => setShowPaDiscardConfirm(true)} className="p-1 rounded transition-colors shrink-0 ml-4" style={{ color: 'var(--text-muted)' }}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+              {/* Scenario selection */}
+              <div>
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сценарий после одобрения</p>
+                <div className="space-y-3">
+                  {[
+                    { id: 'immediate' as NextStepScenario, title: 'Доступ открывается сразу', desc: 'Подходит для бесплатного входа. После одобрения кандидат сразу получает доступ к сообществу.', preview: 'доступ открыт, можно войти и начать со стартового шага.' },
+                    { id: 'payment' as NextStepScenario, title: 'Кандидат переходит к оплате', desc: 'Подходит для платного входа. После одобрения кандидат получает ссылку на оплату.', preview: 'заявка одобрена, следующий шаг — оплатить участие. После успешной оплаты доступ откроется автоматически.' },
+                    { id: 'manual' as NextStepScenario, title: 'Доступ открывает лидер вручную', desc: 'Подходит для случаев, где перед входом нужна ручная проверка или индивидуальное решение.', preview: 'заявка одобрена, доступ будет открыт после проверки. Когда доступ откроется, кандидат получит отдельное уведомление.' },
+                  ].map((sc) => (
+                    <label key={sc.id} className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${paScenario === sc.id ? 'ring-1' : ''}`} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', ...(paScenario === sc.id ? { ringColor: 'var(--gold)' } : {}) }}>
+                      <input type="radio" name="paScenario" checked={paScenario === sc.id} onChange={() => { setPaScenario(sc.id); if (sc.id === 'immediate') setPaBtnText('Войти в сообщество'); if (sc.id === 'payment') setPaBtnText('Перейти к оплате'); }} className="w-4 h-4 accent-gold mt-0.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{sc.title}</p>
+                        <p className="text-xs mb-1.5" style={{ color: 'var(--text-secondary)' }}>{sc.desc}</p>
+                        <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Что увидит кандидат: {sc.preview}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Message after approval */}
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение после одобрения</p>
+                  <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Кандидат получит это сообщение сразу после одобрения заявки. Текст можно будет отредактировать перед отправкой в конкретной заявке.</p>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</label>
+                  <input type="text" maxLength={120} value={paTitle} onChange={(e) => setPaTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                  <TitleCounter count={paTitle.length} />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение кандидату</label>
+                  <textarea maxLength={1000} value={paBody} onChange={(e) => setPaBody(e.target.value)} className="w-full px-3 py-3 rounded-xl text-sm resize-none leading-relaxed" rows={8} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content' }} />
+                  <div className="mt-1"><MessageCounter count={paBody.length} /></div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Как система подставит следующий шаг</p>
+                  <div className="space-y-2">
+                    <div><p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Если доступ открывается сразу</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Доступ уже открыт — можно войти в сообщество и начать со стартового шага.</p></div>
+                    <div><p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Если кандидат переходит к оплате</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Чтобы войти в сообщество, завершите оплату. После подтверждения платежа доступ откроется автоматически.</p></div>
+                    <div><p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Если доступ открывает лидер вручную</p><p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Заявка одобрена. Мы сообщим, когда доступ будет открыт.</p></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Button for candidate */}
+              <div className="space-y-3">
+                <p className="text-[11px] font-semibold tracking-widest" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Кнопка для кандидата</p>
+                {paScenario === 'manual' ? (
+                  <div className="space-y-4">
+                    <label className="text-[11px] font-semibold tracking-widest block mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Для сценария «Доступ открывает лидер вручную»</label>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Кнопка после одобрения не показывается. Кандидат получит отдельное уведомление, когда лидер откроет доступ вручную.</p>
+                    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+                    <div className="space-y-3">
+                      <p className="text-[11px] font-semibold tracking-widest" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Уведомление после открытия доступа</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Кандидат получит это сообщение, когда доступ будет открыт. Так он поймёт, что уже может войти в сообщество и с чего начать.</p>
+                      <div>
+                        <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок</label>
+                        <input type="text" maxLength={120} value={paNotifyTitle} onChange={(e) => setPaNotifyTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                        <TitleCounter count={paNotifyTitle.length} />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение</label>
+                        <textarea maxLength={1000} value={paNotifyBody} onChange={(e) => setPaNotifyBody(e.target.value)} className="w-full px-3 py-3 rounded-xl text-sm resize-none leading-relaxed" rows={5} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content' }} />
+                        <div className="mt-1"><MessageCounter count={paNotifyBody.length} /></div>
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Кнопка для кандидата</label>
+                        <input type="text" maxLength={60} value={paNotifyBtn} onChange={(e) => setPaNotifyBtn(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                        <div className="text-right"><span className="text-[11px]" style={{ color: paNotifyBtn.length > 50 ? TERRACOTTA : 'var(--text-muted)' }}>{paNotifyBtn.length} / 60</span></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                      {paScenario === 'immediate' ? 'Для сценария «Доступ открывается сразу»' : 'Для сценария «Кандидат переходит к оплате»'}
+                    </label>
+                    <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>Текст кнопки:</p>
+                    <input type="text" maxLength={60} value={paBtnText} onChange={(e) => setPaBtnText(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                    <div className="text-right"><span className="text-[11px]" style={{ color: paBtnText.length > 50 ? TERRACOTTA : 'var(--text-muted)' }}>{paBtnText.length} / 60</span></div>
+                  </div>
+                )}
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* After successful payment */}
+              <div className="space-y-3">
+                <p className="text-[11px] font-semibold tracking-widest" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>После успешной оплаты</p>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paAutoOpen} onChange={(e) => setPaAutoOpen(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Открывать доступ автоматически после подтверждённого платежа</p>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paAddNewcomers} onChange={(e) => setPaAddNewcomers(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Добавлять участника в «Новички в первые 7 дней»</p>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paSendNotify} onChange={(e) => setPaSendNotify(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Отправлять уведомление «Доступ к сообществу открыт»</p>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paCreateHistory} onChange={(e) => setPaCreateHistory(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Создавать запись в истории заявки</p>
+                </label>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* If payment not completed */}
+              <div className="space-y-4">
+                <p className="text-[11px] font-semibold tracking-widest" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Если оплата не завершена</p>
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Настройте, когда напоминать кандидату об оплате после одобрения заявки.</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Напомнить об оплате через</label>
+                    <div className="flex items-center gap-2">
+                      <input type="number" min={1} max={72} value={paRemindHours} onChange={(e) => setPaRemindHours(Number(e.target.value))} className="w-20 px-3 py-2.5 rounded-lg text-sm" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>часов</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Закрыть ссылку на оплату через</label>
+                    <div className="flex items-center gap-2">
+                      <input type="number" min={1} max={30} value={paCloseDays} onChange={(e) => setPaCloseDays(Number(e.target.value))} className="w-20 px-3 py-2.5 rounded-lg text-sm" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>дней</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок напоминания</label>
+                  <input type="text" maxLength={120} value={paRemindTitle} onChange={(e) => setPaRemindTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                  <TitleCounter count={paRemindTitle.length} />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение кандидату</label>
+                  <textarea maxLength={1000} value={paRemindBody} onChange={(e) => setPaRemindBody(e.target.value)} className="w-full px-3 py-3 rounded-xl text-sm resize-none leading-relaxed" rows={6} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content' }} />
+                  <div className="mt-1"><MessageCounter count={paRemindBody.length} /></div>
+                </div>
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* If access didn't open */}
+              <div className="space-y-3">
+                <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Если доступ не открылся автоматически</p>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paSigNoAccess} onChange={(e) => setPaSigNoAccess(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Показать лидеру сигнал, если оплата прошла, но доступ не создан</p>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paSigShowList} onChange={(e) => setPaSigShowList(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Показать заявку в списке «Одобрены» со статусом «доступ не открылся»</p>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paAllowManual} onChange={(e) => setPaAllowManual(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Разрешить ручное открытие доступа после проверки оплаты</p>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" checked={paShowCalmMsg} onChange={(e) => setPaShowCalmMsg(e.target.checked)} className="w-4 h-4 rounded accent-gold mt-0.5" />
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Показать кандидату спокойное сообщение, если оплата прошла, а доступ пока не открылся</p>
+                </label>
+                {paShowCalmMsg && (
+                  <>
+                    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+                    <div className="space-y-3 mt-4">
+                      <p className="text-[11px] font-semibold tracking-widest" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение кандидату при задержке доступа</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Это сообщение кандидат увидит, если оплата прошла, но доступ не открылся автоматически. Важно спокойно объяснить, что ситуация уже видна команде и повторно оплачивать не нужно.</p>
+                      <div>
+                        <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок</label>
+                        <input type="text" maxLength={120} value={paDelayTitle} onChange={(e) => setPaDelayTitle(e.target.value)} className="w-full px-3 py-2.5 rounded-lg text-sm mb-1" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
+                        <TitleCounter count={paDelayTitle.length} />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-semibold tracking-widest block mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение</label>
+                        <textarea maxLength={1000} value={paDelayBody} onChange={(e) => setPaDelayBody(e.target.value)} className="w-full px-3 py-3 rounded-xl text-sm resize-none leading-relaxed" rows={3} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content' }} />
+                        <div className="mt-1"><MessageCounter count={paDelayBody.length} /></div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* What changes */}
+              <div className="rounded-lg p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что изменится</p>
+                <ul className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex gap-2"><span>—</span><span>После одобрения кандидат будет видеть понятный следующий шаг</span></li>
+                  <li className="flex gap-2"><span>—</span><span>При платном входе кандидат перейдёт к оплате</span></li>
+                  <li className="flex gap-2"><span>—</span><span>После успешной оплаты доступ откроется автоматически, если включена авто-выдача</span></li>
+                  <li className="flex gap-2"><span>—</span><span>Если доступ не откроется, лидер увидит сигнал, а кандидат получит спокойное объяснение</span></li>
+                  <li className="flex gap-2"><span>—</span><span>Ручное открытие доступа останется доступно для спорных или нестандартных случаев</span></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Sticky footer */}
+            <div className="shrink-0 flex flex-wrap items-center gap-3 p-6 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setShowPaymentAccessModal(false); showToast(paScenario === 'payment' ? 'Настройки сохранены. После одобрения кандидаты будут переходить к оплате.' : paScenario === 'immediate' ? 'Настройки сохранены. Доступ будет открываться сразу после одобрения.' : 'Настройки сохранены. После одобрения доступ будет открывать лидер вручную.', 'success'); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Сохранить настройки</button>
+              <button onClick={() => setShowPaRestoreConfirm(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Восстановить исходные настройки</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== PAYMENT & ACCESS: RESTORE CONFIRM ===== */}
+      {showPaRestoreConfirm && (
+        <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={() => setShowPaRestoreConfirm(false)}>
+          <div className="modal-enter rounded-2xl max-w-md w-full p-6 relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Восстановить исходные настройки?</h3>
+            <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Тексты сообщений и правила открытия доступа вернутся к стандартным значениям. Уже отправленные сообщения и открытые доступы не изменятся.</p>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button onClick={() => setShowPaRestoreConfirm(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Остаться</button>
+              <button onClick={() => {
+                setPaScenario('immediate'); setPaTitle('Заявка одобрена: следующий шаг');
+                setPaBody('{Имя}, привет!\n\nВаша заявка в «{Сообщество}» одобрена.\n\n{Следующий шаг}\n\nПосле входа вы появитесь в разделе для новичков. Там будет видно, с чего начать, где задать первый вопрос и как получить первый живой отклик.');
+                setPaBtnText('Войти в сообщество'); setPaNotifyTitle('Доступ к сообществу открыт');
+                setPaNotifyBody('{Имя}, привет!\n\nДоступ к «{Сообщество}» открыт. Теперь можно войти в сообщество и начать со стартового шага.\n\nВ первые дни мы поможем сориентироваться: выбрать понятный первый шаг, задать вопрос и найти людей рядом.');
+                setPaNotifyBtn('Войти в сообщество'); setPaAutoOpen(true); setPaAddNewcomers(true); setPaSendNotify(true); setPaCreateHistory(true);
+                setPaRemindHours(24); setPaCloseDays(7); setPaRemindTitle('Следующий шаг для входа в «{Сообщество}»');
+                setPaRemindBody('{Имя}, привет!\n\nВаша заявка одобрена. Чтобы войти в сообщество, завершите оплату участия.\n\nПосле успешной оплаты доступ откроется автоматически.\n\nЕсли возникнут сложности с оплатой, напишите нам — поможем разобраться.');
+                setPaSigNoAccess(true); setPaSigShowList(true); setPaAllowManual(true); setPaShowCalmMsg(true);
+                setPaDelayTitle('Доступ временно проверяется'); setPaDelayBody('Оплата прошла, но доступ пока не открылся. Мы уже видим ситуацию и проверяем её. Повторно оплачивать не нужно.');
+                setShowPaRestoreConfirm(false); showToast('Исходные настройки оплаты и доступа восстановлены.', 'success');
+              }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Восстановить</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== PAYMENT & ACCESS: DISCARD CONFIRM ===== */}
+      {showPaDiscardConfirm && (
+        <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={() => setShowPaDiscardConfirm(false)}>
+          <div className="modal-enter rounded-2xl max-w-md w-full p-6 relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Закрыть без сохранения?</h3>
+            <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Изменения в оплате и открытии доступа не сохранятся.</p>
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button onClick={() => setShowPaDiscardConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>Продолжить редактирование</button>
+              <button onClick={() => { setShowPaDiscardConfirm(false); setShowPaymentAccessModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ color: TERRACOTTA }}>Закрыть без сохранения</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== NEXT STEP AFTER APPROVAL MODAL ===== */}
       {/* ===== NEXT STEP AFTER APPROVAL MODAL ===== */}
       {showNextStepModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowNextStepDiscardConfirm(true)}>
