@@ -2649,20 +2649,17 @@ export default function LeaderConsoleEntry() {
       {/* ===== SUPPORT MODAL ===== */}
       {showSupportModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowSupportModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full max-h-[90vh] relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowSupportModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="modal-scroll overflow-y-auto max-h-[90vh] p-6 md:p-8">
-              {/* Header */}
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Подобрать опору</h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-                Мария на 2-м дне в сообществе. Цель — стать frontend-разработчиком. Первой связи пока нет.
-              </p>
-
-              {/* Options */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Подобрать опору</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Мария на 2-м дне в сообществе. Цель — стать frontend-разработчиком. Первой связи пока нет.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="space-y-4">
-                {/* Mentor on start */}
                 <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0" style={{ backgroundColor: 'rgba(107,158,124,0.15)', color: SAGE }}>А</div>
@@ -2674,8 +2671,6 @@ export default function LeaderConsoleEntry() {
                   </div>
                   <button onClick={() => { setShowSupportModal(false); setShowMentorModal(true); }} className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Предложить функцию</button>
                 </div>
-
-                {/* Participant nearby */}
                 <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0" style={{ backgroundColor: 'rgba(212,175,55,0.12)', color: 'var(--gold)' }}>С</div>
@@ -2686,8 +2681,6 @@ export default function LeaderConsoleEntry() {
                   </div>
                   <button onClick={() => { setShowSupportModal(false); setShowConnectModal(true); }} className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Предложить участника рядом</button>
                 </div>
-
-
               </div>
             </div>
           </div>
@@ -2697,23 +2690,19 @@ export default function LeaderConsoleEntry() {
       {/* ===== MENTOR FUNCTION MODAL ===== */}
       {showMentorModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowMentorModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowMentorModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              {/* Header */}
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Предложить функцию</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>
-                Предложить Анне функцию «Помощник на старте»? Она сможет согласиться или отказаться.
-              </p>
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Предложить функцию</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Предложить Анне функцию «Помощник на старте»? Она сможет согласиться или отказаться.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="rounded-lg p-4 mb-5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                  Анна уже помогала новичкам и сейчас не перегружена. Можно предложить ей сопровождать новичка 7 дней.
-                </p>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Анна уже помогала новичкам и сейчас не перегружена. Можно предложить ей сопровождать новичка 7 дней.</p>
               </div>
-
-              {/* Message */}
               <div className="mb-5">
                 <h3 className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение для Анны</h3>
                 <input
@@ -2734,9 +2723,7 @@ export default function LeaderConsoleEntry() {
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{mentorMessage.length} / 1000</span>
                 </div>
               </div>
-
-              {/* Settings */}
-              <div className="mb-6 space-y-3">
+              <div className="mb-2 space-y-3">
                 <h3 className="text-xs font-semibold tracking-widest" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Настройки предложения</h3>
                 <div className="flex items-center gap-3 py-2" style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <Clock className="w-4 h-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
@@ -2758,12 +2745,10 @@ export default function LeaderConsoleEntry() {
                   <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Можно поставить на паузу</span>
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowMentorModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Предложить функцию</button>
-                <button onClick={() => setShowMentorModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Отмена</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowMentorModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Предложить функцию</button>
+              <button onClick={() => setShowMentorModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Отмена</button>
             </div>
           </div>
         </div>
