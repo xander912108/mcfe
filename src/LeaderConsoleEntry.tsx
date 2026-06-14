@@ -758,7 +758,7 @@ export default function LeaderConsoleEntry() {
         </div>
 
         {/* ===== SECTION NAVIGATION CARDS ===== */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 section-fade-in" style={{ animationDelay: '50ms' }}>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 section-fade-in" style={{ animationDelay: '50ms' }}>
           {sections.map((s) => (
             <button
               key={s.key}
