@@ -103,12 +103,13 @@ const pulseUpItems = [
 ];
 
 const paramDescriptions = [
-  { label: 'Первая связь', desc: 'Получили ли новички живой человеческий отклик после входа.' },
-  { label: 'Запросы', desc: 'Насколько быстро участники получают ответы и разборы.' },
-  { label: 'Вклад', desc: 'Замечается ли польза участников.' },
-  { label: 'Взаимопомощь', desc: 'Помогает ли сообщество само себе, а не только лидер.' },
-  { label: 'Доступ и оплата', desc: 'Нет ли проблем с оплатой и открытием доступа.' },
-  { label: 'Настройки и риски', desc: 'Не создают ли роли, лимиты и доступы перегрузку.' },
+  { label: 'Первая связь', desc: 'Показывает, получают ли новички живой контакт после входа: ответ, отклик, встречу, благодарность, Помощника на старте или участника рядом.' },
+  { label: 'Запросы', desc: 'Показывает, остаются ли вопросы участников без ответа и есть ли первые вопросы новичков, которые лучше не откладывать.' },
+  { label: 'Вклад', desc: 'Показывает, замечаются ли полезные действия участников: ответы, разборы, помощь новичкам, инсайты и вклад в ритуалы.' },
+  { label: 'Взаимопомощь', desc: 'Показывает, помогает ли сообщество само себе, а не держится ли вся нагрузка только на лидере.' },
+  { label: 'Доступ и оплата', desc: 'Показывает, проходят ли оплаты корректно и открывается ли доступ после оплаты без ручной проверки.' },
+  { label: 'Настройки и риски', desc: 'Показывает, есть ли настройки, которые могут создать перегрузку, подвесить доступ или оставить людей без понятного сценария.' },
+  { label: 'Индекс отдачи', desc: 'Показывает соотношение между запросами помощи и полезными откликами. Если индекс выше 1, участники не только получают помощь, но и начинают отдавать её другим.' },
 ];
 
 /* ===== COMPONENT ===== */
@@ -435,7 +436,7 @@ export default function LeaderConsoleMain() {
             <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto">
               {/* Header */}
               <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Пульс сообщества</h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>Показывает, насколько сейчас в сообществе всё работает без заметных провалов.</p>
+              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>Показывает, насколько сейчас в сообществе всё работает без заметных провалов: новички получают первую связь, запросы не остаются без ответа, Вклад замечается, оплата и доступ работают корректно, а настройки не создают перегрузку.</p>
 
               {/* Top score */}
               <div className="flex items-center gap-4 mb-6 p-4 rounded-xl" style={{ backgroundColor: GOLD_GLOW, border: `1px solid ${GOLD_BORDER}` }}>
@@ -446,27 +447,7 @@ export default function LeaderConsoleMain() {
                 </div>
               </div>
 
-              {/* What to do now */}
-              <div className="mb-6">
-                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что лучше сделать сейчас</p>
-                <div className="space-y-3">
-                  {[
-                    { title: 'Проверить доступ после оплаты', desc: 'Один участник оплатил участие, но доступ не открылся автоматически.' },
-                    { title: 'Подобрать опору новичкам', desc: '3 новичка пока не получили живого отклика.' },
-                    { title: 'Настроить лимит Помощника на старте', desc: 'У функции пока не задан лимит нагрузки.' },
-                  ].map((a, i) => (
-                    <div key={i} className="flex gap-3">
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>{i + 1}</span>
-                      <div>
-                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{a.title}</p>
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{a.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              <div className="h-px mb-6" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
 
               {/* Parameters */}
               <div className="mb-6">
@@ -521,7 +502,8 @@ export default function LeaderConsoleMain() {
               <div className="rounded-xl p-4 mb-6" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-[11px] font-semibold tracking-widest mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Индекс отдачи</p>
                 <p className="text-2xl font-bold heading-accent mb-1" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)' }}>1.34</p>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>На 1 запрос помощи приходится 1.34 полезного отклика. Значение выше 1 — хороший знак: участники не только получают помощь, но и начинают отдавать её другим.</p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>На 1 запрос помощи приходится 1.34 полезного отклика: ответ, благодарность, разбор, помощь новичку или сохранённый Инсайт.</p>
+                <p className="text-xs leading-relaxed mt-2" style={{ color: 'var(--text-secondary)' }}>Значение выше 1 — хороший знак: участники не только получают помощь, но и начинают отдавать её другим.</p>
               </div>
 
               {/* Parameter descriptions (expandable) */}
