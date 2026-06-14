@@ -623,10 +623,7 @@ export default function LeaderConsoleMain() {
 
             {/* Fixed Header */}
             <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertTriangle className="w-5 h-5" style={{ color: TERRACOTTA }} />
-                <h2 className="text-xl font-bold heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Доступ после оплаты</h2>
-              </div>
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Доступ после оплаты</h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Участник уже оплатил участие, но доступ в сообщество не открылся автоматически. Лучше проверить это первым: человек уже сделал шаг доверия и ждёт входа.</p>
             </div>
 
@@ -708,9 +705,6 @@ export default function LeaderConsoleMain() {
               </button>
               <button onClick={() => { setShowPaymentModal(false); navigate('/leader/monetization'); }} className="w-full py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
                 Открыть в Монетизации
-              </button>
-              <button onClick={() => setShowPaymentModal(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
-                Вернуться к Главному сейчас
               </button>
             </div>
           </div>
