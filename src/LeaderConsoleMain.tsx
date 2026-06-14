@@ -391,7 +391,7 @@ export default function LeaderConsoleMain() {
       <aside className="w-full lg:w-[240px] shrink-0 space-y-5 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto right-scrollbar">
 
         {/* Focus of the day */}
-        <div className="sidebar-section p-1">
+        <div className="sidebar-section p-1" style={{ backgroundColor: 'transparent', border: 'none', boxShadow: 'none' }}>
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               <Zap className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
@@ -432,8 +432,7 @@ export default function LeaderConsoleMain() {
         <div className="h-px mx-1" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
 
         {/* What parameters mean */}
-        <div className="sidebar-section p-1">
-          <p className="text-[10px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Может пригодиться</p>
+        <div className="sidebar-section p-1" style={{ backgroundColor: 'transparent', border: 'none', boxShadow: 'none' }}>
           <button onClick={() => { setShowParamDescriptions(true); setShowPulseModal(true); }} className="w-full text-left group flex items-start gap-2.5">
             <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
             <div>
