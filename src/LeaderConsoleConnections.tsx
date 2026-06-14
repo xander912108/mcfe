@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  ChevronRight, X, Link2, AlertTriangle,
+  ChevronRight, X, Link2, AlertTriangle, Info,
   Users, Map, GitMerge, BarChart3, Settings,
   Zap, Check, ArrowRight,
   MessageSquare, Shield, Sliders
@@ -1050,6 +1050,88 @@ export default function LeaderConsoleConnections() {
         )}
 
       </main>
+
+      {/* ===== RIGHT COLUMN ===== */}
+      <aside className="w-full lg:w-[240px] shrink-0 space-y-5 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto right-scrollbar">
+
+        {/* Attention & Insights: hide advisor */}
+        {(activeSection === 'attention' || activeSection === 'insights') && null}
+
+        {/* Map: contextual advisor */}
+        {activeSection === 'map' && (
+          <>
+            <div className="sidebar-section">
+              <div className="flex items-center gap-2 mb-3">
+                <Info className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
+                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Советник</h3>
+              </div>
+              <div className="p-3 rounded-xl" style={{ backgroundColor: GOLD_GLOW, border: `1px solid rgba(201,169,110,0.15)` }}>
+                <p className="text-xs font-medium mb-1" style={{ color: 'var(--gold)' }}>Один круг почти не связан с остальным</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Участники frontend активно общаются внутри себя, но почти не пересекаются с backend. Можно создать мягкий мост.</p>
+                <button onClick={() => setActiveSection('connect')} className="text-[11px] mt-2 font-medium transition-colors hover:opacity-80" style={{ color: 'var(--gold)' }}>Показать мост</button>
+              </div>
+            </div>
+            <div className="sidebar-section">
+              <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Может пригодиться</h3>
+              <div className="space-y-2">
+                <button className="text-left w-full text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Что считается связью</span>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Ответы, разборы, благодарности, наставничество</p>
+                </button>
+                <button className="text-left w-full text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Приватность карты</span>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Что видит лидер и участник</p>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Connect: advisor with recommendation */}
+        {activeSection === 'connect' && (
+          <>
+            <div className="sidebar-section">
+              <div className="flex items-center gap-2 mb-3">
+                <Info className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
+                <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Советник</h3>
+              </div>
+              <div className="p-3 rounded-xl" style={{ backgroundColor: TERRACOTTA_LIGHT, border: `1px solid ${TERRACOTTA_BORDER}` }}>
+                <p className="text-xs font-medium mb-1" style={{ color: TERRACOTTA }}>Сначала дайте связь новичку без контакта</p>
+                <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Мария уже выбрала первый шаг, но пока не получила живой отклик. Система нашла участника рядом.</p>
+                <button onClick={() => setRecFilter('first_connection')} className="text-[11px] mt-2 font-medium transition-colors hover:opacity-80" style={{ color: TERRACOTTA }}>Показать рекомендацию</button>
+              </div>
+            </div>
+            <div className="sidebar-section">
+              <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Может пригодиться</h3>
+              <div className="space-y-2">
+                <button className="text-left w-full text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Лимиты помощников</span>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Как не перегружать тех, кто часто помогает</p>
+                </button>
+                <button className="text-left w-full text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Шаблоны предложений</span>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>Для помощника, участника рядом, мини-чата</p>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Settings: advisor only if problem */}
+        {activeSection === 'settings' && (
+          <div className="sidebar-section">
+            <div className="flex items-center gap-2 mb-3">
+              <Info className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
+              <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Советник</h3>
+            </div>
+            <div className="p-3 rounded-xl" style={{ backgroundColor: GOLD_GLOW, border: `1px solid rgba(201,169,110,0.15)` }}>
+              <p className="text-xs font-medium mb-1" style={{ color: 'var(--gold)' }}>Общий интерес создаёт много рекомендаций</p>
+              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Слабые совпадения целей попадают в рекомендации. Лучше оставить их как подсказку, но не считать живой связью.</p>
+              <button className="text-[11px] mt-2 font-medium transition-colors hover:opacity-80" style={{ color: 'var(--gold)' }}>Настроить правила</button>
+            </div>
+          </div>
+        )}
+      </aside>
 
       {/* ===== MODAL: Ask helper ===== */}
       {showAskModal && (
