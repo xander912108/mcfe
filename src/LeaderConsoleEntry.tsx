@@ -1467,14 +1467,16 @@ export default function LeaderConsoleEntry() {
       {/* ===== 1. CLARIFY MODAL ===== */}
       {showClarifyModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowClarifyModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowClarifyModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Задать уточнение</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Кандидат получит сообщение ниже. После отправки заявка перейдёт в статус «На уточнении». Когда кандидат ответит, карточка вернётся в список «Требуют ответа» со статусом «Ответил».</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Задать уточнение</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Кандидат получит сообщение ниже. После отправки заявка перейдёт в статус «На уточнении». Когда кандидат ответит, карточка вернётся в список «Требуют ответа» со статусом «Ответил».</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-2">
                 <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>Заголовок сообщения</p>
                 <input
@@ -1500,12 +1502,11 @@ export default function LeaderConsoleEntry() {
               <div className="flex justify-end mb-2">
                 <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{clarifyText.length} / 1000</span>
               </div>
-              <p className="text-[11px] mb-4" style={{ color: 'var(--gold)' }}>Можно отредактировать перед отправкой.</p>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { setClarifyDirty(false); setShowClarifyModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить уточнение</button>
-                <button onClick={() => { if (clarifyDirty) { setShowClarifyConfirm(true); } else { setShowClarifyModal(false); } }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
-              </div>
+              <p className="text-[11px] mb-2" style={{ color: 'var(--gold)' }}>Можно отредактировать перед отправкой.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setClarifyDirty(false); setShowClarifyModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить уточнение</button>
+              <button onClick={() => { if (clarifyDirty) { setShowClarifyConfirm(true); } else { setShowClarifyModal(false); } }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
             </div>
           </div>
         </div>
@@ -1514,14 +1515,15 @@ export default function LeaderConsoleEntry() {
       {/* ===== CLARIFY CONFIRM: exit without saving ===== */}
       {showClarifyConfirm && (
         <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} onClick={() => setShowClarifyConfirm(false)}>
-          <div className="modal-enter rounded-2xl max-w-sm w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 md:p-8">
+          <div className="modal-enter rounded-2xl max-w-sm w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
               <h2 className="text-lg font-bold mb-2 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Выйти без сохранения?</h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>Вы изменили текст уточнения. Если вернуться к заявке, изменения не будут отправлены.</p>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowClarifyConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Остаться в модалке</button>
-                <button onClick={() => { setClarifyDirty(false); setShowClarifyConfirm(false); setShowClarifyModal(false); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Выйти без сохранения</button>
-              </div>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Вы изменили текст уточнения. Если вернуться к заявке, изменения не будут отправлены.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowClarifyConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Остаться в модалке</button>
+              <button onClick={() => { setClarifyDirty(false); setShowClarifyConfirm(false); setShowClarifyModal(false); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Выйти без сохранения</button>
             </div>
           </div>
         </div>
@@ -1530,14 +1532,16 @@ export default function LeaderConsoleEntry() {
       {/* ===== PAYMENT REMIND MODAL ===== */}
       {showPaymentRemindModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowPaymentRemindModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowPaymentRemindModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Напомнить об оплате</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Кандидат получит сообщение ниже. Статус заявки останется «Одобрена · оплата не завершена». После успешной оплаты доступ откроется автоматически.</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Напомнить об оплате</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Кандидат получит сообщение ниже. Статус заявки останется «Одобрена · оплата не завершена». После успешной оплаты доступ откроется автоматически.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               {/* Context */}
               {sidePanelApp && (
                 <div className="mb-4 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
@@ -1573,13 +1577,12 @@ export default function LeaderConsoleEntry() {
                 <div className="flex justify-end mt-1">
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{paymentRemindText.length} / 1000</span>
                 </div>
-                <p className="text-[11px] mb-4" style={{ color: 'var(--gold)' }}>Можно отредактировать перед отправкой.</p>
+                <p className="text-[11px] mb-2" style={{ color: 'var(--gold)' }}>Можно отредактировать перед отправкой.</p>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { setPaymentRemindDirty(false); setShowPaymentRemindModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить напоминание</button>
-                <button onClick={() => { if (paymentRemindDirty) { setPaymentRemindDirty(false); } setShowPaymentRemindModal(false); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setPaymentRemindDirty(false); setShowPaymentRemindModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить напоминание</button>
+              <button onClick={() => { if (paymentRemindDirty) { setPaymentRemindDirty(false); } setShowPaymentRemindModal(false); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
             </div>
           </div>
         </div>
