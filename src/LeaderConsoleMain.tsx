@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from './ToastContext';
 import {
   AlertTriangle, ChevronRight, Check,
   X, Info, Zap,
@@ -115,6 +116,7 @@ const paramDescriptions = [
 /* ===== COMPONENT ===== */
 export default function LeaderConsoleMain() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [activeSection, setActiveSection] = useState<SectionKey>('map');
   const [showPulseModal, setShowPulseModal] = useState(false);
   const [showWhyId, setShowWhyId] = useState<number | null>(null);
@@ -122,6 +124,8 @@ export default function LeaderConsoleMain() {
   const [showParamDescriptions, setShowParamDescriptions] = useState(false);
   const [showPulseInfo, setShowPulseInfo] = useState(false);
   const [showIndexInfo, setShowIndexInfo] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [advisorFocus, setAdvisorFocus] = useState<'payment' | 'newcomer' | 'applications'>('payment');
   const paramDescriptionsRef = useRef<HTMLDivElement>(null);
 
@@ -410,7 +414,7 @@ export default function LeaderConsoleMain() {
           )}
           <button
             onClick={() => {
-              if (advisorFocus === 'payment') { setActiveSection('plan'); setShowWhyId(1); }
+              if (advisorFocus === 'payment') setShowPaymentModal(true);
               if (advisorFocus === 'newcomer') { setActiveSection('plan'); setShowWhyId(2); }
               if (advisorFocus === 'applications') { setActiveSection('plan'); setShowWhyId(3); }
             }}
@@ -612,6 +616,164 @@ export default function LeaderConsoleMain() {
               <button onClick={() => { setShowPulseModal(false); setShowParamDescriptions(false); }} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
                 Понятно
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: ДОСТУП ПОСЛЕ ОПЛАТЫ ===== */}
+      {showPaymentModal && (
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowPaymentModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden my-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowPaymentModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
+
+            <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-center gap-2 mb-1">
+                <AlertTriangle className="w-5 h-5" style={{ color: TERRACOTTA }} />
+                <h2 className="text-xl font-bold heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Доступ после оплаты</h2>
+              </div>
+              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>Участник уже оплатил участие, но доступ в сообщество не открылся автоматически. Лучше проверить это первым: человек уже сделал шаг доверия и ждёт входа.</p>
+
+              {/* Участник */}
+              <div className="mb-6">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Участник</p>
+                <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                  <p className="text-sm font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Иван Петров</p>
+                  <div className="space-y-1.5">
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><span style={{ color: 'var(--text-muted)' }}>Формат:</span> вход в сообщество «IT Технологии»</p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><span style={{ color: 'var(--text-muted)' }}>Сумма:</span> 7 900 ₽</p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><span style={{ color: 'var(--text-muted)' }}>Провайдер:</span> ЮKassa</p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><span style={{ color: 'var(--text-muted)' }}>Статус оплаты:</span> <span style={{ color: SAGE }}>оплата прошла</span></p>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}><span style={{ color: 'var(--text-muted)' }}>Статус доступа:</span> <span style={{ color: TERRACOTTA }}>доступ не открылся</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-px mb-6" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Что произошло */}
+              <div className="mb-6">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произошло</p>
+                <ul className="space-y-2">
+                  {[
+                    'платёж подтверждён',
+                    'система получила событие оплаты',
+                    'доступ должен был открыться автоматически',
+                    'доступ пока не создан',
+                    'участнику показано сообщение: «Доступ временно проверяется»',
+                  ].map((item, i) => (
+                    <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
+                      <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: i < 4 ? 'var(--gold)' : TERRACOTTA }} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="h-px mb-6" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Почему это важно */}
+              <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: TERRACOTTA_LIGHT, border: `1px solid ${TERRACOTTA_BORDER}` }}>
+                <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: TERRACOTTA, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Почему это важно</p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Оплата — это сильный шаг доверия. Если после оплаты человек не получает доступ, у него может появиться ощущение, что вход завис или что оплату нужно повторить.</p>
+                <p className="text-xs leading-relaxed mt-2" style={{ color: 'var(--text-secondary)' }}>Повторно оплачивать не нужно. Ситуацию лучше проверить и открыть доступ вручную, если платёж подтверждён.</p>
+              </div>
+
+              <div className="h-px mb-6" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Проверка перед открытием */}
+              <div className="mb-6">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Проверка перед открытием</p>
+                <div className="space-y-2">
+                  {[
+                    { label: 'Платёж прошёл', ok: true },
+                    { label: 'Сумма совпадает', ok: true },
+                    { label: 'Сообщество активно', ok: true },
+                    { label: 'Участник найден', ok: true },
+                    { label: 'Доступ ещё не создан', ok: false },
+                  ].map((check) => (
+                    <div key={check.label} className="flex items-center gap-2">
+                      {check.ok ? (
+                        <Check className="w-3.5 h-3.5 shrink-0" style={{ color: SAGE }} />
+                      ) : (
+                        <span className="w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center" style={{ borderColor: TERRACOTTA }}>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TERRACOTTA }} />
+                        </span>
+                      )}
+                      <span className="text-xs" style={{ color: check.ok ? 'var(--text-secondary)' : TERRACOTTA }}>{check.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px mb-6" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Что дальше */}
+              <div className="mb-6">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что дальше</p>
+                <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>Если данные оплаты корректны, можно открыть доступ вручную. Участник получит уведомление «Доступ к сообществу открыт» и появится в разделе «Новички» во «Вступлении».</p>
+                <div className="space-y-2">
+                  <button onClick={() => setShowConfirmModal(true)} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>
+                    Открыть доступ вручную
+                  </button>
+                  <button onClick={() => { setShowPaymentModal(false); navigate('/leader/monetization'); }} className="w-full py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                    Открыть в Монетизации
+                  </button>
+                  <button onClick={() => setShowPaymentModal(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                    Вернуться к Главному сейчас
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: ПОДТВЕРЖДЕНИЕ ОТКРЫТИЯ ДОСТУПА ===== */}
+      {showConfirmModal && (
+        <div className="modal-backdrop fixed inset-0 z-[70] flex items-start justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} onClick={() => setShowConfirmModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden my-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowConfirmModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
+
+            <div className="p-6 md:p-8">
+              <h3 className="text-lg font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть доступ вручную?</h3>
+              <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>Платёж прошёл, но доступ не открылся автоматически. После подтверждения участник получит доступ к сообществу и уведомление «Доступ к сообществу открыт».</p>
+
+              <div className="p-4 rounded-xl mb-6" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произойдёт</p>
+                <ul className="space-y-1.5">
+                  {[
+                    'доступ будет открыт вручную',
+                    'событие сохранится в истории',
+                    'участник получит уведомление',
+                    'карточка уйдёт из ситуации «доступ не открылся»',
+                    'участник появится в «Новичках» во «Вступлении»',
+                  ].map((item, i) => (
+                    <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
+                      <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: SAGE }} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    setShowPaymentModal(false);
+                    showToast('Доступ открыт вручную. Иван получил уведомление и добавлен в новичков.', 'success');
+                  }}
+                  className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90"
+                  style={{ backgroundColor: SAGE, color: '#fff' }}
+                >
+                  Открыть доступ
+                </button>
+                <button onClick={() => setShowConfirmModal(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                  Вернуться к проверке
+                </button>
+              </div>
             </div>
           </div>
         </div>
