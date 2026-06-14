@@ -120,6 +120,8 @@ export default function LeaderConsoleMain() {
   const [showWhyId, setShowWhyId] = useState<number | null>(null);
   const [showAdvisorWhy, setShowAdvisorWhy] = useState(false);
   const [showParamDescriptions, setShowParamDescriptions] = useState(false);
+  const [showPulseInfo, setShowPulseInfo] = useState(false);
+  const [showIndexInfo, setShowIndexInfo] = useState(false);
   const [advisorFocus, setAdvisorFocus] = useState<'payment' | 'newcomer' | 'applications'>('payment');
 
   const GradientDivider = () => (
@@ -440,12 +442,43 @@ export default function LeaderConsoleMain() {
 
               {/* Top score */}
               <div className="flex items-center gap-4 mb-6 p-4 rounded-xl" style={{ backgroundColor: GOLD_GLOW, border: `1px solid ${GOLD_BORDER}` }}>
-                <div className="text-4xl font-bold heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)' }}>74<span className="text-xl" style={{ color: 'var(--text-muted)' }}>/100</span></div>
-                <div>
-                  <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Среда стабильна</p>
+                <div className="text-4xl font-bold heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)' }}>
+                  74<span className="text-xl" style={{ color: 'var(--text-muted)' }}>/100</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Среда стабильна</p>
+                    <button onClick={() => setShowPulseInfo(!showPulseInfo)} className="p-0.5 rounded transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}><Info className="w-3.5 h-3.5" /></button>
+                  </div>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Есть точки внимания, но в целом сообщество держит хороший ритм.</p>
                 </div>
               </div>
+
+              {/* Popover: How Pulse is calculated */}
+              {showPulseInfo && (
+                <div className="mb-6 p-5 rounded-xl relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--gold)', boxShadow: 'var(--card-shadow)' }}>
+                  <button onClick={() => setShowPulseInfo(false)} className="absolute top-3 right-3 p-0.5 rounded transition-colors" style={{ color: 'var(--text-muted)' }}><X className="w-4 h-4" /></button>
+                  <p className="text-xs font-bold mb-3" style={{ color: 'var(--gold)' }}>Как считается Пульс</p>
+                  <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
+                    Пульс — это среднее значение шести параметров:
+                  </p>
+                  <ul className="space-y-1 mb-3">
+                    {['первая связь', 'запросы', 'вклад', 'взаимопомощь', 'доступ и оплата', 'настройки и риски'].map((p) => (
+                      <li key={p} className="text-xs flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                        <span className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: 'var(--gold)' }} />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="p-3 rounded-lg mb-3" style={{ backgroundColor: 'var(--hover-bg)' }}>
+                    <p className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Формула:</p>
+                    <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>(60 + 82 + 91 + 76 + 47 + 88) / 6 = 74</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                    Каждый параметр считается по шкале от 0 до 100. Чем выше значение, тем меньше заметных провалов в этой части сообщества. Пульс не оценивает лидера и не является рейтингом. Это спокойный индикатор состояния среды.
+                  </p>
+                </div>
+              )}
 
 
 
@@ -500,11 +533,45 @@ export default function LeaderConsoleMain() {
 
               {/* Index */}
               <div className="rounded-xl p-4 mb-6" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                <p className="text-[11px] font-semibold tracking-widest mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Индекс отдачи</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[11px] font-semibold tracking-widest" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Индекс отдачи</p>
+                  <button onClick={() => setShowIndexInfo(!showIndexInfo)} className="p-0.5 rounded transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}><Info className="w-3.5 h-3.5" /></button>
+                </div>
                 <p className="text-2xl font-bold heading-accent mb-1" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)' }}>1.34</p>
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>На 1 запрос помощи приходится 1.34 полезного отклика: ответ, благодарность, разбор, помощь новичку или сохранённый Инсайт.</p>
                 <p className="text-xs leading-relaxed mt-2" style={{ color: 'var(--text-secondary)' }}>Значение выше 1 — хороший знак: участники не только получают помощь, но и начинают отдавать её другим.</p>
               </div>
+
+              {/* Popover: How Index is calculated */}
+              {showIndexInfo && (
+                <div className="mb-6 p-5 rounded-xl relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--gold)', boxShadow: 'var(--card-shadow)' }}>
+                  <button onClick={() => setShowIndexInfo(false)} className="absolute top-3 right-3 p-0.5 rounded transition-colors" style={{ color: 'var(--text-muted)' }}><X className="w-4 h-4" /></button>
+                  <p className="text-xs font-bold mb-3" style={{ color: 'var(--gold)' }}>Как считается Индекс отдачи</p>
+                  <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
+                    Индекс отдачи показывает, сколько полезных откликов появляется на один запрос помощи.
+                  </p>
+                  <div className="p-3 rounded-lg mb-3" style={{ backgroundColor: 'var(--hover-bg)' }}>
+                    <p className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Формула:</p>
+                    <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Полезные отклики / Запросы помощи = Индекс отдачи</p>
+                  </div>
+                  <p className="text-[11px] font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>В полезные отклики входят:</p>
+                  <ul className="space-y-1 mb-3">
+                    {['ответы на запросы', 'благодарности за помощь', 'разборы работ', 'помощь новичкам', 'сохранённые Инсайты'].map((item) => (
+                      <li key={item} className="text-[11px] flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                        <span className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: 'var(--gold)' }} />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="p-3 rounded-lg mb-3" style={{ backgroundColor: 'var(--hover-bg)' }}>
+                    <p className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Пример:</p>
+                    <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>47 полезных откликов / 35 запросов помощи = 1.34</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                    Если значение выше 1, значит сообщество не только просит помощь, но и возвращает её другим участникам.
+                  </p>
+                </div>
+              )}
 
               {/* Parameter descriptions (expandable) */}
               <div className="mb-4">
