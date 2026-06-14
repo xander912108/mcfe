@@ -2500,10 +2500,12 @@ export default function LeaderConsoleEntry() {
             <button onClick={() => setShowEditDraftModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8 overflow-y-auto">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Продолжить ответ</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Первый ответ особенно важен: по нему новичок понимает, что в сообществе есть живой отклик. Черновик уже сохранён — вы можете поправить текст и отправить его Илье.</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Продолжить ответ</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Первый ответ особенно важен: по нему новичок понимает, что в сообществе есть живой отклик. Черновик уже сохранён — вы можете поправить текст и отправить его Илье.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-5">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Вопрос новичка</p>
                 <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
@@ -2511,7 +2513,6 @@ export default function LeaderConsoleEntry() {
                   <p className="text-sm italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«Я хочу сделать API для личного трекера привычек, но не понимаю, как правильно разложить проект на слои: handlers, services, repository. С чего лучше начать, чтобы не усложнить?»</p>
                 </div>
               </div>
-
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</p>
                 <input type="text" className="w-full px-4 py-2.5 rounded-xl text-sm" value={editDraftTitle} onChange={(e) => setEditDraftTitle(e.target.value)} maxLength={120} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
@@ -2519,7 +2520,6 @@ export default function LeaderConsoleEntry() {
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{editDraftTitle.length} / 120</span>
                 </div>
               </div>
-
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение новичку</p>
                 <textarea className="w-full px-4 py-3 rounded-xl text-sm leading-relaxed resize-none overflow-hidden" value={editDraftText} onChange={(e) => setEditDraftText(e.target.value)} maxLength={1000} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content', overflow: 'hidden' }} />
@@ -2527,12 +2527,11 @@ export default function LeaderConsoleEntry() {
                   <MessageCounter count={editDraftText.length} />
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { setShowEditDraftModal(false); setShowSendDraftConfirmModal(true); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить ответ</button>
-                <button onClick={() => setShowEditDraftModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Сохранить изменения</button>
-                <button onClick={() => setShowEditDraftModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setShowEditDraftModal(false); setShowSendDraftConfirmModal(true); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить ответ</button>
+              <button onClick={() => setShowEditDraftModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Сохранить изменения</button>
+              <button onClick={() => setShowEditDraftModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
             </div>
           </div>
         </div>
@@ -2545,18 +2544,19 @@ export default function LeaderConsoleEntry() {
             <button onClick={() => setShowSendDraftConfirmModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8 overflow-y-auto">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Отправить ответ Илье?</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Илья получит сохранённый черновик ниже. После отправки вопрос перестанет быть без ответа, а в истории входа появится событие «первый ответ отправлен».</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Отправить ответ Илье?</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Илья получит сохранённый черновик ниже. После отправки вопрос перестанет быть без ответа, а в истории входа появится событие «первый ответ отправлен».</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Вопрос новичка</p>
                 <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
                   <p className="text-sm italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«Я хочу сделать API для личного трекера привычек, но не понимаю, как правильно разложить проект на слои: handlers, services, repository. С чего лучше начать, чтобы не усложнить?»</p>
                 </div>
               </div>
-
-              <div className="mb-5">
+              <div className="mb-2">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Ответ, который получит Илья</p>
                 <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                   <p className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Заголовок сообщения</p>
@@ -2565,12 +2565,11 @@ export default function LeaderConsoleEntry() {
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{editDraftText}</p>
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { setShowSendDraftConfirmModal(false); setShowEditDraftModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Отправить ответ</button>
-                <button onClick={() => { setShowSendDraftConfirmModal(false); setShowEditDraftModal(true); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Продолжить редактирование</button>
-                <button onClick={() => setShowSendDraftConfirmModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setShowSendDraftConfirmModal(false); setShowEditDraftModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Отправить ответ</button>
+              <button onClick={() => { setShowSendDraftConfirmModal(false); setShowEditDraftModal(true); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Продолжить редактирование</button>
+              <button onClick={() => setShowSendDraftConfirmModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
             </div>
           </div>
         </div>
@@ -2579,17 +2578,20 @@ export default function LeaderConsoleEntry() {
       {/* ===== 10. SETTINGS TRANSITION MODAL ===== */}
       {showSettingsModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowSettingsModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowSettingsModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-4 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Настроить форму заявки</h2>
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Настроить форму заявки</h2>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="rounded-lg p-4 mb-5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Форма заявки помогает понять, кто хочет войти в сообщество и с каким запросом человек приходит.</p>
                 <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Сейчас в форме не хватает вопроса о цели. Без цели сложнее подобрать новичку первый шаг, участника рядом или Помощника на старте.</p>
               </div>
-              <div className="mb-5">
+              <div className="mb-2">
                 <h3 className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что можно настроить</h3>
                 <div className="space-y-1.5">
                   {['Вопросы заявки', 'Вопрос о цели', 'Вопрос об опыте', 'Текст после отправки заявки', 'Что происходит после одобрения'].map((item, i) => (
@@ -2600,10 +2602,10 @@ export default function LeaderConsoleEntry() {
                   ))}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowSettingsModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Перейти к настройке формы</button>
-                <button onClick={() => setShowSettingsModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Позже</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowSettingsModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Перейти к настройке формы</button>
+              <button onClick={() => setShowSettingsModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Позже</button>
             </div>
           </div>
         </div>
@@ -2612,16 +2614,19 @@ export default function LeaderConsoleEntry() {
       {/* ===== LIMITS MODAL ===== */}
       {showLimitsModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowLimitsModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowLimitsModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-4 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Лимиты Помощника на старте</h2>
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Лимиты Помощника на старте</h2>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="rounded-lg p-4 mb-5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Без лимита участника можно случайно перегрузить новыми назначениями. Лучше заранее указать, сколько новичков можно сопровождать одновременно.</p>
               </div>
-              <div className="mb-5">
+              <div className="mb-2">
                 <h3 className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что можно настроить</h3>
                 <div className="space-y-1.5">
                   {['Лимит новичков на одного Помощника', 'Срок функции (по умолчанию 7 дней)', 'Возможность поставить помощь на паузу', 'Темы, по которым Помощник помогает', 'Уведомления о перегрузе'].map((item, i) => (
@@ -2632,10 +2637,10 @@ export default function LeaderConsoleEntry() {
                   ))}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowLimitsModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Перейти к настройкам</button>
-                <button onClick={() => setShowLimitsModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Позже</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowLimitsModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Перейти к настройкам</button>
+              <button onClick={() => setShowLimitsModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Позже</button>
             </div>
           </div>
         </div>
