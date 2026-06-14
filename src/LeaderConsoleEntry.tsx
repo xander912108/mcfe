@@ -3643,11 +3643,14 @@ export default function LeaderConsoleEntry() {
       {/* ===== RESTORE CONFIRM MODAL ===== */}
       {showRestoreConfirm && (
         <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={() => setShowRestoreConfirm(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full p-6 relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Восстановить исходные тексты?</h3>
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Все изменения в шаблонах одобрения, уточнения и решения «Не принимаем сейчас» будут заменены исходными текстами.</p>
-            <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Уже отправленные сообщения не изменятся.</p>
-            <div className="flex flex-wrap gap-2 justify-end">
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h3 className="text-lg font-bold mb-2 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Восстановить исходные тексты?</h3>
+              <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Все изменения в шаблонах одобрения, уточнения и решения «Не принимаем сейчас» будут заменены исходными текстами.</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Уже отправленные сообщения не изменятся.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2 justify-end" style={{ borderTop: '1px solid var(--border-color)' }}>
               <button onClick={() => setShowRestoreConfirm(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к настройке</button>
               <button onClick={() => {
                 setAppMsgApproveTitle('Заявка одобрена: следующий шаг');
@@ -4682,10 +4685,13 @@ export default function LeaderConsoleEntry() {
       {/* ===== FIRST 7 DAYS: DISCARD CONFIRM ===== */}
       {showF7DiscardConfirm && (
         <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={() => setShowF7DiscardConfirm(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full p-6 relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Закрыть без сохранения?</h3>
-            <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Изменения в настройках первых 7 дней не сохранятся.</p>
-            <div className="flex flex-wrap gap-2 justify-end">
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h3 className="text-lg font-bold mb-2 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Закрыть без сохранения?</h3>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Изменения в настройках первых 7 дней не сохранятся.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2 justify-end" style={{ borderTop: '1px solid var(--border-color)' }}>
               <button onClick={() => setShowF7DiscardConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>Продолжить редактирование</button>
               <button onClick={() => { setShowF7DiscardConfirm(false); setShowFirst7DaysModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ color: TERRACOTTA }}>Закрыть без сохранения</button>
             </div>
@@ -4696,10 +4702,13 @@ export default function LeaderConsoleEntry() {
       {/* ===== DISCARD CONFIRM MODAL ===== */}
       {showDiscardConfirm && (
         <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }} onClick={() => setShowDiscardConfirm(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full p-6 relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Выйти без сохранения?</h3>
-            <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>Изменения в сообщениях будут потеряны.</p>
-            <div className="flex flex-wrap gap-2 justify-end">
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h3 className="text-lg font-bold mb-2 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Выйти без сохранения?</h3>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Изменения в сообщениях будут потеряны.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2 justify-end" style={{ borderTop: '1px solid var(--border-color)' }}>
               <button onClick={() => setShowDiscardConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--hover-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}>Остаться</button>
               <button onClick={() => { setShowDiscardConfirm(false); setShowAppMessageModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ color: TERRACOTTA }}>Выйти без сохранения</button>
             </div>
