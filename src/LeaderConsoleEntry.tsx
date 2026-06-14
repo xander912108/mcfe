@@ -2069,15 +2069,16 @@ export default function LeaderConsoleEntry() {
       {/* ===== 5. MENTOR ASSIGN MODAL ===== */}
       {showMentorAssignModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowMentorAssignModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full max-h-[90vh] relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowMentorAssignModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="modal-scroll overflow-y-auto max-h-[90vh] p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Назначить Помощника на старте</h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>Помощник на старте помогает новичку освоиться в первые дни: ответить на первый вопрос, подсказать первый шаг и не дать человеку остаться одному.</p>
-
-              {/* Newcomers without connection */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Назначить Помощника на старте</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Помощник на старте помогает новичку освоиться в первые дни: ответить на первый вопрос, подсказать первый шаг и не дать человеку остаться одному.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-5">
                 <h3 className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Новички без первой связи</h3>
                 <div className="space-y-2">
@@ -2096,8 +2097,6 @@ export default function LeaderConsoleEntry() {
                   ))}
                 </div>
               </div>
-
-              {/* Candidates */}
               <div className="mb-5">
                 <h3 className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Кого можно предложить</h3>
                 <div className="space-y-3">
@@ -2108,8 +2107,6 @@ export default function LeaderConsoleEntry() {
                   </div>
                 </div>
               </div>
-
-              {/* Message */}
               <div className="mb-5">
                 <h3 className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение участнику</h3>
                 <input
@@ -2130,16 +2127,13 @@ export default function LeaderConsoleEntry() {
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{assignMessage.length} / 1000</span>
                 </div>
               </div>
-
-              {/* Note */}
-              <div className="rounded-lg p-3 mb-5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+              <div className="rounded-lg p-3 mb-2" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Функция не назначается автоматически. Участник получит предложение и сможет согласиться или отказаться.</p>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowMentorAssignModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Предложить функцию</button>
-                <button onClick={() => setShowMentorAssignModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Отмена</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowMentorAssignModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Предложить функцию</button>
+              <button onClick={() => setShowMentorAssignModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Отмена</button>
             </div>
           </div>
         </div>
@@ -2148,27 +2142,24 @@ export default function LeaderConsoleEntry() {
       {/* ===== 6. CONNECT MODAL ===== */}
       {showConnectModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowConnectModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowConnectModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Предложить познакомиться</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Первая связь не обязана идти от лидера. Иногда новичку достаточно познакомиться с участником, который проходил похожий путь.</p>
-
-              {/* Newcomer */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Предложить познакомиться</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Первая связь не обязана идти от лидера. Иногда новичку достаточно познакомиться с участником, который проходил похожий путь.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Мария Козлова · 2-й день</p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Цель: стать frontend-разработчиком. Первой связи пока нет.</p>
               </div>
-
-              {/* Member nearby */}
               <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: SAGE_LIGHT, border: `1px solid ${SAGE_BORDER}` }}>
                 <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Сергей Волков</p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Проходил похожий путь · уже отвечал по теме frontend · сейчас не перегружен</p>
               </div>
-
-              {/* Message */}
               <div className="mb-2">
                 <textarea
                   className="w-full px-3 py-2 rounded-lg text-sm resize-none"
@@ -2178,14 +2169,13 @@ export default function LeaderConsoleEntry() {
                   style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' , fieldSizing: 'content', overflow: 'hidden' }}
                 />
               </div>
-              <div className="flex justify-end mb-5">
+              <div className="flex justify-end mb-2">
                 <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{connectText.length} / 1000</span>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowConnectModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Предложить участника рядом</button>
-                <button onClick={() => setShowConnectModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Отмена</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowConnectModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Предложить участника рядом</button>
+              <button onClick={() => setShowConnectModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Отмена</button>
             </div>
           </div>
         </div>
@@ -2194,21 +2184,20 @@ export default function LeaderConsoleEntry() {
       {/* ===== 7. MEETING INVITE MODAL ===== */}
       {showMeetingInviteModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowMeetingInviteModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full max-h-[90vh] relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowMeetingInviteModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="modal-scroll overflow-y-auto max-h-[90vh] p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Пригласить новичков на встречу</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Встреча может стать первой живой связью для новичка: человек увидит участников, услышит вопросы других и почувствует ритм сообщества.</p>
-
-              {/* Meeting */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Пригласить новичков на встречу</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Встреча может стать первой живой связью для новичка: человек увидит участников, услышит вопросы других и почувствует ритм сообщества.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="rounded-lg p-4 mb-5" style={{ backgroundColor: 'rgba(201,169,110,0.08)', border: '1px solid rgba(201,169,110,0.2)' }}>
                 <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Разбор пет-проектов</p>
                 <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>Завтра · 19:00 · тема понятна новичкам, мягкий вход без обязательного выступления</p>
               </div>
-
-              {/* Newcomers to invite */}
               <div className="mb-5">
                 <h3 className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Кого пригласить</h3>
                 <div className="space-y-2">
@@ -2227,8 +2216,6 @@ export default function LeaderConsoleEntry() {
                   ))}
                 </div>
               </div>
-
-              {/* Message */}
               <div className="mb-2">
                 <h3 className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение новичкам</h3>
                 <input
@@ -2250,10 +2237,10 @@ export default function LeaderConsoleEntry() {
                 <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{meetingText.length} / 1000</span>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowMeetingInviteModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Пригласить новичков</button>
-                <button onClick={() => setShowMeetingInviteModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Отмена</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowMeetingInviteModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Пригласить новичков</button>
+              <button onClick={() => setShowMeetingInviteModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Отмена</button>
             </div>
           </div>
         </div>
