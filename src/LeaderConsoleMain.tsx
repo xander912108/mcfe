@@ -391,47 +391,55 @@ export default function LeaderConsoleMain() {
       <aside className="w-full lg:w-[240px] shrink-0 space-y-5 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto right-scrollbar">
 
         {/* Focus of the day */}
-        <div className="sidebar-section">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
-            <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Фокус дня</h3>
+        <div className="sidebar-section p-1">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
+              <h3 className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Фокус дня</h3>
+            </div>
           </div>
-          <div className="p-3 rounded-xl" style={{ backgroundColor: GOLD_GLOW, border: `1px solid ${GOLD_BORDER}` }}>
-            <p className="text-xs font-medium mb-2" style={{ color: 'var(--gold)' }}>{ac.title}</p>
-            <p className="text-[11px] leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>{ac.text}</p>
-            <button
-              onClick={() => {
-                if (advisorFocus === 'payment') { setActiveSection('plan'); setShowWhyId(1); }
-                if (advisorFocus === 'newcomer') { setActiveSection('plan'); setShowWhyId(2); }
-                if (advisorFocus === 'applications') { setActiveSection('plan'); setShowWhyId(3); }
-              }}
-              className="text-[11px] px-3 py-1.5 rounded-lg font-medium transition-all duration-200 hover:opacity-90 w-full"
-              style={{ backgroundColor: 'var(--gold)', color: '#fff' }}
-            >
-              {ac.action}
-            </button>
-          </div>
-          {/* Why */}
-          <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mt-2 transition-colors hover:opacity-80 flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs font-semibold leading-relaxed mb-1" style={{ color: 'var(--text-primary)' }}>{ac.title}</p>
+          <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>{ac.text}</p>
+          <button onClick={() => setShowAdvisorWhy(!showAdvisorWhy)} className="text-[11px] mb-3 transition-colors hover:opacity-80 flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
             {showAdvisorWhy ? 'Скрыть' : 'Почему я это вижу?'} <ChevronDown className="w-3 h-3" style={{ transform: showAdvisorWhy ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
           </button>
           {showAdvisorWhy && (
-            <p className="text-[11px] mt-2 leading-relaxed" style={{ color: 'var(--text-muted)' }}>{ac.why}</p>
+            <div className="rounded-lg p-3 mb-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{ac.why}</p>
+            </div>
           )}
-          {/* Next focus button (for demo) */}
+          <button
+            onClick={() => {
+              if (advisorFocus === 'payment') { setActiveSection('plan'); setShowWhyId(1); }
+              if (advisorFocus === 'newcomer') { setActiveSection('plan'); setShowWhyId(2); }
+              if (advisorFocus === 'applications') { setActiveSection('plan'); setShowWhyId(3); }
+            }}
+            className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80 mb-3"
+            style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}
+          >
+            {ac.action}
+          </button>
           <button
             onClick={() => setAdvisorFocus(ac.next)}
-            className="text-[10px] mt-2 transition-colors hover:opacity-80"
+            className="text-[10px] transition-colors hover:opacity-80 block"
             style={{ color: 'var(--text-muted)' }}
           >
             Следующий фокус (демо)
           </button>
         </div>
 
-        {/* Quiet link */}
-        <div className="sidebar-section">
-          <button onClick={() => { setShowParamDescriptions(true); setShowPulseModal(true); }} className="text-[11px] transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
-            Что означают параметры Пульса
+        {/* Divider */}
+        <div className="h-px mx-1" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+        {/* What parameters mean */}
+        <div className="sidebar-section p-1">
+          <p className="text-[10px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Может пригодиться</p>
+          <button onClick={() => { setShowParamDescriptions(true); setShowPulseModal(true); }} className="w-full text-left group flex items-start gap-2.5">
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-muted)' }} />
+            <div>
+              <p className="text-xs font-medium transition-colors group-hover:text-[var(--gold)]" style={{ color: 'var(--text-secondary)' }}>Что означают параметры Пульса</p>
+              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Расшифровка всех параметров и как они влияют на общую оценку</p>
+            </div>
           </button>
         </div>
 
