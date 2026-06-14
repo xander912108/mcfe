@@ -451,15 +451,21 @@ export default function LeaderConsoleMain() {
 
       {/* ===== MODAL: ПУЛЬС СООБЩЕСТВА ===== */}
       {showPulseModal && (
-        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => { setShowPulseModal(false); setShowParamDescriptions(false); }}>
-          <div className="modal-enter rounded-2xl max-w-xl w-full relative overflow-hidden my-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => { setShowPulseModal(false); setShowParamDescriptions(false); }}>
+          <div className="modal-enter rounded-2xl max-w-xl w-full relative overflow-hidden my-8 max-h-[85vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => { setShowPulseModal(false); setShowParamDescriptions(false); }} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
 
-            <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto">
-              {/* Header */}
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Пульс сообщества</h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>Показывает, насколько сейчас в сообществе всё работает без заметных провалов: новички получают первую связь, запросы не остаются без ответа, Вклад замечается, оплата и доступ работают корректно, а настройки не создают перегрузку.</p>
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Пульс сообщества</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Показывает, насколько сейчас в сообществе всё работает без заметных провалов: новички получают первую связь, запросы не остаются без ответа, Вклад замечается, оплата и доступ работают корректно, а настройки не создают перегрузку.</p>
+            </div>
 
+            {/* Gradient divider */}
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto px-6 md:px-8 py-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--border-color) transparent' }}>
               {/* Top score */}
               <div className="flex items-center gap-4 mb-6 p-4 rounded-xl" style={{ backgroundColor: GOLD_GLOW, border: `1px solid ${GOLD_BORDER}` }}>
                 <div className="text-4xl font-bold heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--gold)' }}>
@@ -479,14 +485,11 @@ export default function LeaderConsoleMain() {
                 <div className="mb-6 p-5 rounded-xl relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--gold)', boxShadow: 'var(--card-shadow)' }}>
                   <button onClick={() => setShowPulseInfo(false)} className="absolute top-3 right-3 p-0.5 rounded transition-colors" style={{ color: 'var(--text-muted)' }}><X className="w-4 h-4" /></button>
                   <p className="text-xs font-bold mb-3" style={{ color: 'var(--gold)' }}>Как считается Пульс</p>
-                  <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
-                    Пульс — это среднее значение шести параметров:
-                  </p>
+                  <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Пульс — это среднее значение шести параметров:</p>
                   <ul className="space-y-1 mb-3">
                     {['первая связь', 'запросы', 'вклад', 'взаимопомощь', 'доступ и оплата', 'настройки и риски'].map((p) => (
                       <li key={p} className="text-xs flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
-                        <span className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: 'var(--gold)' }} />
-                        {p}
+                        <span className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: 'var(--gold)' }} />{p}
                       </li>
                     ))}
                   </ul>
@@ -494,13 +497,9 @@ export default function LeaderConsoleMain() {
                     <p className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Формула:</p>
                     <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>(60 + 82 + 91 + 76 + 47 + 88) / 6 = 74</p>
                   </div>
-                  <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                    Каждый параметр считается по шкале от 0 до 100. Чем выше значение, тем меньше заметных провалов в этой части сообщества. Пульс не оценивает лидера и не является рейтингом. Это спокойный индикатор состояния среды.
-                  </p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Каждый параметр считается по шкале от 0 до 100. Чем выше значение, тем меньше заметных провалов в этой части сообщества. Пульс не оценивает лидера и не является рейтингом. Это спокойный индикатор состояния среды.</p>
                 </div>
               )}
-
-
 
               {/* Parameters */}
               <div className="mb-6">
@@ -529,8 +528,7 @@ export default function LeaderConsoleMain() {
                 <ul className="space-y-1.5">
                   {pulseDownItems.map((t, i) => (
                     <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
-                      <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: TERRACOTTA }} />
-                      {t}
+                      <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: TERRACOTTA }} />{t}
                     </li>
                   ))}
                 </ul>
@@ -542,8 +540,7 @@ export default function LeaderConsoleMain() {
                 <ul className="space-y-1.5">
                   {pulseUpItems.map((t, i) => (
                     <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
-                      <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: SAGE }} />
-                      {t}
+                      <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: SAGE }} />{t}
                     </li>
                   ))}
                 </ul>
@@ -567,9 +564,7 @@ export default function LeaderConsoleMain() {
                 <div className="mb-6 p-5 rounded-xl relative" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--gold)', boxShadow: 'var(--card-shadow)' }}>
                   <button onClick={() => setShowIndexInfo(false)} className="absolute top-3 right-3 p-0.5 rounded transition-colors" style={{ color: 'var(--text-muted)' }}><X className="w-4 h-4" /></button>
                   <p className="text-xs font-bold mb-3" style={{ color: 'var(--gold)' }}>Как считается Индекс отдачи</p>
-                  <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>
-                    Индекс отдачи показывает, сколько полезных откликов появляется на один запрос помощи.
-                  </p>
+                  <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Индекс отдачи показывает, сколько полезных откликов появляется на один запрос помощи.</p>
                   <div className="p-3 rounded-lg mb-3" style={{ backgroundColor: 'var(--hover-bg)' }}>
                     <p className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Формула:</p>
                     <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Полезные отклики / Запросы помощи = Индекс отдачи</p>
@@ -578,8 +573,7 @@ export default function LeaderConsoleMain() {
                   <ul className="space-y-1 mb-3">
                     {['ответы на запросы', 'благодарности за помощь', 'разборы работ', 'помощь новичкам', 'сохранённые Инсайты'].map((item) => (
                       <li key={item} className="text-[11px] flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
-                        <span className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: 'var(--gold)' }} />
-                        {item}
+                        <span className="w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: 'var(--gold)' }} />{item}
                       </li>
                     ))}
                   </ul>
@@ -587,9 +581,7 @@ export default function LeaderConsoleMain() {
                     <p className="text-[11px] font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Пример:</p>
                     <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>47 полезных откликов / 35 запросов помощи = 1.34</p>
                   </div>
-                  <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                    Если значение выше 1, значит сообщество не только просит помощь, но и возвращает её другим участникам.
-                  </p>
+                  <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>Если значение выше 1, значит сообщество не только просит помощь, но и возвращает её другим участникам.</p>
                 </div>
               )}
 
@@ -611,8 +603,10 @@ export default function LeaderConsoleMain() {
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Close button */}
+            {/* Fixed Footer */}
+            <div className="shrink-0 px-6 md:px-8 py-4" style={{ borderTop: '1px solid var(--border-color)' }}>
               <button onClick={() => { setShowPulseModal(false); setShowParamDescriptions(false); }} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
                 Понятно
               </button>
@@ -623,18 +617,24 @@ export default function LeaderConsoleMain() {
 
       {/* ===== MODAL: ДОСТУП ПОСЛЕ ОПЛАТЫ ===== */}
       {showPaymentModal && (
-        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowPaymentModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden my-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowPaymentModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden my-8 max-h-[85vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowPaymentModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
 
-            <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto">
-              {/* Header */}
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
               <div className="flex items-center gap-2 mb-1">
                 <AlertTriangle className="w-5 h-5" style={{ color: TERRACOTTA }} />
-                <h2 className="text-xl font-bold heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Доступ после оплаты</h2>
+                <h2 className="text-xl font-bold heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Доступ после оплаты</h2>
               </div>
-              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>Участник уже оплатил участие, но доступ в сообщество не открылся автоматически. Лучше проверить это первым: человек уже сделал шаг доверия и ждёт входа.</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Участник уже оплатил участие, но доступ в сообщество не открылся автоматически. Лучше проверить это первым: человек уже сделал шаг доверия и ждёт входа.</p>
+            </div>
 
+            {/* Gradient divider */}
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto px-6 md:px-8 py-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--border-color) transparent' }}>
               {/* Участник */}
               <div className="mb-6">
                 <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Участник</p>
@@ -656,16 +656,9 @@ export default function LeaderConsoleMain() {
               <div className="mb-6">
                 <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произошло</p>
                 <ul className="space-y-2">
-                  {[
-                    'платёж подтверждён',
-                    'система получила событие оплаты',
-                    'доступ должен был открыться автоматически',
-                    'доступ пока не создан',
-                    'участнику показано сообщение: «Доступ временно проверяется»',
-                  ].map((item, i) => (
+                  {['платёж подтверждён', 'система получила событие оплаты', 'доступ должен был открыться автоматически', 'доступ пока не создан', 'участнику показано сообщение: «Доступ временно проверяется»'].map((item, i) => (
                     <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
-                      <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: i < 4 ? 'var(--gold)' : TERRACOTTA }} />
-                      {item}
+                      <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: i < 4 ? 'var(--gold)' : TERRACOTTA }} />{item}
                     </li>
                   ))}
                 </ul>
@@ -686,20 +679,12 @@ export default function LeaderConsoleMain() {
               <div className="mb-6">
                 <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Проверка перед открытием</p>
                 <div className="space-y-2">
-                  {[
-                    { label: 'Платёж прошёл', ok: true },
-                    { label: 'Сумма совпадает', ok: true },
-                    { label: 'Сообщество активно', ok: true },
-                    { label: 'Участник найден', ok: true },
-                    { label: 'Доступ ещё не создан', ok: false },
-                  ].map((check) => (
+                  {[{ label: 'Платёж прошёл', ok: true }, { label: 'Сумма совпадает', ok: true }, { label: 'Сообщество активно', ok: true }, { label: 'Участник найден', ok: true }, { label: 'Доступ ещё не создан', ok: false }].map((check) => (
                     <div key={check.label} className="flex items-center gap-2">
                       {check.ok ? (
                         <Check className="w-3.5 h-3.5 shrink-0" style={{ color: SAGE }} />
                       ) : (
-                        <span className="w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center" style={{ borderColor: TERRACOTTA }}>
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TERRACOTTA }} />
-                        </span>
+                        <span className="w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center" style={{ borderColor: TERRACOTTA }}><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TERRACOTTA }} /></span>
                       )}
                       <span className="text-xs" style={{ color: check.ok ? 'var(--text-secondary)' : TERRACOTTA }}>{check.label}</span>
                     </div>
@@ -710,21 +695,23 @@ export default function LeaderConsoleMain() {
               <div className="h-px mb-6" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
 
               {/* Что дальше */}
-              <div className="mb-6">
+              <div className="mb-2">
                 <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что дальше</p>
                 <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>Если данные оплаты корректны, можно открыть доступ вручную. Участник получит уведомление «Доступ к сообществу открыт» и появится в разделе «Новички» во «Вступлении».</p>
-                <div className="space-y-2">
-                  <button onClick={() => setShowConfirmModal(true)} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>
-                    Открыть доступ вручную
-                  </button>
-                  <button onClick={() => { setShowPaymentModal(false); navigate('/leader/monetization'); }} className="w-full py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
-                    Открыть в Монетизации
-                  </button>
-                  <button onClick={() => setShowPaymentModal(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
-                    Вернуться к Главному сейчас
-                  </button>
-                </div>
               </div>
+            </div>
+
+            {/* Fixed Footer */}
+            <div className="shrink-0 px-6 md:px-8 py-4 space-y-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowConfirmModal(true)} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>
+                Открыть доступ вручную
+              </button>
+              <button onClick={() => { setShowPaymentModal(false); navigate('/leader/monetization'); }} className="w-full py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                Открыть в Монетизации
+              </button>
+              <button onClick={() => setShowPaymentModal(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                Вернуться к Главному сейчас
+              </button>
             </div>
           </div>
         </div>
@@ -732,48 +719,45 @@ export default function LeaderConsoleMain() {
 
       {/* ===== MODAL: ПОДТВЕРЖДЕНИЕ ОТКРЫТИЯ ДОСТУПА ===== */}
       {showConfirmModal && (
-        <div className="modal-backdrop fixed inset-0 z-[70] flex items-start justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} onClick={() => setShowConfirmModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden my-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-backdrop fixed inset-0 z-[70] flex items-start justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} onClick={() => setShowConfirmModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden my-8 max-h-[85vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowConfirmModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
 
-            <div className="p-6 md:p-8">
-              <h3 className="text-lg font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть доступ вручную?</h3>
-              <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>Платёж прошёл, но доступ не открылся автоматически. После подтверждения участник получит доступ к сообществу и уведомление «Доступ к сообществу открыт».</p>
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h3 className="text-lg font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть доступ вручную?</h3>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Платёж прошёл, но доступ не открылся автоматически. После подтверждения участник получит доступ к сообществу и уведомление «Доступ к сообществу открыт».</p>
+            </div>
 
-              <div className="p-4 rounded-xl mb-6" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+            {/* Gradient divider */}
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto px-6 md:px-8 py-4" style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--border-color) transparent' }}>
+              <div className="p-4 rounded-xl mb-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произойдёт</p>
                 <ul className="space-y-1.5">
-                  {[
-                    'доступ будет открыт вручную',
-                    'событие сохранится в истории',
-                    'участник получит уведомление',
-                    'карточка уйдёт из ситуации «доступ не открылся»',
-                    'участник появится в «Новичках» во «Вступлении»',
-                  ].map((item, i) => (
+                  {['доступ будет открыт вручную', 'событие сохранится в истории', 'участник получит уведомление', 'карточка уйдёт из ситуации «доступ не открылся»', 'участник появится в «Новичках» во «Вступлении»'].map((item, i) => (
                     <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
-                      <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: SAGE }} />
-                      {item}
+                      <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: SAGE }} />{item}
                     </li>
                   ))}
                 </ul>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    setShowConfirmModal(false);
-                    setShowPaymentModal(false);
-                    showToast('Доступ открыт вручную. Иван получил уведомление и добавлен в новичков.', 'success');
-                  }}
-                  className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90"
-                  style={{ backgroundColor: SAGE, color: '#fff' }}
-                >
-                  Открыть доступ
-                </button>
-                <button onClick={() => setShowConfirmModal(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
-                  Вернуться к проверке
-                </button>
-              </div>
+            {/* Fixed Footer */}
+            <div className="shrink-0 px-6 md:px-8 py-4 space-y-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button
+                onClick={() => { setShowConfirmModal(false); setShowPaymentModal(false); showToast('Доступ открыт вручную. Иван получил уведомление и добавлен в новичков.', 'success'); }}
+                className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90"
+                style={{ backgroundColor: SAGE, color: '#fff' }}
+              >
+                Открыть доступ
+              </button>
+              <button onClick={() => setShowConfirmModal(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                Вернуться к проверке
+              </button>
             </div>
           </div>
         </div>
