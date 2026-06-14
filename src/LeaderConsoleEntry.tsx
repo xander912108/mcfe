@@ -3,7 +3,7 @@ import {
   AlertTriangle, ChevronRight, Check,
   X, Info, Users, Zap, Lightbulb,
   BookOpen, Pause, Clock, ArrowRight,
-  FileText, Search
+  FileText, Search, BarChart3, Settings
 } from 'lucide-react';
 import { useToast } from './ToastContext';
 
@@ -540,12 +540,12 @@ export default function LeaderConsoleEntry() {
   type SectionKey = 'attention' | 'applications' | 'newcomers' | 'progress' | 'settings';
   const [activeSection, setActiveSection] = useState<SectionKey>('attention');
 
-  const sections: { key: SectionKey; label: string; count: string }[] = [
-    { key: 'attention', label: 'Ваше внимание', count: `${attentionCards.length} точки требуют заботы` },
-    { key: 'applications', label: 'Заявки', count: `${applicationsByFilter.waiting.length} ждут ответа` },
-    { key: 'newcomers', label: 'Новички', count: `${newcomers.length} в первые 7 дней` },
-    { key: 'progress', label: 'Что получается', count: `${selfManaging.length} хороших сигнала` },
-    { key: 'settings', label: 'Настройки входа', count: `${settingsRisks.length} настройка мешает входу` },
+  const sectionCards: { key: SectionKey; label: string; subtitle: string; icon: typeof AlertTriangle }[] = [
+    { key: 'attention', label: 'Ваше внимание', subtitle: `${attentionCards.length} точки требуют заботы`, icon: AlertTriangle },
+    { key: 'applications', label: 'Заявки', subtitle: `${applicationsByFilter.waiting.length} ждут ответа`, icon: FileText },
+    { key: 'newcomers', label: 'Новички', subtitle: `${newcomers.length} в первые 7 дней`, icon: Users },
+    { key: 'progress', label: 'Что получается', subtitle: `${selfManaging.length} хороших сигнала`, icon: BarChart3 },
+    { key: 'settings', label: 'Настройки входа', subtitle: `${settingsRisks.length} настройка мешает входу`, icon: Settings },
   ];
 
   const filteredNewcomers = newcomers.filter((nc) => {
@@ -757,23 +757,28 @@ export default function LeaderConsoleEntry() {
           </div>
         </div>
 
-        {/* ===== SECTION NAVIGATION CARDS ===== */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 section-fade-in" style={{ animationDelay: '50ms' }}>
-          {sections.map((s) => (
-            <button
-              key={s.key}
-              onClick={() => { setActiveSection(s.key); if (s.key === 'newcomers') setNewcomerFilter('all'); }}
-              className={`rounded-xl p-4 text-left transition-all duration-200 border ${activeSection === s.key ? 'ring-1' : 'hover:translate-y-[-2px]'}`}
-              style={{
-                backgroundColor: activeSection === s.key ? 'var(--hover-bg)' : 'var(--bg-card)',
-                borderColor: activeSection === s.key ? 'var(--gold)' : 'var(--border-color)',
-                boxShadow: activeSection === s.key ? 'var(--card-shadow)' : 'none',
-              }}
-            >
-              <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{s.label}</p>
-              <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{s.count}</p>
-            </button>
-          ))}
+        {/* ===== NAVIGATION CARDS ===== */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 section-fade-in" style={{ animationDelay: '50ms' }}>
+          {sectionCards.map((sc) => {
+            const Icon = sc.icon;
+            const isActive = activeSection === sc.key;
+            return (
+              <button
+                key={sc.key}
+                onClick={() => { setActiveSection(sc.key); if (sc.key === 'newcomers') setNewcomerFilter('all'); }}
+                className={`text-left p-4 rounded-xl transition-all duration-200 border ${isActive ? 'ring-1' : 'hover:translate-y-[-2px]'}`}
+                style={{
+                  backgroundColor: isActive ? 'var(--bg-card)' : 'var(--hover-bg)',
+                  borderColor: isActive ? 'var(--gold)' : 'var(--border-color)',
+                  boxShadow: isActive ? 'var(--card-shadow)' : 'none',
+                }}
+              >
+                <Icon className="w-4 h-4 mb-2" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }} />
+                <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{sc.label}</p>
+                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{sc.subtitle}</p>
+              </button>
+            );
+          })}
         </div>
 
           {/* ===== ATTENTION SECTION ===== */}
