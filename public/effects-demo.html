@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MENTORI CLUB — Premium Effects</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #D4AF37;
+  --gold-light: #E0C158;
+  --gold-dark: #B8962F;
+  --gold-glow: rgba(212, 175, 55, 0.4);
+  --bg-main: #0D0D0F;
+  --bg-card: #1A1A1E;
+  --bg-card-light: #FAFAF8;
+  --text-primary: #E8E6E3;
+  --text-secondary: #9A9895;
+  --border-color: #2A2A2E;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 8px;
+  letter-spacing: 0.1em;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 50px;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: var(--gold);
+}
+
+.card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+.demo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ============================================
+   EFFECT 1: Animated Border (бегущая рамка)
+   ============================================ */
+@keyframes borderRotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.fx-border-glow {
+  position: relative;
+  padding: 14px 36px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gold);
+  background: var(--bg-main);
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  z-index: 1;
+}
+
+.fx-border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light), var(--gold), var(--gold-dark));
+  background-size: 300% 100%;
+  animation: borderRotate 3s linear infinite;
+  z-index: -1;
+}
+
+.fx-border-glow::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 999px;
+  background: var(--bg-main);
+  z-index: -1;
+}
+
+.fx-border-glow:hover {
+  color: white;
+}
+
+.fx-border-glow:hover::after {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+}
+
+/* ============================================
+   EFFECT 2: Shimmer (блик на тексте)
+   ============================================ */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.fx-shimmer {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  background: linear-gradient(90deg, 
+    var(--gold-dark) 0%, 
+    var(--gold) 25%, 
+    var(--gold-light) 50%, 
+    var(--gold) 75%, 
+    var(--gold-dark) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ============================================
+   EFFECT 3: Pulse Glow (пульсация золотая)
+   ============================================ */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+  50% { box-shadow: 0 0 20px 10px rgba(212, 175, 55, 0.1); }
+}
+
+.fx-pulse-glow {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  animation: pulseGlow 2s ease-in-out infinite;
+  cursor: pointer;
+  border: none;
+}
+
+/* ============================================
+   EFFECT 4: Confetti Canvas (конфетти)
+   ============================================ */
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.fx-confetti-btn {
+  padding: 14px 36px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+  transition: transform 0.2s;
+}
+
+.fx-confetti-btn:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+   EFFECT 5: Ripple (золотая волна)
+   ============================================ */
+.fx-ripple {
+  position: relative;
+  padding: 14px 36px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+.fx-ripple .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: rippleAnim 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes rippleAnim {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   EFFECT 6: Floating particles (частицы)
+   ============================================ */
+.fx-particles {
+  position: relative;
+  width: 200px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: floatUp 3s ease-in-out infinite;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(20px) scale(0); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 0.3; }
+  100% { transform: translateY(-30px) scale(1); opacity: 0; }
+}
+
+/* ============================================
+   EFFECT 7: Sparkle Trail (след искр)
+   ============================================ */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+.fx-sparkle {
+  position: relative;
+  padding: 14px 36px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.sparkle-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--gold-light);
+  border-radius: 50%;
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   EFFECT 8: Neon glow (неоновое свечение)
+   ============================================ */
+@keyframes neonFlicker {
+  0%, 100% { text-shadow: 0 0 10px var(--gold-glow), 0 0 20px var(--gold-glow), 0 0 40px var(--gold-glow); }
+  50% { text-shadow: 0 0 5px var(--gold-glow), 0 0 10px var(--gold-glow), 0 0 20px var(--gold-glow); }
+}
+
+.fx-neon {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gold);
+  animation: neonFlicker 2s ease-in-out infinite;
+  font-family: 'Playfair Display', serif;
+}
+
+/* ============================================
+   EFFECT 9: Counter tick (анимация числа)
+   ============================================ */
+@keyframes countUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.fx-counter {
+  font-size: 48px;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  color: var(--gold);
+  animation: countUp 0.8s ease-out;
+}
+
+/* ============================================
+   EFFECT 10: Progress ring (кольцо прогресса)
+   ============================================ */
+@keyframes ringRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.fx-progress-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.fx-progress-ring svg {
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 4;
+}
+
+.ring-fill {
+  fill: none;
+  stroke: url(#goldGradient);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 55;
+  transition: stroke-dashoffset 1s ease;
+}
+
+.ring-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 28px;
+}
+
+/* ============================================
+   EFFECT 11: Achievement unlock (разблокировка)
+   ============================================ */
+@keyframes achievementPop {
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  50% { transform: scale(1.2) rotate(5deg); }
+  70% { transform: scale(0.95) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes achievementGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.6); }
+}
+
+.fx-achievement {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.02));
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  animation: achievementPop 0.8s ease-out, achievementGlow 3s ease-in-out infinite 0.8s;
+}
+
+.fx-achievement__icon {
+  font-size: 40px;
+}
+
+.fx-achievement__text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.fx-achievement__sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ============================================
+   EFFECT 12: Notification dot (пульс точки)
+   ============================================ */
+@keyframes notifyPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.5; }
+}
+
+.fx-notify {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.fx-notify__dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F44336, #FF5722);
+  border: 2px solid var(--bg-main);
+}
+
+.fx-notify__dot--pulse {
+  animation: notifyPulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   EFFECT 13: Typing indicator (печатает...)
+   ============================================ */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
+}
+
+.fx-typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 20px;
+  background: var(--hover-bg);
+  border-radius: 20px;
+}
+
+.fx-typing span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: typingBounce 1.4s ease-in-out infinite;
+}
+
+.fx-typing span:nth-child(1) { animation-delay: 0s; }
+.fx-typing span:nth-child(2) { animation-delay: 0.2s; }
+.fx-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ============================================
+   EFFECT 14: Golden rain (золотой дождь)
+   ============================================ */
+@keyframes goldenDrop {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.golden-drop {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: goldenDrop linear forwards;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ============================================
+   EFFECT 15: Level up (повышение уровня)
+   ============================================ */
+@keyframes levelUpBg {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+@keyframes levelUpScale {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.fx-levelup {
+  padding: 24px 40px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light), var(--gold));
+  background-size: 300% 300%;
+  animation: levelUpBg 3s ease infinite, levelUpScale 0.6s ease-out;
+  color: white;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+}
+
+.fx-levelup__level {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  opacity: 0.9;
+}
+
+.fx-levelup__title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+/* ============================================
+   EFFECT 16: Streak fire (огонь серии)
+   ============================================ */
+@keyframes fireFlicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); }
+  25% { transform: scale(1.05) rotate(2deg); }
+  50% { transform: scale(0.98) rotate(-1deg); }
+  75% { transform: scale(1.02) rotate(1deg); }
+}
+
+.fx-streak {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, rgba(255,87,34,0.15), rgba(255,152,0,0.08));
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  border-radius: 16px;
+  animation: fireFlicker 0.5s ease-in-out infinite;
+}
+
+.fx-streak__icon {
+  font-size: 28px;
+}
+
+.fx-streak__count {
+  font-size: 22px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FF5722, #FF9800);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fx-streak__label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   EFFECT 17: Hover lift (подъём карточки)
+   ============================================ */
+.fx-hover-lift {
+  padding: 20px 30px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fx-hover-lift:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+/* ============================================
+   EFFECT 18: SVG Check draw (прорисовка галочки)
+   ============================================ */
+@keyframes drawCheck {
+  0% { stroke-dashoffset: 100; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.fx-check-draw {
+  width: 60px;
+  height: 60px;
+}
+
+.fx-check-draw circle {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 3;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: drawCheck 0.6s ease-out forwards;
+}
+
+.fx-check-draw path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: drawCheck 0.4s ease-out 0.4s forwards;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#B8962F" />
+      <stop offset="100%" style="stop-color:#D4AF37" />
+    </linearGradient>
+  </defs>
+</svg>
+
+<canvas id="confetti-canvas"></canvas>
+
+<h1>MENTORI CLUB</h1>
+<p class="subtitle">Premium Effects — Kommyunitizatsiya & Vizualniye Effekti</p>
+
+<div class="container">
+
+  <!-- 1. Animated Border -->
+  <div class="card">
+    <h3>1. Begushchaya Granitsa</h3>
+    <p>Ispolzovat dlya: "Priglasit v soobshchestvo", PREMIUM-knopki. Zolotaya liniya bez ostanovki begayet po krayu.</p>
+    <div class="demo-area">
+      <button class="fx-border-glow">Priglasit v soobshchestvo</button>
+    </div>
+  </div>
+
+  <!-- 2. Shimmer -->
+  <div class="card">
+    <h3>2. Zolotoy Shimmer</h3>
+    <p>Ispolzovat dlya: zagolovkov PREMIUM-blokov, nazvaniya soobshchestv VIP-urovnya. Blik probegayet po tekstu.</p>
+    <div class="demo-area">
+      <span class="fx-shimmer">PREMIUM Soobshchestvo</span>
+    </div>
+  </div>
+
+  <!-- 3. Pulse Glow -->
+  <div class="card">
+    <h3>3. Pulsiruyushchee Svecheniye</h3>
+    <p>Ispolzovat dlya: khlopka pomoshchi, kriticheskikh uvedomleniy, khollovey-nachala. Privlekaya vnimaniye.</p>
+    <div class="demo-area">
+      <button class="fx-pulse-glow">?</button>
+    </div>
+  </div>
+
+  <!-- 4. Confetti -->
+  <div class="card">
+    <h3>4. Konfetti-Salyut</h3>
+    <p>Ispolzovat dlya: vstupleniye v soobshchestvo, perviy post, dostizheniye tseli, den rozhdeniya kommyuniti.</p>
+    <div class="demo-area">
+      <button class="fx-confetti-btn" onclick="fireConfetti()">
+        Vstupit v soobshchestvo!
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. Ripple -->
+  <div class="card">
+    <h3>5. Zolotaya Volna (Ripple)</h3>
+    <p>Ispolzovat dlya: vsekh knopok deystviya. Pri klike rasprostranyayetsya volna iz tochki kasaniya.</p>
+    <div class="demo-area">
+      <button class="fx-ripple" onclick="createRipple(event)">
+        Nazhat menya
+      </button>
+    </div>
+  </div>
+
+  <!-- 6. Floating Particles -->
+  <div class="card">
+    <h3>6. Plavayushchiye Chastitsi</h3>
+    <p>Ispolzovat dlya: kartochek mentora, profilya uchastnika. Zolotiye tochki plavayut vverkh.</p>
+    <div class="demo-area">
+      <div class="fx-particles" id="particles-box">
+        <span style="color:var(--text-secondary);font-size:13px;">Top Mentor</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Sparkle Trail -->
+  <div class="card">
+    <h3>7. Iskry vokrug Knopki</h3>
+    <p>Ispolzovat dlya: "Napisat mentoru", "Zabronirovat". Zolotiye iskry vspykhivayut po krugu.</p>
+    <div class="demo-area">
+      <button class="fx-sparkle" id="sparkle-btn">
+        Napisat mentoru
+        <span class="sparkle-dot" style="top:-4px;left:20%;animation-delay:0s;"></span>
+        <span class="sparkle-dot" style="top:-4px;left:60%;animation-delay:0.5s;"></span>
+        <span class="sparkle-dot" style="bottom:-4px;left:40%;animation-delay:1s;"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 8. Neon Glow -->
+  <div class="card">
+    <h3>8. Neonnoye Svecheniye</h3>
+    <p>Ispolzovat dlya: limitirovannikh predlozheniy, ekspress-sobitiy, nochnikh marafonov.</p>
+    <div class="demo-area">
+      <span class="fx-neon">EKSPRESS VEBINAR</span>
+    </div>
+  </div>
+
+  <!-- 9. Counter -->
+  <div class="card">
+    <h3>9. Animatsiya Chisla</h3>
+    <p>Ispolzovat dlya: schitika uchastnikov, urovnya progressa, nagrad. Chislo "viletayet" snizu.</p>
+    <div class="demo-area">
+      <span class="fx-counter">2,847</span>
+      <span style="color:var(--text-secondary);font-size:14px;">uchastnikov</span>
+    </div>
+  </div>
+
+  <!-- 10. Progress Ring -->
+  <div class="card">
+    <h3>10. Koltso Progressa</h3>
+    <p>Ispolzovat dlya: progressa kursa, ritualov, dney serii. Zolotoye kolso zapolnayetsya.</p>
+    <div class="demo-area">
+      <div class="fx-progress-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle class="ring-bg" cx="40" cy="40" r="35"/>
+          <circle class="ring-fill" cx="40" cy="40" r="35"/>
+        </svg>
+        <span class="ring-icon">&#128218;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Achievement -->
+  <div class="card">
+    <h3>11. Razblokirovka Dostizheniya</h3>
+    <p>Ispolzovat dlya: novikh dostizheniy, bench-markov soobshchestva, nagrad aktivnosti.</p>
+    <div class="demo-area">
+      <div class="fx-achievement">
+        <span class="fx-achievement__icon">&#127942;</span>
+        <div>
+          <div class="fx-achievement__text">Dostizheniye razblokirovano!</div>
+          <div class="fx-achievement__sub">Aktivniy uchastnik — 30 dney</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. Notification -->
+  <div class="card">
+    <h3>12. Pulsiruyushchaya Tochka</h3>
+    <p>Ispolzovat dlya: uvedomleniy, novikh soobshcheniy, zaprosov v druzya, priglasheniy.</p>
+    <div class="demo-area">
+      <div class="fx-notify">
+        &#128276;
+        <span class="fx-notify__dot fx-notify__dot--pulse"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. Typing -->
+  <div class="card">
+    <h3>13. Indikator Pechati</h3>
+    <p>Ispolzovat dlya: chata, soobshcheniy, generatsii otveta mentorom, AI-podskazok.</p>
+    <div class="demo-area">
+  <div class="fx-typing">
+    <span></span><span></span><span></span>
+  </div>
+    </div>
+  </div>
+
+  <!-- 14. Golden Rain -->
+  <div class="card">
+    <h3>14. Zolotoy Dozhd</h3>
+    <p>Ispolzovat dlya: godovshchini soobshchestva, dostizheniya 1000 uchastnikov, premium-perekhoda.</p>
+    <div class="demo-area">
+      <button class="fx-confetti-btn" onclick="fireGoldenRain()">
+        &#127881; Prazdnuem!
+      </button>
+    </div>
+  </div>
+
+  <!-- 15. Level Up -->
+  <div class="card">
+    <h3>15. Povisheniye Urovnya</h3>
+    <p>Ispolzovat dlya: novogo urovnya v soobshchestve, apgreyd-premium, novoy roli.</p>
+    <div class="demo-area">
+      <div class="fx-levelup">
+        <div class="fx-levelup__level">Uroven povishen</div>
+        <div class="fx-levelup__title">Zolotoy Uchastnik</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 16. Streak -->
+  <div class="card">
+    <h3>16. Seriya Dney (Streak)</h3>
+    <p>Ispolzovat dlya: ritualov, ezhednevnogo poseshcheniya, marafonov, vikladyvaniy.</p>
+    <div class="demo-area">
+      <div class="fx-streak">
+        <span class="fx-streak__icon">&#128293;</span>
+        <div>
+          <div class="fx-streak__count">15 dney</div>
+          <div class="fx-streak__label">seriya aktivnosti</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 17. Hover Lift -->
+  <div class="card">
+    <h3>17. Effekt Podema pri Navedenii</h3>
+    <p>Ispolzovat dlya: vsekh kartochek soobshchestva, mentora, postov. Podem + zolotaya ten.</p>
+    <div class="demo-area">
+      <div class="fx-hover-lift">Navedite na menya &#9995;</div>
+    </div>
+  </div>
+
+  <!-- 18. Check Draw -->
+  <div class="card">
+    <h3>18. Prorisovka Galochki</h3>
+    <p>Ispolzovat dlya: zaversheniya zadaniya, proverki rituala, podtverzhdeniya urovnya.</p>
+    <div class="demo-area">
+      <svg class="fx-check-draw" viewBox="0 0 60 60">
+        <circle cx="30" cy="30" r="26"/>
+        <path d="M18 30 L26 38 L42 22"/>
+      </svg>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ====== PARTICLES ======
+function createParticles() {
+  const box = document.getElementById('particles-box');
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 3 + 's';
+    p.style.animationDuration = (2 + Math.random() * 2) + 's';
+    p.style.width = p.style.height = (3 + Math.random() * 4) + 'px';
+    box.appendChild(p);
+  }
+}
+createParticles();
+
+// ====== RIPPLE EFFECT ======
+function createRipple(event) {
+  const btn = event.currentTarget;
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = (event.clientX - rect.left - size/2) + 'px';
+  ripple.style.top = (event.clientY - rect.top - size/2) + 'px';
+  btn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+}
+
+// ====== CONFETTI ENGINE ======
+const canvas = document.getElementById('confetti-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+class Confetti {
+  constructor() {
+    this.particles = [];
+    this.colors = ['#D4AF37', '#E0C158', '#B8962F', '#C9A96E', '#F5EFE3', '#FFD700', '#FFA500'];
+  }
+
+  fire(x, y) {
+    for (let i = 0; i < 80; i++) {
+      this.particles.push({
+        x: x || canvas.width / 2,
+        y: y || canvas.height / 2,
+        vx: (Math.random() - 0.5) * 20,
+        vy: (Math.random() - 1) * 20 - 5,
+        size: Math.random() * 8 + 4,
+        color: this.colors[Math.floor(Math.random() * this.colors.length)],
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10,
+        opacity: 1,
+        gravity: 0.3,
+        drag: 0.98
+      });
+    }
+    if (!this.running) {
+      this.running = true;
+      this.animate();
+    }
+  }
+
+  animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    this.particles = this.particles.filter(p => p.opacity > 0.01 && p.y < canvas.height + 50);
+
+    for (const p of this.particles) {
+      p.vx *= p.drag;
+      p.vy *= p.drag;
+      p.vy += p.gravity;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.rotationSpeed;
+      p.opacity -= 0.005;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+      ctx.restore();
+    }
+
+    if (this.particles.length > 0) {
+      requestAnimationFrame(() => this.animate());
+    } else {
+      this.running = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+}
+
+const confetti = new Confetti();
+
+function fireConfetti() {
+  confetti.fire(canvas.width / 2, canvas.height / 2);
+}
+
+// ====== GOLDEN RAIN ======
+function fireGoldenRain() {
+  const colors = ['#D4AF37', '#E0C158', '#B8962F', '#FFD700', '#FFA500'];
+  for (let i = 0; i < 50; i++) {
+    const drop = document.createElement('div');
+    drop.className = 'golden-drop';
+    drop.style.left = Math.random() * 100 + 'vw';
+    drop.style.animationDuration = (2 + Math.random() * 3) + 's';
+    drop.style.animationDelay = Math.random() * 2 + 's';
+    drop.style.width = drop.style.height = (4 + Math.random() * 8) + 'px';
+    drop.style.background = colors[Math.floor(Math.random() * colors.length)];
+    document.body.appendChild(drop);
+    setTimeout(() => drop.remove(), 5000);
+  }
+}
+</script>
+
+</body>
+</html>
