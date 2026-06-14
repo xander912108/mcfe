@@ -1657,15 +1657,16 @@ export default function LeaderConsoleEntry() {
       {/* ===== OPEN ACCESS MANUALLY MODAL ===== */}
       {showOpenAccessModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowOpenAccessModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowOpenAccessModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть доступ вручную?</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Участник уже одобрен, но доступ не открылся автоматически. Перед ручным открытием проверьте, что оплата прошла или что доступ можно открыть без оплаты.</p>
-
-              {/* Context */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть доступ вручную?</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Участник уже одобрен, но доступ не открылся автоматически. Перед ручным открытием проверьте, что оплата прошла или что доступ можно открыть без оплаты.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               {sidePanelApp && (
                 <div className="mb-4 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                   <p className="text-[10px] font-semibold tracking-widest mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Контекст</p>
@@ -1673,8 +1674,6 @@ export default function LeaderConsoleEntry() {
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Заявка одобрена · доступ не открылся</p>
                 </div>
               )}
-
-              {/* Timeline */}
               {sidePanelApp?.timeline && (
                 <div className="mb-4">
                   <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произошло</p>
@@ -1688,18 +1687,15 @@ export default function LeaderConsoleEntry() {
                   </div>
                 </div>
               )}
-
-              {/* Warning */}
-              <div className="mb-5 rounded-lg p-3" style={{ backgroundColor: TERRACOTTA_LIGHT, border: `1px solid ${TERRACOTTA_BORDER}` }}>
+              <div className="mb-2 rounded-lg p-3" style={{ backgroundColor: TERRACOTTA_LIGHT, border: `1px solid ${TERRACOTTA_BORDER}` }}>
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   <span style={{ color: TERRACOTTA }}>После ручного открытия участник сможет войти в сообщество.</span> Действие сохранится в истории заявки и в журнале изменений.
                 </p>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowOpenAccessModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Открыть доступ вручную</button>
-                <button onClick={() => setShowOpenAccessModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowOpenAccessModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Открыть доступ вручную</button>
+              <button onClick={() => setShowOpenAccessModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
             </div>
           </div>
         </div>
@@ -1708,15 +1704,16 @@ export default function LeaderConsoleEntry() {
       {/* ===== CHECK PAYMENT MODAL ===== */}
       {showCheckPaymentModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowCheckPaymentModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowCheckPaymentModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Проверить оплату</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Здесь видно, что произошло с оплатой и почему доступ мог не открыться автоматически.</p>
-
-              {/* Context */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Проверить оплату</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Здесь видно, что произошло с оплатой и почему доступ мог не открыться автоматически.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               {sidePanelApp && (
                 <div className="mb-4 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                   <p className="text-[10px] font-semibold tracking-widest mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Контекст</p>
@@ -1724,8 +1721,6 @@ export default function LeaderConsoleEntry() {
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Заявка одобрена · доступ не открылся</p>
                 </div>
               )}
-
-              {/* Payment details */}
               <div className="mb-4 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Детали оплаты</p>
                 <div className="space-y-1.5 text-xs">
@@ -1737,19 +1732,16 @@ export default function LeaderConsoleEntry() {
                   <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>Entitlement:</span><span style={{ color: TERRACOTTA }}>не создан</span></div>
                 </div>
               </div>
-
-              {/* What it means */}
-              <div className="mb-5 rounded-lg p-3" style={{ backgroundColor: SAGE_LIGHT, border: `1px solid ${SAGE_BORDER}` }}>
+              <div className="mb-2 rounded-lg p-3" style={{ backgroundColor: SAGE_LIGHT, border: `1px solid ${SAGE_BORDER}` }}>
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   <span style={{ color: SAGE }}>Оплата прошла, но право доступа не было создано автоматически.</span> Можно открыть доступ вручную и позже проверить обработку webhook.
                 </p>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { setShowCheckPaymentModal(false); setShowOpenAccessModal(true); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Открыть доступ вручную</button>
-                <button onClick={() => { setShowCheckPaymentModal(false); setShowMonetizationModal(true); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Открыть Монетизацию</button>
-                <button onClick={() => setShowCheckPaymentModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setShowCheckPaymentModal(false); setShowOpenAccessModal(true); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Открыть доступ вручную</button>
+              <button onClick={() => { setShowCheckPaymentModal(false); setShowMonetizationModal(true); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Открыть Монетизацию</button>
+              <button onClick={() => setShowCheckPaymentModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
             </div>
           </div>
         </div>
@@ -1758,15 +1750,16 @@ export default function LeaderConsoleEntry() {
       {/* ===== MONETIZATION MODAL ===== */}
       {showMonetizationModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowMonetizationModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowMonetizationModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть Монетизацию?</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Вы перейдёте в раздел «Монетизация», где можно проверить оплату, доступы, webhook и правила открытия доступа после оплаты.</p>
-
-              {/* Context */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть Монетизацию?</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Вы перейдёте в раздел «Монетизация», где можно проверить оплату, доступы, webhook и правила открытия доступа после оплаты.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               {sidePanelApp && (
                 <div className="mb-4 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                   <p className="text-[10px] font-semibold tracking-widest mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Контекст</p>
@@ -1774,9 +1767,7 @@ export default function LeaderConsoleEntry() {
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Заявка одобрена · доступ не открылся</p>
                 </div>
               )}
-
-              {/* What to check */}
-              <div className="mb-5 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+              <div className="mb-2 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что можно проверить в Монетизации</p>
                 <div className="space-y-1.5">
                   {['прошла ли оплата', 'создался ли доступ', 'сработал ли webhook', 'не зависла ли выдача доступа', 'нужно ли открыть доступ вручную'].map((item, i) => (
@@ -1787,11 +1778,10 @@ export default function LeaderConsoleEntry() {
                   ))}
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowMonetizationModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Открыть Монетизацию</button>
-                <button onClick={() => setShowMonetizationModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowMonetizationModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Открыть Монетизацию</button>
+              <button onClick={() => setShowMonetizationModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
             </div>
           </div>
         </div>
