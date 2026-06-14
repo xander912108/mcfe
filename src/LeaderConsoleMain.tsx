@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle, ChevronRight, Check,
@@ -123,6 +123,15 @@ export default function LeaderConsoleMain() {
   const [showPulseInfo, setShowPulseInfo] = useState(false);
   const [showIndexInfo, setShowIndexInfo] = useState(false);
   const [advisorFocus, setAdvisorFocus] = useState<'payment' | 'newcomer' | 'applications'>('payment');
+  const paramDescriptionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (showParamDescriptions && paramDescriptionsRef.current) {
+      setTimeout(() => {
+        paramDescriptionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  }, [showParamDescriptions, showPulseModal]);
 
   const GradientDivider = () => (
     <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
@@ -421,7 +430,7 @@ export default function LeaderConsoleMain() {
 
         {/* Quiet link */}
         <div className="sidebar-section">
-          <button onClick={() => setShowPulseModal(true)} className="text-[11px] transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+          <button onClick={() => { setShowParamDescriptions(true); setShowPulseModal(true); }} className="text-[11px] transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
             Что означают параметры Пульса
           </button>
         </div>
@@ -431,9 +440,9 @@ export default function LeaderConsoleMain() {
 
       {/* ===== MODAL: ПУЛЬС СООБЩЕСТВА ===== */}
       {showPulseModal && (
-        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowPulseModal(false)}>
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => { setShowPulseModal(false); setShowParamDescriptions(false); }}>
           <div className="modal-enter rounded-2xl max-w-xl w-full relative overflow-hidden my-8" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setShowPulseModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
+            <button onClick={() => { setShowPulseModal(false); setShowParamDescriptions(false); }} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
 
             <div className="p-6 md:p-8 max-h-[85vh] overflow-y-auto">
               {/* Header */}
@@ -574,7 +583,7 @@ export default function LeaderConsoleMain() {
               )}
 
               {/* Parameter descriptions (expandable) */}
-              <div className="mb-4">
+              <div ref={paramDescriptionsRef} className="mb-4">
                 <button onClick={() => setShowParamDescriptions(!showParamDescriptions)} className="flex items-center gap-2 text-xs font-medium transition-colors hover:opacity-80" style={{ color: 'var(--gold)' }}>
                   <Info className="w-3.5 h-3.5" />
                   Что означают параметры
@@ -593,7 +602,7 @@ export default function LeaderConsoleMain() {
               </div>
 
               {/* Close button */}
-              <button onClick={() => setShowPulseModal(false)} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
+              <button onClick={() => { setShowPulseModal(false); setShowParamDescriptions(false); }} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
                 Понятно
               </button>
             </div>
