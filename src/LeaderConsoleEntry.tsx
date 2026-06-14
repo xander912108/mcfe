@@ -2249,22 +2249,21 @@ export default function LeaderConsoleEntry() {
       {/* ===== 8. FIRST REPLY MODAL ===== */}
       {showFirstReplyModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowFirstReplyModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowFirstReplyModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Написать первый отклик</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Первый отклик помогает новичку почувствовать, что его заметили. Он не должен быть длинным — важно поприветствовать человека, связать сообщение с его целью и подсказать ближайший понятный шаг.</p>
-
-              {/* Context */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Написать первый отклик</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Первый отклик помогает новичку почувствовать, что его заметили. Он не должен быть длинным — важно поприветствовать человека, связать сообщение с его целью и подсказать ближайший понятный шаг.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-5 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Мария Козлова · 2-й день</p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Цель: стать frontend-разработчиком</p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Первый шаг выбран · первой связи пока нет · опора не назначена</p>
               </div>
-
-              {/* Subject */}
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</p>
                 <input
@@ -2275,8 +2274,6 @@ export default function LeaderConsoleEntry() {
                   style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }}
                 />
               </div>
-
-              {/* Message */}
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение новичку</p>
                 <textarea
@@ -2290,13 +2287,11 @@ export default function LeaderConsoleEntry() {
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{replyText.length} / 1000</span>
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowFirstReplyModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить отклик</button>
-                <button onClick={() => setShowFirstReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Сохранить как черновик</button>
-                <button onClick={() => setShowFirstReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowFirstReplyModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить отклик</button>
+              <button onClick={() => setShowFirstReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Сохранить как черновик</button>
+              <button onClick={() => setShowFirstReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
             </div>
           </div>
         </div>
@@ -2309,10 +2304,12 @@ export default function LeaderConsoleEntry() {
             <button onClick={() => setShowFirstQuestionReplyModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8 overflow-y-auto">
-              <h2 className="text-xl font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Ответить на первый вопрос</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Первый ответ особенно важен: по нему новичок понимает, что в сообществе есть живой отклик. Ответ не должен быть большим — достаточно помочь сориентироваться, дать первый шаг и показать, куда можно двигаться дальше.</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Ответить на первый вопрос</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Первый ответ особенно важен: по нему новичок понимает, что в сообществе есть живой отклик. Ответ не должен быть большим — достаточно помочь сориентироваться, дать первый шаг и показать, куда можно двигаться дальше.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-5">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Вопрос новичка</p>
                 <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
@@ -2321,7 +2318,6 @@ export default function LeaderConsoleEntry() {
                   <p className="text-[11px] mt-2 font-medium" style={{ color: 'var(--gold)' }}>Статус: вопрос пока без ответа</p>
                 </div>
               </div>
-
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заголовок сообщения</p>
                 <input type="text" className="w-full px-4 py-2.5 rounded-xl text-sm" value={questionReplyTitle} onChange={(e) => setQuestionReplyTitle(e.target.value)} maxLength={120} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none' }} />
@@ -2329,7 +2325,6 @@ export default function LeaderConsoleEntry() {
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{questionReplyTitle.length} / 120</span>
                 </div>
               </div>
-
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение новичку</p>
                 <textarea className="w-full px-4 py-3 rounded-xl text-sm leading-relaxed resize-none overflow-hidden" value={questionReplyText} onChange={(e) => setQuestionReplyText(e.target.value)} maxLength={1000} style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', outline: 'none', fieldSizing: 'content', overflow: 'hidden' }} />
@@ -2337,12 +2332,11 @@ export default function LeaderConsoleEntry() {
                   <MessageCounter count={questionReplyText.length} />
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить ответ</button>
-                <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Сохранить как черновик</button>
-                <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить ответ</button>
+              <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Сохранить как черновик</button>
+              <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
             </div>
           </div>
         </div>
