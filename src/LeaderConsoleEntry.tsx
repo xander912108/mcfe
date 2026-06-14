@@ -1591,17 +1591,17 @@ export default function LeaderConsoleEntry() {
       {/* ===== 2. APPROVE MODAL ===== */}
       {showApproveModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowApproveModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowApproveModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-4 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Одобрить заявку?</h2>
-
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Кандидат получит сообщение ниже. После одобрения он сможет сделать следующий шаг: оплатить участие, если вход платный, или сразу войти в сообщество. После открытия доступа участник появится в блоке «Новички в первые 7 дней».</p>
-
-              {/* Message to candidate */}
-              <div className="mb-5">
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Одобрить заявку?</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Кандидат получит сообщение ниже. После одобрения он сможет сделать следующий шаг: оплатить участие, если вход платный, или сразу войти в сообщество. После открытия доступа участник появится в блоке «Новички в первые 7 дней».</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
+              <div className="mb-2">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение кандидату</p>
                 <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>Заголовок сообщения</p>
                 <input
@@ -1626,14 +1626,12 @@ export default function LeaderConsoleEntry() {
                 <div className="flex justify-end mt-1">
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{approveText.length} / 1000</span>
                 </div>
-                <p className="text-[11px] mb-4" style={{ color: 'var(--gold)' }}>Можно отредактировать перед отправкой.</p>
+                <p className="text-[11px] mb-2" style={{ color: 'var(--gold)' }}>Можно отредактировать перед отправкой.</p>
               </div>
-
-              {/* Actions */}
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { setApproveDirty(false); setShowApproveModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Одобрить заявку</button>
-                <button onClick={() => { if (approveDirty) { setShowApproveConfirm(true); } else { setShowApproveModal(false); } }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { setApproveDirty(false); setShowApproveModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Одобрить заявку</button>
+              <button onClick={() => { if (approveDirty) { setShowApproveConfirm(true); } else { setShowApproveModal(false); } }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Вернуться к заявке</button>
             </div>
           </div>
         </div>
@@ -1642,14 +1640,15 @@ export default function LeaderConsoleEntry() {
       {/* ===== APPROVE CONFIRM: exit without saving ===== */}
       {showApproveConfirm && (
         <div className="modal-backdrop fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} onClick={() => setShowApproveConfirm(false)}>
-          <div className="modal-enter rounded-2xl max-w-sm w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 md:p-8">
+          <div className="modal-enter rounded-2xl max-w-sm w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
               <h2 className="text-lg font-bold mb-2 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Выйти без сохранения?</h2>
-              <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>Вы изменили текст сообщения. Если вернуться к заявке, изменения не будут отправлены.</p>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setShowApproveConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Остаться в модалке</button>
-                <button onClick={() => { setApproveDirty(false); setShowApproveConfirm(false); setShowApproveModal(false); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Выйти без сохранения</button>
-              </div>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Вы изменили текст сообщения. Если вернуться к заявке, изменения не будут отправлены.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowApproveConfirm(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Остаться в модалке</button>
+              <button onClick={() => { setApproveDirty(false); setShowApproveConfirm(false); setShowApproveModal(false); }} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Выйти без сохранения</button>
             </div>
           </div>
         </div>
