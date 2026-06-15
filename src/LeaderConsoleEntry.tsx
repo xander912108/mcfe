@@ -253,7 +253,31 @@ type NewcomerFilterKey = typeof newcomerFilters[number]['key'];
 function getNewcomerFilterCount(key: NewcomerFilterKey): number {
   const visible = newcomers.filter((nc: any) => !nc.hidden);
   if (key === 'all') return visible.length;
-  if (key === 'ждёт первой связи') return visible.filter(nc => nc.statusLabel === 'ждёт первой связи' || (nc as any).hasFirstQuestion === true).length;
+  if (key === 'ждёт первой связи') {
+    return visible.filter(nc =>
+      nc.statusLabel === 'ждёт первой связи'
+      || (nc as any).hasFirstQuestion === true
+      || nc.statusLabel === 'приглашён на встречу, но не пришёл'
+      || nc.statusLabel === 'опора предложена, но ещё нет живого контакта'
+    ).length;
+  }
+  if (key === 'Без цели') {
+    return visible.filter(nc =>
+      nc.statusLabel === 'цель пока не указана'
+      || nc.statusLabel === 'цель уточняется'
+      || nc.statusLabel === 'цель пока не указана · черновик сообщения'
+      || nc.statusLabel === 'цель нужно уточнить'
+      || nc.statusLabel === 'временная цель задана · ждём ответ'
+    ).length;
+  }
+  if (key === 'нужен первый шаг') {
+    return visible.filter(nc =>
+      nc.statusLabel === 'нужен первый шаг'
+      || nc.statusLabel === 'нужен первый шаг · есть рекомендация'
+      || nc.statusLabel === 'ждём выбор первого шага'
+      || nc.statusLabel === 'нужен первый шаг · черновик отклика'
+    ).length;
+  }
   if (key === 'нужна опора') return visible.filter(nc => (nc as any).needsSupport === true).length;
   return visible.filter(nc => nc.statusLabel === key).length;
 }
@@ -528,6 +552,97 @@ const newcomers = [
     nextStep: 'Анна не сможет помочь Роману. Нужно выбрать другого человека, не показывая Анну в рекомендациях.',
     actions: ['Открыть путь', 'Выбрать другую опору'],
   },
+  /* === Ждут первой связи: дополнительные (4-5) === */
+  {
+    name: 'Никита Смирнов',
+    day: '2-й день',
+    goal: 'подготовиться к собеседованию на frontend',
+    hasGoal: true,
+    hasFirstStep: true,
+    firstStepName: 'пройти тестовое задание',
+    hasConnection: false,
+    hasSupport: false,
+    firstResponseReceived: false,
+    wasInvitedToMeeting: true,
+    meetingAttended: false,
+    statusLabel: 'приглашён на встречу, но не пришёл' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Никита вошёл', 'приглашён на встречу', 'не пришёл', 'первая связь пока не появилась'],
+    nextStep: 'Никита не пришёл на встречу. Нужно дать другой живой контакт: написать лично или подобрать опору.',
+    actions: ['Написать первый отклик', 'Подобрать опору'],
+  },
+  {
+    name: 'Ольга Петрова',
+    day: '1-й день',
+    goal: 'собрать первый pet-проект',
+    hasGoal: true,
+    hasFirstStep: true,
+    firstStepName: 'стартовый гайд',
+    hasConnection: false,
+    hasSupport: false,
+    supportOffered: true,
+    supportConfirmed: false,
+    firstResponseReceived: false,
+    statusLabel: 'опора предложена, но ещё нет живого контакта' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Ольга вошла', 'опора предложена', 'пока нет живого контакта'],
+    nextStep: 'Опоре предложена, но Ольга пока не получила живого отклика. Стоит написать лично.',
+    actions: ['Написать первый отклик', 'Подобрать опору'],
+  },
+  /* === Без цели: дополнительные (3, 5) === */
+  {
+    name: 'Максим Борисов',
+    day: '2-й день',
+    goal: '',
+    hasGoal: false,
+    hasFirstStep: true,
+    firstStepName: 'стартовый гайд',
+    hasConnection: false,
+    hasSupport: false,
+    firstResponseReceived: false,
+    hasDraftGoalMessage: true,
+    draftGoalTitle: 'Уточнение цели',
+    statusLabel: 'цель пока не указана · черновик сообщения' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Максим вошёл', 'цель не указана', 'черновик сообщения сохранён'],
+    nextStep: 'Черновик сообщения о цели готов. Нужно отправить или дополнить.',
+    actions: ['Помочь с целью', 'Написать первый отклик'],
+  },
+  {
+    name: 'Татьяна Волкова',
+    day: '3-й день',
+    goal: 'временная: разобраться с направлением',
+    hasGoal: false,
+    hasFirstStep: true,
+    firstStepName: 'стартовый гайд',
+    hasConnection: false,
+    hasSupport: false,
+    firstResponseReceived: false,
+    tempGoalSet: true,
+    statusLabel: 'временная цель задана · ждём ответ' as const,
+    statusColor: 'gold' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Татьяна вошла', 'временная цель задана', 'ждём ответа новичка'],
+    nextStep: 'Временная цель поможет Татьяне не потеряться, но лучше уточнить настоящую.',
+    actions: ['Уточнить цель', 'Написать первый отклик'],
+  },
+  /* === Без первого шага: дополнительная (4) === */
+  {
+    name: 'Денис Морозов',
+    day: '2-й день',
+    goal: 'освоить fullstack-разработку',
+    hasGoal: true,
+    hasFirstStep: false,
+    hasConnection: false,
+    hasSupport: false,
+    firstResponseReceived: false,
+    hasDraftFirstResponse: true,
+    draftResponseTitle: 'Денис, начни с простого проекта',
+    statusLabel: 'нужен первый шаг · черновик отклика' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Денис вошёл', 'цель понятна', 'черновик отклика сохранён', 'первый шаг пока не выбран'],
+    nextStep: 'Черновик первого отклика готов, но первый шаг ещё не выбран. Нужно завершить и отправить.',
+    actions: ['Выбрать первый шаг', 'Отправить отклик'],
+  },
 ];
 /* ===== DATA: WHAT WORKS ===== */
 const selfManaging = [
@@ -633,7 +748,25 @@ export default function LeaderConsoleEntry() {
   const filteredNewcomers = newcomers.filter((nc: any) => {
     if (nc.hidden) return false;
     if (newcomerFilter === 'all') return true;
-    if (newcomerFilter === 'ждёт первой связи') return nc.statusLabel === 'ждёт первой связи' || nc.hasFirstQuestion === true;
+    if (newcomerFilter === 'ждёт первой связи') {
+      return nc.statusLabel === 'ждёт первой связи'
+        || nc.hasFirstQuestion === true
+        || nc.statusLabel === 'приглашён на встречу, но не пришёл'
+        || nc.statusLabel === 'опора предложена, но ещё нет живого контакта';
+    }
+    if (newcomerFilter === 'Без цели') {
+      return nc.statusLabel === 'цель пока не указана'
+        || nc.statusLabel === 'цель уточняется'
+        || nc.statusLabel === 'цель пока не указана · черновик сообщения'
+        || nc.statusLabel === 'цель нужно уточнить'
+        || nc.statusLabel === 'временная цель задана · ждём ответ';
+    }
+    if (newcomerFilter === 'нужен первый шаг') {
+      return nc.statusLabel === 'нужен первый шаг'
+        || nc.statusLabel === 'нужен первый шаг · есть рекомендация'
+        || nc.statusLabel === 'ждём выбор первого шага'
+        || nc.statusLabel === 'нужен первый шаг · черновик отклика';
+    }
     if (newcomerFilter === 'нужна опора') return nc.needsSupport === true;
     return nc.statusLabel === newcomerFilter;
   });
@@ -1187,33 +1320,6 @@ export default function LeaderConsoleEntry() {
                         )}
                       </div>
                       <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{nc.day} в сообществе · {nc.goal || 'цель пока не указана'}</p>
-                      {/* Action buttons */}
-                      {(nc as any).actions && (
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {(nc as any).actions.map((action: string) => (
-                            <button
-                              key={action}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (action === 'Помочь с целью') setShowGoalHelpModal(true);
-                                else if (action === 'Написать первый отклик') setShowFirstReplyModal(true);
-                                else if (action === 'Ответить на первый вопрос') setShowFirstQuestionReplyModal(true);
-                                else if (action === 'Продолжить редактирование') setShowEditDraftModal(true);
-                                else if (action === 'Отправить ответ') setShowSendDraftConfirmModal(true);
-                                else if (action === 'Выбрать первый шаг' || action === 'Предложить первый шаг' || action === 'Выбрать шаг вручную' || action === 'Напомнить о выборе') { setPickFirstStepTarget(nc.name); setShowPickFirstStepModal(true); }
-                                else if (action === 'Подобрать опору') setShowSupportModal(true);
-                                else if (action === 'Пригласить на встречу') setShowMeetingInviteModal(true);
-                                else if (action === 'Спросить Сергея') { setPickFirstStepTarget(nc.name); setShowSupportModal(true); }
-                                else if (action === 'Открыть во Вступлении') setNewcomerSidePanel(nc);
-                              }}
-                              className="text-[10px] px-2 py-0.5 rounded-md font-medium transition-all duration-200 hover:opacity-90"
-                              style={action === 'Удалить черновик' || action === 'Открыть путь' || action === 'Посмотреть профиль' || action === 'Посмотреть другие варианты' ? { color: 'var(--text-muted)', border: '1px solid var(--border-color)' } : { backgroundColor: bc.bg, color: bc.text, border: `1px solid ${bc.border}` }}
-                            >
-                              {action}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
                     <ChevronRight className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1" style={{ color: 'var(--text-muted)' }} />
                   </div>
@@ -1417,6 +1523,39 @@ export default function LeaderConsoleEntry() {
                     }}>
                       <p className="text-[10px] font-semibold tracking-widest mb-1" style={{ color: (newcomerSidePanel as any).hasDraft ? 'var(--gold)' : SAGE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что дальше</p>
                       <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{(newcomerSidePanel as any).panelNextStep || newcomerSidePanel.nextStep}</p>
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  {(newcomerSidePanel as any).actions && (
+                    <div className="mt-4">
+                      <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Действия</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(newcomerSidePanel as any).actions.map((action: string) => {
+                          const isSecondary = ['Открыть путь', 'Посмотреть профиль', 'Открыть во Вступлении', 'Удалить черновик', 'Посмотреть другие варианты'].includes(action);
+                          return (
+                            <button
+                              key={action}
+                              onClick={() => {
+                                if (action === 'Помочь с целью') setShowGoalHelpModal(true);
+                                else if (action === 'Написать первый отклик') setShowFirstReplyModal(true);
+                                else if (action === 'Ответить на первый вопрос') setShowFirstQuestionReplyModal(true);
+                                else if (action === 'Продолжить редактирование') setShowEditDraftModal(true);
+                                else if (action === 'Отправить ответ') setShowSendDraftConfirmModal(true);
+                                else if (action === 'Выбрать первый шаг' || action === 'Предложить первый шаг' || action === 'Выбрать шаг вручную' || action === 'Напомнить о выборе') { setPickFirstStepTarget(newcomerSidePanel.name); setShowPickFirstStepModal(true); }
+                                else if (action === 'Подобрать опору') setShowSupportModal(true);
+                                else if (action === 'Пригласить на встречу') setShowMeetingInviteModal(true);
+                                else if (action === 'Спросить Сергея') { setPickFirstStepTarget(newcomerSidePanel.name); setShowSupportModal(true); }
+                                else if (action === 'Открыть во Вступлении') setNewcomerSidePanel(newcomerSidePanel);
+                              }}
+                              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all duration-200 hover:opacity-90 ${isSecondary ? '' : ''}`}
+                              style={isSecondary ? { color: 'var(--text-muted)', border: '1px solid var(--border-color)' } : { backgroundColor: TERRACOTTA, color: '#fff' }}
+                            >
+                              {action}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
