@@ -345,13 +345,14 @@ export default function LeaderConsoleMain() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => {
-                            if (item.link === 'monetization') navigate('/leader/monetization');
-                            else navigate('/leader/entry');
+                            if (item.id === 1) setShowPaymentModal(true);
+                            else if (item.id === 2) setShowSupportModal(true);
+                            else if (item.id === 3) setShowApplicationsModal(true);
                           }}
                           className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:opacity-90"
                           style={item.accent === 'terracotta' ? { backgroundColor: TERRACOTTA, color: '#fff' } : { backgroundColor: 'var(--gold)', color: '#fff' }}
                         >
-                          {item.primary}
+                          {item.id === 3 ? 'Открыть Заявки' : item.primary}
                         </button>
                         {item.why && (
                           <button onClick={() => setShowWhyId(showWhyId === item.id ? null : item.id)} className="px-2 py-1.5 rounded-lg text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
