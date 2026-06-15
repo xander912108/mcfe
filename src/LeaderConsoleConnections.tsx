@@ -1192,7 +1192,6 @@ export default function LeaderConsoleConnections() {
                 </button>
               </div>
             </div>
-          </div>
         </div>
       )}
     </div>
