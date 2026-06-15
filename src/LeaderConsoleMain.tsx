@@ -165,6 +165,7 @@ export default function LeaderConsoleMain() {
   const [messageBody, setMessageBody] = useState('');
   const [advisorFocus, setAdvisorFocus] = useState<'payment' | 'newcomer' | 'applications'>('payment');
   const paramDescriptionsRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (showParamDescriptions && paramDescriptionsRef.current) {
@@ -173,6 +174,14 @@ export default function LeaderConsoleMain() {
       }, 50);
     }
   }, [showParamDescriptions, showPulseModal]);
+
+  /* Auto-resize textarea for message body */
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }, [messageBody]);
 
   const GradientDivider = () => (
     <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
@@ -842,7 +851,7 @@ export default function LeaderConsoleMain() {
 
             {/* Fixed Footer */}
             <div className="shrink-0 px-6 md:px-8 py-4" style={{ borderTop: '1px solid var(--border-color)' }}>
-              <button onClick={() => setShowSupportModal(false)} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
+              <button onClick={() => setShowSupportModal(false)} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
                 Закрыть
               </button>
             </div>
@@ -894,11 +903,11 @@ export default function LeaderConsoleMain() {
                     <span className="text-[10px]" style={{ color: messageBody.length > 1000 ? TERRACOTTA : 'var(--text-muted)' }}>{messageBody.length}/1000</span>
                   </div>
                   <textarea
+                    ref={textareaRef}
                     value={messageBody}
                     onChange={(e) => setMessageBody(e.target.value.slice(0, 1000))}
-                    rows={5}
-                    className="w-full px-3 py-2.5 rounded-lg text-xs leading-relaxed outline-none resize-none transition-colors"
-                    style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    className="w-full px-3 py-2.5 rounded-lg text-xs leading-relaxed outline-none transition-colors"
+                    style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', minHeight: '80px', overflow: 'hidden' }}
                     placeholder="Напишите сообщение помощнику..."
                   />
                 </div>
