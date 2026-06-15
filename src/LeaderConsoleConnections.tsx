@@ -1136,14 +1136,16 @@ export default function LeaderConsoleConnections() {
       {/* ===== MODAL: Ask helper ===== */}
       {showAskModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowAskModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowAskModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}>
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-lg font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>{askTitle}</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Помощник получит предложение. Участник ничего не получит, пока помощник не согласится.</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-lg font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>{askTitle}</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Помощник получит предложение. Участник ничего не получит, пока помощник не согласится.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8" style={{ borderBottom: '1px solid var(--border-color)' }} />
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-2">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что увидит помощник</p>
                 <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>Заголовок сообщения</p>
@@ -1167,10 +1169,9 @@ export default function LeaderConsoleConnections() {
                 <div className="flex justify-end mt-1">
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{askBody.length} / 1000</span>
                 </div>
-                <p className="text-[11px] mb-4" style={{ color: 'var(--gold)' }}>Можно отредактировать перед отправкой.</p>
+                <p className="text-[11px] mb-2" style={{ color: 'var(--gold)' }}>Можно отредактировать перед отправкой.</p>
               </div>
-
-              <div className="rounded-lg p-3 mb-5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+              <div className="rounded-lg p-3 mb-2" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-[10px] font-semibold tracking-widest mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произойдёт</p>
                 <ul className="space-y-1">
                   {['Помощник получит предложение', 'Участник пока ничего не получит', 'Рекомендация перейдёт в статус «ждём подтверждение»', 'Если помощник согласится — система предложит создать мини-чат', 'Если откажется — можно выбрать другого участника'].map((t, i) => (
@@ -1181,8 +1182,8 @@ export default function LeaderConsoleConnections() {
                   ))}
                 </ul>
               </div>
-
-              <div className="flex flex-wrap gap-2">
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
                 <button onClick={() => { showToast('Предложение отправлено. Ждём, готова ли помощник помочь.', 'success'); setShowAskModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
                   Отправить предложение
                 </button>

@@ -1002,13 +1002,15 @@ export default function LeaderConsoleMonetization() {
       {/* ===== MODAL: Create Format ===== */}
       {showCreateModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowCreateModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-lg font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Создать платный формат</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Выберите, что участник сможет купить. Сначала создаётся черновик, опубликовать можно после проверки.</p>
-
-              <div className="space-y-3 mb-6">
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-lg font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Создать платный формат</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Выберите, что участник сможет купить. Сначала создаётся черновик, опубликовать можно после проверки.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8" style={{ borderBottom: '1px solid var(--border-color)' }} />
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
+              <div className="space-y-3 mb-2">
                 {[
                   { type: 'Трек', desc: 'Пошаговая программа для самостоятельного прохождения' },
                   { type: 'Поток', desc: 'Групповое прохождение трека с датой старта' },
@@ -1024,15 +1026,14 @@ export default function LeaderConsoleMonetization() {
                   </div>
                 ))}
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { showToast('Черновик платного формата создан.', 'success'); setShowCreateModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
-                  Создать черновик
-                </button>
-                <button onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
-                  Вернуться к форматам
-                </button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { showToast('Черновик платного формата создан.', 'success'); setShowCreateModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
+                Создать черновик
+              </button>
+              <button onClick={() => setShowCreateModal(false)} className="px-4 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                Вернуться к форматам
+              </button>
             </div>
           </div>
         </div>
@@ -1041,12 +1042,14 @@ export default function LeaderConsoleMonetization() {
       {/* ===== MODAL: Open Access Manually ===== */}
       {showAccessModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowAccessModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowAccessModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-lg font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть доступ вручную?</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Платёж прошёл, но доступ не открылся автоматически. Перед ручным открытием проверьте, что оплата подтверждена.</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-lg font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Открыть доступ вручную?</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Платёж прошёл, но доступ не открылся автоматически. Перед ручным открытием проверьте, что оплата подтверждена.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8" style={{ borderBottom: '1px solid var(--border-color)' }} />
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="rounded-lg p-4 mb-5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Проверка</p>
                 <div className="space-y-1.5">
@@ -1063,8 +1066,7 @@ export default function LeaderConsoleMonetization() {
                   ))}
                 </div>
               </div>
-
-              <div className="rounded-lg p-3 mb-5" style={{ backgroundColor: GOLD_GLOW, border: `1px solid rgba(201,169,110,0.15)` }}>
+              <div className="rounded-lg p-3 mb-2" style={{ backgroundColor: GOLD_GLOW, border: `1px solid rgba(201,169,110,0.15)` }}>
                 <p className="text-[11px] font-semibold tracking-widest mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произойдёт</p>
                 <ul className="space-y-1">
                   {['Участнику откроется доступ к формату', 'В истории появится ручное открытие доступа', 'Участник получит уведомление «Доступ открыт»', 'Ситуация уйдёт из списка «Доступ не открылся»'].map((t, i) => (
@@ -1075,15 +1077,14 @@ export default function LeaderConsoleMonetization() {
                   ))}
                 </ul>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { showToast('Доступ открыт вручную. Участник получил уведомление.', 'success'); setShowAccessModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
-                  Открыть доступ вручную
-                </button>
-                <button onClick={() => setShowAccessModal(false)} className="px-4 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
-                  Вернуться к платежу
-                </button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { showToast('Доступ открыт вручную. Участник получил уведомление.', 'success'); setShowAccessModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
+                Открыть доступ вручную
+              </button>
+              <button onClick={() => setShowAccessModal(false)} className="px-4 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                Вернуться к платежу
+              </button>
             </div>
           </div>
         </div>

@@ -1159,12 +1159,14 @@ export default function LeaderConsoleContribution() {
       {/* ===== MODAL: Publish Recognition ===== */}
       {showPublishModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowPublishModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowPublishModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-lg font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Опубликовать признание?</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Признание покажет полезное действие без сравнения с другими и без лидерборда.</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-lg font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Опубликовать признание?</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Признание покажет полезное действие без сравнения с другими и без лидерборда.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8" style={{ borderBottom: '1px solid var(--border-color)' }} />
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Тип признания</p>
                 <div className="flex flex-wrap gap-2">
@@ -1173,7 +1175,6 @@ export default function LeaderConsoleContribution() {
                   ))}
                 </div>
               </div>
-
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Текст признания</p>
                 <textarea
@@ -1188,8 +1189,7 @@ export default function LeaderConsoleContribution() {
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{pubText.length} / 1000</span>
                 </div>
               </div>
-
-              <div className="mb-5">
+              <div className="mb-2">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Где опубликовать</p>
                 <div className="space-y-2">
                   {[
@@ -1206,18 +1206,17 @@ export default function LeaderConsoleContribution() {
                   ))}
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { showToast('Признание опубликовано. Участник получит уведомление.', 'success'); setShowPublishModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
-                  Опубликовать признание
-                </button>
-                <button onClick={() => setShowPublishModal(false)} className="px-4 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
-                  Сохранить черновик
-                </button>
-                <button onClick={() => setShowPublishModal(false)} className="px-3 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
-                  Вернуться
-                </button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { showToast('Признание опубликовано. Участник получит уведомление.', 'success'); setShowPublishModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
+                Опубликовать признание
+              </button>
+              <button onClick={() => setShowPublishModal(false)} className="px-4 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                Сохранить черновик
+              </button>
+              <button onClick={() => setShowPublishModal(false)} className="px-3 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                Вернуться
+              </button>
             </div>
           </div>
         </div>
@@ -1226,12 +1225,14 @@ export default function LeaderConsoleContribution() {
       {/* ===== MODAL: Offer Role ===== */}
       {showRoleModal && (
         <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowRoleModal(false)}>
-          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowRoleModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
-            <div className="p-6 md:p-8">
-              <h2 className="text-lg font-bold mb-1 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Предложить роль куратора разборов?</h2>
-              <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>Вероника получит предложение роли. Роль не будет назначена автоматически: она появится только после согласия участника.</p>
-
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-lg font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Предложить роль куратора разборов?</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Вероника получит предложение роли. Роль не будет назначена автоматически: она появится только после согласия участника.</p>
+            </div>
+            <div className="shrink-0 px-6 md:px-8" style={{ borderBottom: '1px solid var(--border-color)' }} />
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
               <div className="mb-4">
                 <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что увидит Вероника</p>
                 <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>Заголовок</p>
@@ -1249,8 +1250,7 @@ export default function LeaderConsoleContribution() {
                   <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{roleText.length} / 1000</span>
                 </div>
               </div>
-
-              <div className="rounded-lg p-3 mb-5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+              <div className="rounded-lg p-3 mb-2" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                 <p className="text-[10px] font-semibold tracking-widest mb-1" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что получит роль после согласия</p>
                 <ul className="space-y-1">
                   {['Бейдж роли в профиле', 'Возможность брать разборы из очереди', 'Доступ к заметкам по разбору', 'Лимит: до 3 активных разборов', 'Возможность поставить роль на паузу'].map((t, i) => (
@@ -1261,15 +1261,14 @@ export default function LeaderConsoleContribution() {
                   ))}
                 </ul>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => { showToast('Предложение роли отправлено Веронике. Роль станет активной только после её согласия.', 'success'); setShowRoleModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
-                  Отправить предложение
-                </button>
-                <button onClick={() => setShowRoleModal(false)} className="px-4 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
-                  Вернуться к кандидату
-                </button>
-              </div>
+            </div>
+            <div className="shrink-0 px-6 md:px-8 py-4 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => { showToast('Предложение роли отправлено Веронике. Роль станет активной только после её согласия.', 'success'); setShowRoleModal(false); }} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
+                Отправить предложение
+              </button>
+              <button onClick={() => setShowRoleModal(false)} className="px-4 py-2 rounded-lg text-sm transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                Вернуться к кандидату
+              </button>
             </div>
           </div>
         </div>
