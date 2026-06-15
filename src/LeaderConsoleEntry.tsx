@@ -14,6 +14,8 @@ const TERRACOTTA_BORDER = 'rgba(201,112,106,0.15)';
 const SAGE = '#6B9E7C';
 const SAGE_LIGHT = 'rgba(107,158,124,0.08)';
 const SAGE_BORDER = 'rgba(107,158,124,0.15)';
+const GOLD_GLOW = 'rgba(201,169,110,0.08)';
+const GOLD_BORDER = 'rgba(201,169,110,0.2)';
 /* ===== DATA (placeholder for future metrics if needed) ===== */
 /* ===== DATA: ATTENTION CARDS ===== */
 const attentionCards = [
@@ -249,9 +251,11 @@ const newcomerFilters = [
 type NewcomerFilterKey = typeof newcomerFilters[number]['key'];
 
 function getNewcomerFilterCount(key: NewcomerFilterKey): number {
-  if (key === 'all') return newcomers.length;
-  if (key === 'ждёт первой связи') return newcomers.filter(nc => nc.statusLabel === 'ждёт первой связи' || (nc as any).hasFirstQuestion === true).length;
-  return newcomers.filter(nc => nc.statusLabel === key).length;
+  const visible = newcomers.filter((nc: any) => !nc.hidden);
+  if (key === 'all') return visible.length;
+  if (key === 'ждёт первой связи') return visible.filter(nc => nc.statusLabel === 'ждёт первой связи' || (nc as any).hasFirstQuestion === true).length;
+  if (key === 'нужна опора') return visible.filter(nc => (nc as any).needsSupport === true).length;
+  return visible.filter(nc => nc.statusLabel === key).length;
 }
 
 /* ===== DATA: NEWCOMERS ===== */
@@ -259,18 +263,20 @@ const newcomers = [
   {
     name: 'Мария Козлова',
     day: '2-й день',
-    goal: 'стать frontend-разработчиком',
+    goal: 'собрать frontend pet-проект',
     applicationQuestion: 'Почему вступили?',
     answer: 'Хочу получать разборы кода и понимать, насколько мой код соответствует уровню middle.',
     hasGoal: true,
     hasFirstStep: true,
+    firstStepName: 'стартовый гайд открыт',
     hasConnection: false,
     hasSupport: false,
     firstResponseReceived: false,
     statusLabel: 'ждёт первой связи' as const,
     statusColor: 'terracotta' as const,
     timeline: ['заявка одобрена', 'доступ открыт', 'Мария вошла в сообщество', 'первый шаг выбран', 'первая связь пока не появилась', 'опора пока не назначена'],
-    nextStep: 'Нужно помочь Марии получить первую живую связь: подобрать опору, пригласить на встречу или дать первый ответ.',
+    nextStep: 'Мария уже вошла и начала ориентироваться, но пока не получила живого отклика.',
+    actions: ['Написать первый отклик', 'Подобрать опору', 'Пригласить на встречу'],
     panelIntro: 'Мария уже вошла в сообщество. Здесь видно, есть ли у неё понятная цель, первый шаг, первая связь и человек рядом.',
     panelTimeline: ['заявка одобрена', 'доступ открыт', 'Мария вошла в сообщество', 'первый шаг выбран', 'живого отклика пока не было', 'человек рядом пока не подобран'],
     panelProgress: [
@@ -284,10 +290,10 @@ const newcomers = [
   {
     name: 'Артём Нестеров',
     day: '3-й день',
-    goal: 'разобраться с backend-разработкой и собрать первый pet-проект на Go',
+    goal: 'собрать API на Go',
     applicationQuestion: 'Почему вступили?',
     answer: 'Хочу не просто смотреть курсы, а делать реальный проект и получать обратную связь по архитектуре, коду и ошибкам.',
-    firstQuestion: 'Я хочу сделать API для трекера задач на Go, но не понимаю, с чего лучше начать: сначала база данных, структура проекта или авторизация?',
+    firstQuestion: 'С чего лучше начать API на Go: сначала авторизация или простые endpoints?',
     hasGoal: true,
     hasFirstStep: true,
     hasConnection: false,
@@ -297,7 +303,8 @@ const newcomers = [
     statusColor: 'terracotta' as const,
     hasFirstQuestion: true,
     timeline: ['заявка одобрена', 'доступ открыт', 'Артём вошёл в сообщество', 'первый шаг выбран', 'Артём задал первый вопрос', 'ответа пока нет', 'первая связь пока не появилась'],
-    nextStep: 'Артёму важно получить первый живой ответ. Лучше коротко ответить на вопрос, дать понятный следующий шаг и при необходимости подобрать человека рядом.',
+    nextStep: 'Артём уже проявил инициативу и ждёт ответа. Это важнее обычного первого отклика.',
+    actions: ['Ответить на первый вопрос', 'Открыть во Вступлении'],
     panelIntro: 'Артём уже вошёл в сообщество и сделал важный шаг — задал первый вопрос. Здесь видно, есть ли у него цель, первый шаг, первая связь и человек рядом.',
     panelTimeline: ['заявка одобрена', 'доступ открыт', 'Артём вошёл в сообщество', 'первый шаг выбран', 'Артём задал первый вопрос', 'живого ответа пока не было', 'человек рядом пока не подобран'],
     panelProgress: [
@@ -307,12 +314,12 @@ const newcomers = [
       { label: 'Первая связь пока не появилась', ok: false },
       { label: 'Опора пока не назначена', ok: false },
     ],
-    panelNextStep: 'Артём уже сделал важный шаг — задал первый вопрос. Лучше ответить ему сейчас, пока вопрос свежий: коротко сориентировать, подсказать понятный первый шаг и показать, что в сообществе есть живой отклик. После ответа можно будет подобрать опору или пригласить Артёма на ближайшую встречу.',
+    panelNextStep: 'Артём уже сделал важный шаг — задал первый вопрос. Лучше ответить ему сейчас, пока вопрос свежий.',
   },
   {
     name: 'Илья Громов',
     day: '4-й день',
-    goal: 'собрать первый backend pet-проект и понять, как правильно строить архитектуру',
+    goal: 'разобраться с архитектурой backend-проекта',
     applicationQuestion: 'Почему вступили?',
     answer: 'Хочу сделать не учебный пример, а нормальный backend-проект, который можно показать в портфолио. Больше всего путаюсь в архитектуре и структуре кода.',
     firstQuestion: 'Я хочу сделать API для личного трекера привычек, но не понимаю, как правильно разложить проект на слои: handlers, services, repository. С чего лучше начать, чтобы не усложнить?',
@@ -321,24 +328,107 @@ const newcomers = [
     hasConnection: false,
     hasSupport: false,
     firstResponseReceived: false,
-    statusLabel: 'ждёт ответа на первый вопрос' as const,
+    statusLabel: 'ждёт ответа на первый вопрос · черновик ответа' as const,
     statusColor: 'terracotta' as const,
     hasFirstQuestion: true,
     hasDraft: true,
     draftTitle: 'Илья, начни с простой структуры проекта',
-    draftText: 'Илья, привет! Хороший вопрос — на старте действительно легко переусложнить архитектуру.\n\nЯ бы начал с простой структуры: сначала сделать handlers для входящих запросов, отдельный слой services для логики и repository для работы с данными. Не нужно сразу строить \"идеальную архитектуру\" — важнее быстро собрать рабочий поток: создать привычку, получить список привычек и отметить выполнение.\n\nПервый шаг на неделю: собрать минимальное API без авторизации, но с понятным разделением handlers / services / repository. После этого можно будет посмотреть код и аккуратно улучшить структуру.',
+    draftText: `Илья, привет! Хороший вопрос — на старте действительно легко переусложнить архитектуру.\n\nЯ бы начал с простой структуры: сначала сделать handlers для входящих запросов, отдельный слой services для логики и repository для работы с данными. Не нужно сразу строить "идеальную архитектуру" — важнее быстро собрать рабочий поток.\n\nПервый шаг на неделю: собрать минимальное API без авторизации, но с понятным разделением handlers / services / repository.`,
     timeline: ['заявка одобрена', 'доступ открыт', 'Илья вошёл в сообщество', 'первый шаг выбран', 'Илья задал первый вопрос', 'черновик ответа сохранён', 'ответ пока не отправлен', 'первая связь пока не появилась'],
-    nextStep: 'Лучше завершить и отправить ответ, пока вопрос ещё свежий. После этого можно подобрать человека рядом или пригласить Илью на встречу с разборами.',
+    nextStep: 'Черновик уже есть, но Илья пока не получил ответа. Для системы это всё ещё тишина.',
+    actions: ['Продолжить редактирование', 'Отправить ответ', 'Удалить черновик'],
     panelIntro: 'Илья уже вошёл в сообщество и задал первый вопрос. Ответ пока не отправлен, но по нему уже сохранён черновик.',
     panelTimeline: ['заявка одобрена', 'доступ открыт', 'Илья вошёл в сообщество', 'первый шаг выбран', 'Илья задал первый вопрос', 'черновик ответа сохранён', 'ответ пока не отправлен', 'первая связь пока не появилась'],
     panelProgress: [
       { label: 'Цель указана', ok: true },
-      { label: 'Первый шаг: стартовый гайд по backend pet-проекту', ok: true },
-      { label: 'Первый вопрос пока без ответа', ok: false },
+      { label: 'Первый шаг: стартовый гайд', ok: true },
+      { label: 'Первый вопрос: черновик сохранён', ok: true },
+      { label: 'Ответ пока не отправлен', ok: false },
+      { label: 'Первая связь пока не появилась', ok: false },
+    ],
+    panelNextStep: 'Черновик уже сохранён. Лучше завершить и отправить ответ, пока вопрос ещё свежий.',
+  },
+  {
+    name: 'Елена Васильева',
+    day: '1-й день',
+    goal: '',
+    applicationQuestion: 'Почему вступили?',
+    answer: 'Хочу показывать код и получать конкретные советы.',
+    hasGoal: false,
+    hasFirstStep: true,
+    firstStepName: 'стартовый гайд',
+    hasConnection: false,
+    hasSupport: false,
+    firstResponseReceived: false,
+    statusLabel: 'цель пока не указана' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Елена вошла в сообщество', 'цель пока не указана', 'первый шаг выбран', 'первая связь пока не появилась', 'опора пока не назначена'],
+    nextStep: 'Без цели сложнее подобрать первый шаг, встречу, разбор или участника рядом.',
+    actions: ['Помочь с целью', 'Написать первый отклик'],
+    panelIntro: 'Елена уже вошла в сообщество. Сейчас важно понять, с какой целью она пришла.',
+    panelProgress: [
+      { label: 'Цель пока не указана', ok: false },
+      { label: 'Первый шаг: стартовый гайд', ok: true },
       { label: 'Первая связь пока не появилась', ok: false },
       { label: 'Опора пока не назначена', ok: false },
     ],
-    panelNextStep: 'Черновик уже сохранён. Лучше завершить и отправить ответ, пока вопрос ещё свежий. После отправки Илья получит первый живой отклик, а дальше можно будет подобрать опору или пригласить его на встречу.',
+    panelTimeline: ['заявка одобрена', 'доступ открыт', 'Елена вошла в сообщество', 'цель пока не указана', 'первый шаг выбран', 'первая связь пока не появилась', 'опора пока не назначена'],
+    showGoalInline: true,
+  },
+  {
+    name: 'Влад Пушкарёв',
+    day: '2-й день',
+    goal: 'пока уточняется',
+    applicationQuestion: 'Почему вступили?',
+    answer: 'Хочу развиваться в IT и найти направление для роста.',
+    hasGoal: false,
+    hasFirstStep: true,
+    hasConnection: false,
+    hasSupport: false,
+    firstResponseReceived: false,
+    statusLabel: 'цель уточняется' as const,
+    statusColor: 'gold' as const,
+    goalMessageSent: true,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Влад вошёл', 'сообщение о цели отправлено', 'ждём ответ'],
+    nextStep: 'Владу отправили сообщение с просьбой уточнить цель. Сейчас ждём ответ.',
+    actions: ['Напомнить о цели', 'Выбрать временную цель'],
+    panelIntro: 'Владу уже отправили сообщение с просьбой уточнить цель.',
+  },
+  {
+    name: 'Ирина Соколова',
+    day: '3-й день',
+    goal: 'Хочу развиваться в IT и понять, куда двигаться дальше.',
+    applicationQuestion: 'Почему вступили?',
+    answer: 'Пока не понимаю своё направление, хочу разобраться.',
+    hasGoal: false,
+    hasFirstStep: true,
+    hasConnection: false,
+    hasSupport: false,
+    firstResponseReceived: false,
+    statusLabel: 'цель нужно уточнить' as const,
+    statusColor: 'gold' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Ирина вошла', 'цель слишком общая'],
+    nextStep: 'Цель есть, но она слишком общая. Нужно помочь сузить направление.',
+    actions: ['Уточнить цель', 'Выбрать цель вручную', 'Написать первый отклик'],
+    panelIntro: 'Ирина указала цель, но она слишком общая. Нужно помочь сузить направление.',
+  },
+  {
+    name: 'Пётр Воронин',
+    day: '2-й день',
+    goal: 'разобраться с backend-разработкой',
+    applicationQuestion: 'Почему вступили?',
+    answer: 'Хочу научиться делать реальные backend-проекты, а не только учебные примеры.',
+    hasGoal: true,
+    hasFirstStep: false,
+    hasConnection: false,
+    hasSupport: false,
+    firstResponseReceived: false,
+    statusLabel: 'нужен первый шаг' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Пётр вошёл', 'цель понятна', 'первый шаг пока не выбран'],
+    nextStep: 'У Петра понятная цель, но нет конкретного действия, с которого можно начать.',
+    actions: ['Выбрать первый шаг', 'Написать первый отклик'],
+    panelIntro: 'Пётр вошёл в сообщество. Цель понятна, но первый шаг пока не выбран.',
   },
   {
     name: 'Алексей Новиков',
@@ -348,105 +438,157 @@ const newcomers = [
     answer: 'Ищу сообщество, где можно показать свой pet-проект и получить обратную связь по архитектуре.',
     hasGoal: true,
     hasFirstStep: false,
+    firstStepRecommended: 'открыть гайд по Docker и CI/CD',
     hasConnection: false,
     hasSupport: false,
     firstResponseReceived: false,
-    statusLabel: 'нужен первый шаг' as const,
+    statusLabel: 'нужен первый шаг · есть рекомендация' as const,
     statusColor: 'terracotta' as const,
-    timeline: ['заявка одобрена', 'доступ открыт', 'Алексей вошёл в сообщество', 'цель указана', 'первый шаг пока не выбран'],
-    nextStep: 'Нужно помочь Алексею выбрать первый шаг: загрузить проект для разбора или открыть гайд по Docker.',
-  },
-  {
-    name: 'Елена Васильева',
-    day: '1-й день',
-    goal: '',
-    applicationQuestion: 'Почему вступили?',
-    answer: 'Хочу среду, где можно показать код и получить конкретные советы по улучшению.',
-    hasGoal: false,
-    hasFirstStep: false,
-    hasConnection: false,
-    hasSupport: false,
-    firstResponseReceived: false,
-    statusLabel: 'Без цели' as const,
-    statusColor: 'terracotta' as const,
-    timeline: ['заявка одобрена', 'доступ открыт', 'Елена вошла в сообщество', 'цель пока не указана', 'первый шаг выбран как базовый стартовый гайд', 'первая связь пока не появилась', 'опора пока не назначена'],
-    nextStep: 'Лучше помочь Елене сформулировать цель: что она хочет получить в сообществе и какой результат был бы полезен в первые 7 дней. После этого будет проще подобрать первый шаг, опору или ближайшую встречу.',
-    panelIntro: 'Елена уже вошла в сообщество. Сейчас важно понять, с какой целью она пришла: так будет проще подобрать первый шаг, встречу, разбор или человека рядом.',
-    panelProgress: [
-      { label: 'Цель пока не указана', ok: false },
-      { label: 'Первый шаг: стартовый гайд', ok: true },
-      { label: 'Первая связь пока не появилась', ok: false },
-      { label: 'Опора пока не назначена', ok: false },
-    ],
-    panelTimeline: ['заявка одобрена', 'доступ открыт', 'Елена вошла в сообщество', 'цель пока не указана', 'первый шаг выбран как базовый стартовый гайд', 'первая связь пока не появилась', 'опора пока не назначена'],
-    showGoalInline: true,
-  },
-  {
-    name: 'Сергей Волков',
-    day: '6-й день',
-    goal: 'перейти в middle backend',
-    applicationQuestion: 'Почему вступили?',
-    answer: 'Ищу среду для обсуждения архитектуры и обратной связи на реальных задачах.',
-    hasGoal: true,
-    hasFirstStep: true,
-    hasConnection: true,
-    hasSupport: true,
-    firstResponseReceived: true,
-    statusLabel: 'с опорой' as const,
-    statusColor: 'sage' as const,
-    timeline: ['заявка одобрена', 'доступ открыт', 'Сергей вошёл в сообщество', 'цель указана', 'первый шаг выбран', 'первая связь появилась', 'опора назначена'],
-    nextStep: 'Сергей хорошо вошёл. Важно поддержать связь и помочь продолжить путь после первых 7 дней.',
-  },
-  {
-    name: 'Анна Морозова',
-    day: '3-й день',
-    goal: 'сделать первый пет-проект',
-    hasGoal: true,
-    hasFirstStep: true,
-    hasConnection: true,
-    hasSupport: true,
-    firstResponseReceived: true,
-    statusLabel: 'с опорой' as const,
-    statusColor: 'sage' as const,
-  },
-  {
-    name: 'Павел Миронов',
-    day: '5-й день',
-    goal: 'научиться DevOps',
-    hasGoal: true,
-    hasFirstStep: true,
-    hasConnection: true,
-    hasSupport: false,
-    firstResponseReceived: true,
-    statusLabel: 'первый отклик появился' as const,
-    statusColor: 'gold' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Алексей вошёл', 'цель указана', 'рекомендация: гайд по Docker', 'первый шаг пока не выбран'],
+    nextStep: 'Система уже видит подходящий первый шаг, осталось подтвердить или выбрать другой.',
+    actions: ['Предложить первый шаг', 'Выбрать шаг вручную'],
+    panelIntro: 'Алексей вошёл в сообщество. Система предлагает подходящий первый шаг.',
   },
   {
     name: 'Дарья Лебедева',
-    day: '2-й день',
-    goal: 'стартовать в data science',
+    day: '3-й день',
+    goal: 'подготовить frontend-проект к портфолио',
+    applicationQuestion: 'Почему вступили?',
+    answer: 'Хочу собрать проект, который можно показать работодателю.',
     hasGoal: true,
     hasFirstStep: false,
-    hasConnection: false,
+    firstStepOptionsSent: true,
+    hasConnection: true,
     hasSupport: false,
-    firstResponseReceived: false,
-    statusLabel: 'нужен первый шаг' as const,
-    statusColor: 'terracotta' as const,
+    firstResponseReceived: true,
+    statusLabel: 'ждём выбор первого шага' as const,
+    statusColor: 'gold' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Дарья вошла', 'варианты шагов отправлены', 'первый шаг пока не выбран'],
+    nextStep: 'Дарье предложили варианты, но она пока не выбрала.',
+    actions: ['Напомнить о выборе', 'Выбрать шаг вручную'],
+    panelIntro: 'Дарья получила варианты первого шага, но пока не выбрала.',
   },
   {
-    name: 'Ольга Романова',
-    day: '7-й день',
-    goal: 'перейти из junior в middle frontend',
+    name: 'Ксения Романова',
+    day: '3-й день',
+    goal: 'подготовить портфолио к разбору',
+    hasGoal: true,
+    hasFirstStep: true,
+    firstStepName: 'загрузить портфолио для разбора',
+    hasConnection: true,
+    hasSupport: false,
+    firstResponseReceived: true,
+    statusLabel: 'первый шаг выбран' as const,
+    statusColor: 'sage' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Ксения вошла', 'первый шаг выбран', 'первая связь появилась'],
+    nextStep: 'Ксения уже получила старт и не должна попадать в проблемные срезы.',
+    actions: ['Открыть путь', 'Посмотреть профиль'],
+  },
+  {
+    name: 'София Лебедева',
+    day: '5-й день',
+    goal: 'подготовить первый продуктовый кейс',
     hasGoal: true,
     hasFirstStep: true,
     hasConnection: true,
     hasSupport: false,
     firstResponseReceived: true,
-    statusLabel: 'готов выйти из входа' as const,
+    statusLabel: 'первая связь появилась' as const,
     statusColor: 'sage' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'София вошла', 'первый шаг выбран', 'первая связь появилась'],
+    nextStep: 'София уже получила живой контакт.',
+    actions: ['Открыть путь', 'Посмотреть профиль'],
+  },
+  {
+    name: 'Роман Ковалёв',
+    day: '6-й день',
+    goal: 'собрать архитектуру backend API',
+    hasGoal: true,
+    hasFirstStep: true,
+    hasConnection: true,
+    hasSupport: false,
+    firstResponseReceived: true,
+    statusLabel: 'старт идёт нормально' as const,
+    statusColor: 'sage' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Роман вошёл', 'первый шаг выбран', 'первая связь появилась'],
+    nextStep: 'Роман в первых 7 днях, но сейчас без критичных провалов.',
+    actions: ['Открыть путь', 'Посмотреть профиль'],
+  },
+  {
+    name: 'Ксения Романова (доп)',
+    day: '3-й день',
+    goal: 'подготовить портфолио к разбору',
+    hasGoal: true,
+    hasFirstStep: true,
+    hasConnection: true,
+    hasSupport: false,
+    needsSupport: true,
+    firstResponseReceived: true,
+    supportRecommended: { name: 'Анна Морозова', role: 'Помощник на старте', tags: 'портфолио · frontend', load: 'комфортная' },
+    statusLabel: 'нужна опора' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['первый шаг выбран', 'первая связь есть', 'опора пока не подобрана'],
+    nextStep: 'Ксении может помочь участник с похожим путём.',
+    actions: ['Подобрать опору'],
+    hidden: true,
+  },
+  {
+    name: 'Алексей Новиков (доп)',
+    day: '4-й день',
+    goal: 'освоить Docker и CI/CD',
+    hasGoal: true,
+    hasFirstStep: true,
+    hasConnection: true,
+    hasSupport: false,
+    needsSupport: true,
+    firstResponseReceived: true,
+    supportRecommended: { name: 'Сергей Волков', role: 'Участник рядом', tags: 'backend → DevOps · Docker', load: 'комфортная' },
+    statusLabel: 'нужна опора · есть рекомендация' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['первый шаг выбран', 'первая связь есть', 'опора пока не подтверждена'],
+    nextStep: 'Система рекомендует Сергея как участника рядом.',
+    actions: ['Спросить Сергея', 'Посмотреть другие варианты'],
+    hidden: true,
+  },
+  {
+    name: 'София Лебедева (доп)',
+    day: '5-й день',
+    goal: 'подготовить первый продуктовый кейс',
+    hasGoal: true,
+    hasFirstStep: true,
+    hasConnection: true,
+    hasSupport: false,
+    needsSupport: true,
+    firstResponseReceived: true,
+    supportOfferSentTo: 'Сергей Волков',
+    supportStatus: 'ждём ответ',
+    statusLabel: 'ждём подтверждение опоры' as const,
+    statusColor: 'gold' as const,
+    timeline: ['первый шаг выбран', 'первая связь есть', 'предложение отправлено Сергею', 'ждём подтверждения'],
+    nextStep: 'Сергею отправлено предложение помочь Софии.',
+    actions: ['Напомнить Сергею', 'Выбрать другую опору'],
+    hidden: true,
+  },
+  {
+    name: 'Роман Ковалёв (доп)',
+    day: '6-й день',
+    goal: 'собрать архитектуру backend API',
+    hasGoal: true,
+    hasFirstStep: true,
+    hasConnection: true,
+    hasSupport: false,
+    needsSupport: true,
+    firstResponseReceived: true,
+    prevHelperDeclined: 'Анна Морозова',
+    declineReason: 'перегрузка',
+    statusLabel: 'нужна другая опора' as const,
+    statusColor: 'terracotta' as const,
+    timeline: ['первый шаг выбран', 'первая связь есть', 'Анна отказалась', 'нужна другая опора'],
+    nextStep: 'Анна не сможет помочь. Нужно выбрать другого человека.',
+    actions: ['Выбрать другую опору'],
+    hidden: true,
   },
 ];
-
 /* ===== DATA: WHAT WORKS ===== */
 const selfManaging = [
   { text: 'Заявки за сегодня получили первый отклик', sub: 'Кандидаты не остаются без внимания' },
@@ -548,9 +690,11 @@ export default function LeaderConsoleEntry() {
     { key: 'settings', label: 'Настройки входа', subtitle: `${settingsRisks.length} настройка мешает входу`, icon: Settings },
   ];
 
-  const filteredNewcomers = newcomers.filter((nc) => {
+  const filteredNewcomers = newcomers.filter((nc: any) => {
+    if (nc.hidden) return false;
     if (newcomerFilter === 'all') return true;
-    if (newcomerFilter === 'ждёт первой связи') return nc.statusLabel === 'ждёт первой связи' || (nc as any).hasFirstQuestion === true;
+    if (newcomerFilter === 'ждёт первой связи') return nc.statusLabel === 'ждёт первой связи' || nc.hasFirstQuestion === true;
+    if (newcomerFilter === 'нужна опора') return nc.needsSupport === true;
     return nc.statusLabel === newcomerFilter;
   });
 
@@ -581,6 +725,10 @@ export default function LeaderConsoleEntry() {
   const [editDraftText, setEditDraftText] = useState(`Илья, привет! Хороший вопрос — на старте действительно легко переусложнить архитектуру.\n\nЯ бы начал с простой структуры: сначала сделать handlers для входящих запросов, отдельный слой services для логики и repository для работы с данными. Не нужно сразу строить \"идеальную архитектуру\" — важнее быстро собрать рабочий поток: создать привычку, получить список привычек и отметить выполнение.\n\nПервый шаг на неделю: собрать минимальное API без авторизации, но с понятным разделением handlers / services / repository. После этого можно будет посмотреть код и аккуратно улучшить структуру.`);
   const [editDraftTitle, setEditDraftTitle] = useState('Илья, начни с простой структуры проекта');
   const [showSendDraftConfirmModal, setShowSendDraftConfirmModal] = useState(false);
+
+  /* ===== PICK FIRST STEP MODAL STATE ===== */
+  const [showPickFirstStepModal, setShowPickFirstStepModal] = useState(false);
+  const [pickFirstStepTarget, setPickFirstStepTarget] = useState<string>('');
 
   /* ===== GOAL HELP MODAL STATE (for Elena) ===== */
   const [showGoalHelpModal, setShowGoalHelpModal] = useState(false);
@@ -724,13 +872,13 @@ export default function LeaderConsoleEntry() {
 
   /* ===== BODY SCROLL LOCK ===== */
   useEffect(() => {
-    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm || showPickMaterialModal || pickMatDiscardConfirm || showMetricsModal || showNextStepModal || showNextStepRestoreConfirm || showNextStepDiscardConfirm || showPaymentAccessModal || showPaRestoreConfirm || showPaDiscardConfirm) {
+    if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm || showPickMaterialModal || pickMatDiscardConfirm || showMetricsModal || showNextStepModal || showNextStepRestoreConfirm || showNextStepDiscardConfirm || showPaymentAccessModal || showPaRestoreConfirm || showPaDiscardConfirm || showPickFirstStepModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm, showFirst7DaysModal, showF7RestoreConfirm, showF7DiscardConfirm, showPickMaterialModal, pickMatDiscardConfirm, showMetricsModal, showNextStepModal, showNextStepRestoreConfirm, showNextStepDiscardConfirm, showPaymentAccessModal, showPaRestoreConfirm, showPaDiscardConfirm]);
+  }, [newcomerSidePanel, archivePanelOpen, sidePanelApp, showAppMessageModal, showRestoreConfirm, showDiscardConfirm, showFirst7DaysModal, showF7RestoreConfirm, showF7DiscardConfirm, showPickMaterialModal, pickMatDiscardConfirm, showMetricsModal, showNextStepModal, showNextStepRestoreConfirm, showNextStepDiscardConfirm, showPaymentAccessModal, showPaRestoreConfirm, showPaDiscardConfirm, showPickFirstStepModal]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
@@ -1097,6 +1245,33 @@ export default function LeaderConsoleEntry() {
                         )}
                       </div>
                       <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{nc.day} в сообществе · {nc.goal || 'цель пока не указана'}</p>
+                      {/* Action buttons */}
+                      {(nc as any).actions && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {(nc as any).actions.map((action: string) => (
+                            <button
+                              key={action}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (action === 'Помочь с целью') setShowGoalHelpModal(true);
+                                else if (action === 'Написать первый отклик') setShowFirstReplyModal(true);
+                                else if (action === 'Ответить на первый вопрос') setShowFirstQuestionReplyModal(true);
+                                else if (action === 'Продолжить редактирование') setShowEditDraftModal(true);
+                                else if (action === 'Отправить ответ') setShowSendDraftConfirmModal(true);
+                                else if (action === 'Выбрать первый шаг' || action === 'Предложить первый шаг' || action === 'Выбрать шаг вручную' || action === 'Напомнить о выборе') { setPickFirstStepTarget(nc.name); setShowPickFirstStepModal(true); }
+                                else if (action === 'Подобрать опору') setShowSupportModal(true);
+                                else if (action === 'Пригласить на встречу') setShowMeetingInviteModal(true);
+                                else if (action === 'Спросить Сергея') { setPickFirstStepTarget(nc.name); setShowSupportModal(true); }
+                                else if (action === 'Открыть во Вступлении') setNewcomerSidePanel(nc);
+                              }}
+                              className="text-[10px] px-2 py-0.5 rounded-md font-medium transition-all duration-200 hover:opacity-90"
+                              style={action === 'Удалить черновик' || action === 'Открыть путь' || action === 'Посмотреть профиль' || action === 'Посмотреть другие варианты' ? { color: 'var(--text-muted)', border: '1px solid var(--border-color)' } : { backgroundColor: bc.bg, color: bc.text, border: `1px solid ${bc.border}` }}
+                            >
+                              {action}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <ChevronRight className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1" style={{ color: 'var(--text-muted)' }} />
                   </div>
@@ -2337,6 +2512,73 @@ export default function LeaderConsoleEntry() {
               <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Отправить ответ</button>
               <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Сохранить как черновик</button>
               <button onClick={() => setShowFirstQuestionReplyModal(false)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Вернуться к новичку</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: ВЫБРАТЬ ПЕРВЫЙ ШАГ ===== */}
+      {showPickFirstStepModal && (
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowPickFirstStepModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden my-8 max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowPickFirstStepModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
+
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Выбрать первый шаг</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Первый шаг помогает новичку не потеряться после входа и начать движение в сообществе.</p>
+            </div>
+
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
+              {/* Newcomer */}
+              <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{pickFirstStepTarget || 'Новичок'}</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Цель понятна, но нет конкретного действия, с которого можно начать.</p>
+              </div>
+
+              {/* Options */}
+              <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Варианты первого шага</p>
+              <div className="space-y-3 mb-5">
+                {[
+                  { title: 'Стартовый гайд по теме', desc: 'Открыть подборку материалов по направлению новичка', tag: 'автоматически' },
+                  { title: 'Загрузить проект для разбора', desc: 'Новичок загружает свой код и получает обратную связь', tag: 'активное действие' },
+                  { title: 'Посмотреть запись встречи', desc: 'Посмотреть разбор похожего проекта или вводную встречу', tag: 'пассивное' },
+                  { title: 'Написать первый вопрос', desc: 'Новичок формулирует вопрос и получает живой ответ', tag: 'активное действие' },
+                  { title: 'Другой шаг', desc: 'Указать свой вариант первого шага', tag: 'вручную' },
+                ].map((opt, i) => (
+                  <button key={i} className="w-full text-left p-4 rounded-xl transition-all duration-200 hover:translate-y-[-1px]" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{opt.title}</p>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: i === 0 ? SAGE_LIGHT : GOLD_GLOW, color: i === 0 ? SAGE : 'var(--gold)', border: `1px solid ${i === 0 ? SAGE_BORDER : GOLD_BORDER}` }}>{opt.tag}</span>
+                    </div>
+                    <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{opt.desc}</p>
+                  </button>
+                ))}
+              </div>
+
+              <div className="h-px mb-5" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* What happens */}
+              <div className="mb-2">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произойдёт</p>
+                <ul className="space-y-1.5">
+                  {['первый шаг появится в карточке новичка', 'новичок получит уведомление', 'шаг отобразится в side panel', 'лидер увидит прогресс в разделе «Новички»'].map((item, i) => (
+                    <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
+                      <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: SAGE }} />{item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Fixed Footer */}
+            <div className="shrink-0 px-6 md:px-8 py-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowPickFirstStepModal(false)} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+                Закрыть
+              </button>
             </div>
           </div>
         </div>
