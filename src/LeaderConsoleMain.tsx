@@ -1053,20 +1053,13 @@ export default function LeaderConsoleMain() {
             </div>
 
             {/* Fixed Footer */}
-            <div className="shrink-0 px-6 md:px-8 py-4 space-y-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+            <div className="shrink-0 px-6 md:px-8 py-4" style={{ borderTop: '1px solid var(--border-color)' }}>
               <button
                 onClick={() => { setShowApplicationsModal(false); navigate('/leader/entry'); }}
                 className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90"
                 style={{ backgroundColor: 'var(--gold)', color: '#fff' }}
               >
                 Открыть все во Вступлении
-              </button>
-              <button
-                onClick={() => setShowApplicationsModal(false)}
-                className="w-full py-2 text-xs transition-colors hover:opacity-80"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Вернуться к Главному сейчас
               </button>
             </div>
           </div>
