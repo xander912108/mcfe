@@ -161,6 +161,8 @@ export default function LeaderConsoleMain() {
   const [showAskConfirm, setShowAskConfirm] = useState(false);
   const [askTarget, setAskTarget] = useState<{ newcomerName: string; helperName: string } | null>(null);
   const [askedHelpers, setAskedHelpers] = useState<string[]>([]);
+  const [messageTitle, setMessageTitle] = useState('');
+  const [messageBody, setMessageBody] = useState('');
   const [advisorFocus, setAdvisorFocus] = useState<'payment' | 'newcomer' | 'applications'>('payment');
   const paramDescriptionsRef = useRef<HTMLDivElement>(null);
 
@@ -819,7 +821,12 @@ export default function LeaderConsoleMain() {
                         </div>
                       ) : (
                         <button
-                          onClick={() => { setAskTarget({ newcomerName: nc.name, helperName: nc.helper }); setShowAskConfirm(true); }}
+                          onClick={() => {
+                            setAskTarget({ newcomerName: nc.name, helperName: nc.helper });
+                            setMessageTitle(`Помощь новичку: ${nc.name.split(' ')[0]}`);
+                            setMessageBody(`Привет! ${nc.name} вошёл в сообщество и пока не получил первой связи. Можешь взять его под опеку на первые 7 дней? Твой профиль хорошо подходит.`);
+                            setShowAskConfirm(true);
+                          }}
                           className="w-full py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:opacity-90 flex items-center justify-center gap-2"
                           style={{ backgroundColor: 'var(--gold)', color: '#fff' }}
                         >
@@ -860,12 +867,43 @@ export default function LeaderConsoleMain() {
 
             {/* Scrollable Body */}
             <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
-              {/* Message preview */}
-              <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение помощнику</p>
-                <p className="text-xs leading-relaxed italic" style={{ color: 'var(--text-secondary)' }}>
-                  «Привет! {askTarget.newcomerName} вошёл в сообщество и пока не получил первой связи. Можешь взять его под опеку на первые 7 дней? Твой профиль хорошо подходит.»
-                </p>
+              {/* Editable message */}
+              <div className="mb-5">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение помощнику</p>
+
+                {/* Title input */}
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Заголовок</label>
+                    <span className="text-[10px]" style={{ color: messageTitle.length > 120 ? TERRACOTTA : 'var(--text-muted)' }}>{messageTitle.length}/120</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={messageTitle}
+                    onChange={(e) => setMessageTitle(e.target.value.slice(0, 120))}
+                    className="w-full px-3 py-2 rounded-lg text-xs outline-none transition-colors"
+                    style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    placeholder="Заголовок сообщения..."
+                  />
+                </div>
+
+                {/* Body textarea */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>Текст</label>
+                    <span className="text-[10px]" style={{ color: messageBody.length > 1000 ? TERRACOTTA : 'var(--text-muted)' }}>{messageBody.length}/1000</span>
+                  </div>
+                  <textarea
+                    value={messageBody}
+                    onChange={(e) => setMessageBody(e.target.value.slice(0, 1000))}
+                    rows={5}
+                    className="w-full px-3 py-2.5 rounded-lg text-xs leading-relaxed outline-none resize-none transition-colors"
+                    style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    placeholder="Напишите сообщение помощнику..."
+                  />
+                </div>
+
+                <p className="text-[10px] mt-2" style={{ color: 'var(--text-muted)' }}>Шаблон подставлен автоматически. Можно оставить как есть или дополнить своим текстом.</p>
               </div>
 
               {/* What happens */}
