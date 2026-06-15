@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertTriangle, ChevronRight, Check,
   X, Info, Users, Zap, Lightbulb,
@@ -73,159 +74,180 @@ interface ApplicationData {
   candidateMessage?: string;
   decidedBy?: string;
   decidedAt?: string;
+  actions?: string[];
+  tried?: string;
+  struggle?: string;
+  paymentAmount?: string;
+  paymentProvider?: string;
+  paymentStatus?: string;
+  paymentTime?: string;
+  paymentLinkSent?: string;
 }
 
 const applicationsByFilter: Record<FilterKey, Array<ApplicationData>> = {
   waiting: [
     {
-      name: 'Ольга Романова',
-      waitTime: '12 час. назад',
-      sub: 'Нужен ответ',
+      name: 'Алина Сергеева',
+      waitTime: '8 часов',
+      sub: 'нужен ответ · 8 часов',
       badge: 'нужен ответ',
       badgeColor: 'gold',
-      goal: 'перейти из junior в middle frontend',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Хочу попасть в среду, где можно получать разборы и не учиться в одиночку.',
-      timeline: ['заявка отправлена', 'ответа от сообщества пока нет'],
-      nextStep: 'Посмотрите заявку и решите, что лучше сделать: одобрить, задать уточнение или пока не открывать вход.',
+      goal: 'перейти из вёрстки во frontend и собрать первый проект для портфолио',
+      applicationQuestion: 'Почему вступили?',
+      answer: 'Хочу понять, какие навыки подтянуть, чтобы уверенно откликаться на junior frontend-вакансии.',
+      tried: 'Прошла HTML/CSS, немного JavaScript, делала лендинги.',
+      struggle: 'Не понимаю, какой проект сделать для портфолио.',
+      timeline: ['кандидат подал заявку', 'заявка ждёт ответа 8 часов', 'уточнений ещё не было', 'решение ещё не принято'],
+      nextStep: 'Можно одобрить заявку и дать вход в стартовый сценарий. Если нужен более точный контекст, лучше задать один уточняющий вопрос.',
+      actions: ['Одобрить', 'Задать уточнение', 'Не принимать сейчас'],
     },
     {
-      name: 'Анна Белова',
-      waitTime: '1 день назад',
-      sub: 'Нужен ответ · больше суток',
+      name: 'Максим Орлов',
+      waitTime: '28 часов',
+      sub: 'нужен ответ · больше суток',
       badge: 'больше суток',
       badgeColor: 'terracotta',
-      goal: 'найти среду для роста во frontend',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Хочу получать обратную связь по коду и понимать, что улучшать дальше.',
-      timeline: ['заявка отправлена', 'ответа от сообщества пока нет', 'заявка ждёт больше суток'],
-      nextStep: 'Кандидат уже проявил интерес к сообществу. Лучше ответить, пока запрос ещё тёплый.',
+      goal: 'разобраться с backend-разработкой и понять, с чего начать первый pet-проект',
+      applicationQuestion: 'Почему вступили?',
+      answer: 'Хочу собрать первый backend-проект и получить обратную связь.',
+      tried: 'Смотрел Go и немного Node.js, но пока нет законченного проекта.',
+      struggle: 'Не понимаю, с какой архитектуры начать и как не усложнить.',
+      timeline: ['заявка подана 28 часов назад', 'ответа от сообщества ещё не было', 'кандидат не отменял заявку', 'заявка стала приоритетной из-за ожидания больше суток'],
+      nextStep: 'Лучше принять решение сейчас: одобрить, уточнить опыт или мягко не принимать сейчас.',
+      actions: ['Одобрить', 'Задать уточнение', 'Не принимать сейчас'],
     },
     {
-      name: 'Павел Миронов',
-      waitTime: '2 час. назад',
-      sub: 'Нужен ответ · ответил на уточнение',
+      name: 'Влад Пушкарёв',
+      waitTime: '2 часа назад',
+      sub: 'нужен ответ · ответил на уточнение',
       badge: 'ответил',
       badgeColor: 'sage',
-      goal: 'перейти в backend-разработку',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Хочу за месяц собрать pet-проект и получить разбор архитектуры.',
-      clarifyingQuestion: 'Какой pet-проект вы хотите собрать за месяц и какой разбор архитектуры вам нужен?',
-      clarifyingAnswer: 'Я хочу собрать небольшой REST API на Go с подключением к базе данных и Docker. Мне нужен разбор, чтобы понять, правильно ли я строю архитектуру — боюсь, что накидаю всё в одном файле и потом не разберусь.',
-      timeline: ['заявка отправлена', 'уточнение было отправлено', 'кандидат ответил на уточнение'],
-      nextStep: 'Теперь можно принять решение по заявке или задать ещё один вопрос, если контекста пока недостаточно.',
+      goal: 'освоить Docker и CI/CD для pet-проекта',
+      applicationQuestion: 'Почему вступили?',
+      answer: 'Хочу понять, как собрать первый API и не потеряться в технологиях.',
+      clarifyingQuestion: 'Какой результат хотите получить в первый месяц?',
+      clarifyingAnswer: 'Хочу собрать проект, задеплоить его и понять, как настроить базовый CI/CD.',
+      timeline: ['по заявке было отправлено уточнение', 'кандидат ответил', 'заявка вернулась в «Требуют ответа»', 'теперь нужно принять решение'],
+      nextStep: 'Контекст стал понятнее. Можно одобрить заявку и после входа предложить первый шаг по Docker и CI/CD.',
+      actions: ['Одобрить', 'Задать уточнение', 'Не принимать сейчас'],
     },
   ],
   clarify: [
     {
-      name: 'Алексей Новиков',
-      waitTime: '1 день назад',
-      sub: 'На уточнении',
+      name: 'Ирина Соколова',
+      waitTime: '6 часов',
+      sub: 'на уточнении · 6 часов',
       badge: 'на уточнении',
       badgeColor: 'gold',
-      goal: 'освоить Docker и CI/CD',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Работаю backend-разработчиком, хочу перейти в DevOps-направление.',
-      clarifyingQuestion: 'Расскажите подробнее о вашем текущем опыте с Docker и CI/CD — что уже пробовали и что хотели бы освоить первым?',
-      timeline: ['заявка отправлена', 'лидером задан уточняющий вопрос', 'ответа от кандидата пока нет'],
-      nextStep: 'Ждём ответ кандидата. Если заявка важная, можно отправить мягкое напоминание.',
+      goal: 'Хочу развиваться в IT и понять, куда двигаться дальше.',
+      applicationQuestion: 'Почему вступили?',
+      answer: 'Пока не понимаю своё направление, хочу разобраться.',
+      clarifyingQuestion: 'Какой результат вы хотите получить в ближайший месяц?',
+      timeline: ['заявка была открыта', 'цель показалась слишком общей', 'кандидату отправлено уточнение', 'пока ответа нет'],
+      nextStep: 'Сейчас лучше подождать ответ. Если кандидат долго не отвечает, можно отправить мягкое напоминание.',
+      actions: ['Напомнить об уточнении', 'Не принимать сейчас', 'Закрыть'],
     },
     {
-      name: 'Екатерина Смирнова',
-      waitTime: '1 день назад',
-      sub: 'На уточнении · больше суток без ответа',
+      name: 'Кирилл Антонов',
+      waitTime: '32 часа',
+      sub: 'на уточнении · больше суток без ответа',
       badge: 'без ответа',
       badgeColor: 'terracotta',
-      goal: 'получить разбор первых проектов',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Хочу понять, что улучшить в портфолио перед поиском работы.',
-      clarifyingQuestion: 'Можете поделиться ссылкой на своё портфолио и рассказать, какие проекты в нём считаете сильными?',
-      timeline: ['заявка отправлена', 'уточняющий вопрос отправлен', 'кандидат пока не ответил', 'прошло больше суток'],
-      nextStep: 'Можно мягко напомнить кандидату об уточнении, если заявка всё ещё актуальна.',
+      goal: 'получить поддержку в развитии backend-навыков',
+      applicationQuestion: 'Почему вступили?',
+      answer: 'Хочу задавать вопросы по реальным задачам и получать обратную связь.',
+      clarifyingQuestion: 'Есть ли у вас уже проект или задача, с которой хотите прийти в сообщество?',
+      timeline: ['уточнение отправлено больше суток назад', 'ответа пока нет', 'заявка остаётся в ожидании'],
+      nextStep: 'Можно отправить одно мягкое напоминание. Если кандидат не ответит до срока, заявка перейдёт в историю.',
+      actions: ['Напомнить об уточнении', 'Не принимать сейчас', 'Закрыть'],
     },
   ],
   approved: [
     {
       name: 'Мария Козлова',
-      waitTime: '1 день назад',
-      sub: 'Одобрена · оплата не завершена',
+      waitTime: 'вчера · 18:20',
+      sub: 'одобрена · оплата не завершена',
       badge: 'оплата не завершена',
       badgeColor: 'gold',
-      goal: 'перейти из junior в middle frontend',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Хочу попасть в среду, где можно получать разборы кода и рекомендации по росту. Сейчас работаю один и не понимаю, насколько мой код соответствует middle-уровню.',
-      timeline: ['заявка одобрена', 'оплата пока не завершена', 'доступ откроется после оплаты'],
-      nextStep: 'После успешной оплаты доступ откроется автоматически.',
+      goal: 'перейти из вёрстки во frontend и собрать первый проект для портфолио',
+      paymentAmount: '7 900 ₽',
+      paymentStatus: 'оплата не завершена',
+      paymentLinkSent: 'вчера · 18:20',
+      timeline: ['заявка одобрена', 'кандидат получил ссылку на оплату', 'оплата пока не завершена', 'доступ не открыт, потому платёж не подтверждён'],
+      nextStep: 'Можно напомнить об оплате. После успешной оплаты доступ откроется автоматически.',
+      actions: ['Напомнить об оплате', 'Проверить оплату', 'Открыть Монетизацию'],
     },
     {
-      name: 'Елена Васильева',
-      waitTime: '2 дня назад',
-      sub: 'Одобрена · доступ не открылся',
+      name: 'Иван Петров',
+      waitTime: '12 минут назад',
+      sub: 'одобрена · доступ не открылся',
       badge: 'доступ не открылся',
       badgeColor: 'terracotta',
-      goal: 'сделать первый pet-проект на React',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Недавно закончила курсы по frontend, но не знаю, с чего начать реальный проект. Хочу среду, где можно показать код и получить конкретные советы.',
-      timeline: ['заявка одобрена', 'оплата прошла', 'доступ пока не открылся'],
-      nextStep: 'Человек прошёл вход, но ещё не может попасть в сообщество. Ситуацию лучше проверить сразу.',
+      goal: 'собрать первый pet-проект на React',
+      paymentAmount: '7 900 ₽',
+      paymentProvider: 'ЮKassa',
+      paymentStatus: 'прошёл',
+      paymentTime: 'сегодня · 14:42',
+      timeline: ['заявка одобрена', 'платёж подтверждён', 'webhook получен', 'доступ не создался автоматически', 'кандидату показано сообщение «Доступ временно проверяется»'],
+      nextStep: 'Проверьте оплату и откройте доступ вручную, если платёж действительно подтверждён.',
+      actions: ['Открыть доступ вручную', 'Проверить оплату', 'Открыть Монетизацию'],
     },
-
   ],
   history: [
     {
-      name: 'Никита Орлов',
-      waitTime: '1 день назад',
-      sub: 'Не принимаем сейчас',
-      badge: 'не принимаем сейчас',
-      badgeColor: 'terracotta',
-      goal: 'найти индивидуального ментора для ежедневной проверки задач',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Мне нужен человек, который каждый день будет проверять мои задания и говорить, что делать дальше.',
-      clarifyingQuestion: 'В Mentori Club нет ежедневного менторства с проверкой задач. У нас разборы, встречи и Помощники на старте. Этот формат подходит вам?',
-      clarifyingAnswer: 'Мне нужен человек, который каждый день будет проверять мои задания и говорить, что делать дальше.',
-      rejectionReason: 'Кандидат ищет индивидуального ментора с ежедневной проверкой. Это выходит за рамки формата сообщества.',
-      candidateMessage: 'Спасибо за заявку. Сейчас формат сообщества может не полностью совпасть с вашим запросом, поэтому пока не открываем доступ. Если запрос изменится, вы сможете подать заявку позже.',
-      decidedBy: 'Алексей Петров',
-      decidedAt: 'Сегодня, 10:24',
-      timeline: ['заявка отправлена', 'задан уточняющий вопрос', 'кандидат ответил на уточнение', 'заявка рассмотрена', 'решение отправлено кандидату', 'доступ не открыт'],
-      nextStep: 'Если кандидат вернётся с другим запросом, заявку можно вернуть в работу или предложить подать новую заявку.',
-    },
-    {
-      name: 'Марина Соколова',
-      waitTime: '6 дней назад',
-      sub: 'Доступ открыт',
+      name: 'Ольга Миронова',
+      waitTime: 'сегодня · 10:15',
+      sub: 'доступ открыт',
       badge: 'доступ открыт',
       badgeColor: 'sage',
       goal: 'получить разбор портфолио',
-      applicationQuestion: 'Почему хотите вступить?',
+      applicationQuestion: 'Почему вступили?',
       answer: 'Хочу показать портфолио и понять, что улучшить перед поиском работы.',
-      timeline: ['заявка одобрена', 'доступ открыт', 'кандидат стал участником сообщества'],
-      nextStep: 'Заявка завершена и сохранена в истории входа. Участник уже находится в сообществе, дальнейшая работа с ним продолжается в профиле, пути участника и разделах сообщества.',
+      timeline: ['заявка одобрена', 'оплата прошла', 'доступ открыт автоматически', 'участник добавлен в сообщество', 'участник появился в «Новичках в первые 7 дней»'],
+      nextStep: 'Работа по заявке завершена. Дальше участник проходит вход уже как новичок.',
+      actions: ['Открыть профиль', 'Открыть путь участника'],
     },
     {
-      name: 'Олег Кузнецов',
-      waitTime: '4 дня назад',
-      sub: 'Кандидат отменил заявку',
+      name: 'Никита Волков',
+      waitTime: 'вчера · 16:40',
+      sub: 'не принимаем сейчас',
+      badge: 'не принимаем сейчас',
+      badgeColor: 'terracotta',
+      goal: 'найти индивидуального ментора для ежедневной проверки задач',
+      applicationQuestion: 'Почему вступили?',
+      answer: 'Мне нужен человек, который каждый день будет проверять мои задания и говорить, что делать дальше.',
+      rejectionReason: 'Запрос не совпадает с текущим форматом сообщества.',
+      candidateMessage: 'Спасибо за заявку. Сейчас формат сообщества может не полностью совпасть с вашим запросом. Поэтому мы пока не открываем доступ. Если ваш запрос изменится, вы сможете подать заявку позже.',
+      timeline: ['заявка рассмотрена', 'принято решение «Не принимаем сейчас»', 'кандидат получил мягкое сообщение', 'заявка ушла в историю'],
+      nextStep: 'Если появился новый контекст, заявку можно вернуть в работу. Кандидату ничего не отправится автоматически.',
+      actions: ['Вернуть в работу', 'Открыть профиль'],
+    },
+    {
+      name: 'Анна Белова',
+      waitTime: '3 дня назад',
+      sub: 'кандидат отменил заявку',
       badge: 'отменил заявку',
       badgeColor: 'gold',
-      goal: 'попасть в среду для разборов backend-задач',
-      applicationQuestion: 'Почему хотите вступить?',
-      answer: 'Хочу задавать вопросы по реальным задачам и получать обратную связь.',
-      timeline: ['заявка была отправлена', 'кандидат сам отменил заявку до решения', 'заявка сохранена в истории'],
-      nextStep: 'Действий не требуется. Если человек захочет вернуться позже, он сможет подать новую заявку.',
+      goal: 'попасть в среду для разборов кода',
+      applicationQuestion: 'Почему вступили?',
+      answer: 'Хочу показывать код и получать конкретные советы по улучшению.',
+      timeline: ['кандидат подал заявку', 'решение ещё не было принято', 'кандидат отменил заявку самостоятельно', 'доступ не открывался', 'сообщений после отмены не отправлялось'],
+      nextStep: 'Заявка завершена. Если кандидат захочет вернуться, он сможет подать новую заявку.',
+      actions: ['Открыть профиль'],
     },
     {
-      name: 'Дарья Лебедева',
-      waitTime: '10 дней назад',
-      sub: 'Срок ответа истёк',
+      name: 'Павел Смирнов',
+      waitTime: '7 дней назад',
+      sub: 'срок ответа истёк',
       badge: 'срок истёк',
       badgeColor: 'terracotta',
       goal: 'получить поддержку в первом проекте',
-      applicationQuestion: 'Почему хотите вступить?',
+      applicationQuestion: 'Почему вступили?',
       answer: 'Хочу понять, как начать проект и не бросить его через неделю.',
       clarifyingQuestion: 'Какой проект вы хотите начать и какое у вас сейчас главное препятствие?',
-      timeline: ['заявка отправлена', 'лидером задан уточняющий вопрос', 'кандидат не ответил в установленный срок', 'заявка перенесена в историю'],
-      nextStep: 'Заявка больше не находится в рабочей очереди. Если кандидат вернулся или ответил позже, её можно вернуть в работу. Если прошло много времени, лучше предложить подать новую заявку.',
+      timeline: ['кандидат подал заявку', 'команда отправила уточняющий вопрос', 'кандидат не ответил в течение срока', 'заявка завершена автоматически'],
+      nextStep: 'По умолчанию заявка остаётся в истории. Если кандидат ответит позже, заявку можно вернуть в работу.',
+      actions: ['Открыть профиль'],
     },
   ],
 };
@@ -680,6 +702,7 @@ const settingsRisks = [
 
 /* ===== COMPONENT ===== */
 export default function LeaderConsoleEntry() {
+  const navigate = useNavigate();
   const [showWhyId, setShowWhyId] = useState<number | null>(null);
   const [advisorHidden, setAdvisorHidden] = useState(false);
   const [showAdvisorWhy, setShowAdvisorWhy] = useState(false);
@@ -3400,6 +3423,55 @@ export default function LeaderConsoleEntry() {
                 </div>
               )}
 
+              {/* Tried / Struggle — for applications waiting for response */}
+              {(sidePanelApp as any).tried && (
+                <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                  <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>Что уже пробовали:</p>
+                  <p className="text-xs italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«{(sidePanelApp as any).tried}»</p>
+                </div>
+              )}
+              {(sidePanelApp as any).struggle && (
+                <div className="mt-2 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                  <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>С чем сейчас сложнее всего:</p>
+                  <p className="text-xs italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«{(sidePanelApp as any).struggle}»</p>
+                </div>
+              )}
+
+              {/* Payment info — for approved applications */}
+              {(sidePanelApp as any).paymentAmount && (
+                <div className="mt-4">
+                  <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Оплата</p>
+                  <div className="rounded-lg p-3 space-y-1.5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                    <div className="flex justify-between">
+                      <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Сумма:</span>
+                      <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{(sidePanelApp as any).paymentAmount}</span>
+                    </div>
+                    {(sidePanelApp as any).paymentProvider && (
+                      <div className="flex justify-between">
+                        <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Провайдер:</span>
+                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(sidePanelApp as any).paymentProvider}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Статус:</span>
+                      <span className="text-xs font-medium" style={{ color: (sidePanelApp as any).paymentStatus === 'прошёл' ? SAGE : (sidePanelApp as any).paymentStatus === 'оплата не завершена' ? 'var(--gold)' : 'var(--text-secondary)' }}>{(sidePanelApp as any).paymentStatus}</span>
+                    </div>
+                    {(sidePanelApp as any).paymentTime && (
+                      <div className="flex justify-between">
+                        <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Время:</span>
+                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(sidePanelApp as any).paymentTime}</span>
+                      </div>
+                    )}
+                    {(sidePanelApp as any).paymentLinkSent && (
+                      <div className="flex justify-between">
+                        <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Ссылка отправлена:</span>
+                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(sidePanelApp as any).paymentLinkSent}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Next step — visible immediately */}
               {sidePanelApp.nextStep && (
                 <div className="mt-4 rounded-lg p-3" style={{
@@ -3505,61 +3577,36 @@ export default function LeaderConsoleEntry() {
             {/* Sticky footer: Actions */}
             <div className="sticky bottom-0 px-6 py-4" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-color)' }}>
               <div className="flex flex-wrap gap-2">
-                {sidePanelApp.badge && ['нужен ответ', 'больше суток', 'ответил'].includes(sidePanelApp.badge) && (
-                  <>
-                    <button onClick={() => setShowApproveModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Одобрить</button>
-                    <button onClick={() => setShowClarifyModal(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Задать уточнение</button>
-                    <button onClick={() => setShowRejectModal(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)', border: '1px solid var(--border-color)' }}>Не принимать сейчас</button>
-                  </>
-                )}
-                {sidePanelApp.badge && ['на уточнении', 'без ответа'].includes(sidePanelApp.badge) && (
-                  <>
-                    <button onClick={() => setShowApproveModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Одобрить</button>
-                    <button onClick={() => setShowRejectModal(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)', border: '1px solid var(--border-color)' }}>Не принимать сейчас</button>
-                    <button onClick={() => setShowRemindModal(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Напомнить мягко</button>
-                  </>
-                )}
-                {sidePanelApp.badge === 'оплата не завершена' && (
-                  <>
-                    <button onClick={() => setShowPaymentRemindModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Напомнить об оплате</button>
-                    <button onClick={() => setShowMonetizationModal(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Открыть Монетизацию</button>
-                  </>
-                )}
-                {sidePanelApp.badge === 'вошёл в новички' && (
-                  <>
-                    <button onClick={() => setShowPathPanel(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Посмотреть путь</button>
-                    <button onClick={() => setShowSupportModal(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Подобрать опору</button>
-                  </>
-                )}
-                {sidePanelApp.badge === 'доступ не открылся' && (
-                  <>
-                    <button onClick={() => setShowOpenAccessModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>Открыть доступ вручную</button>
-                    <button onClick={() => setShowCheckPaymentModal(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Проверить оплату</button>
-                    <button onClick={() => setShowMonetizationModal(true)} className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-muted)' }}>Открыть Монетизацию</button>
-                  </>
-                )}
-                {sidePanelApp.badge === 'не принимаем сейчас' && (
-                  <>
-                    {sidePanelApp.isArchive ? (
-                      <>
-                        <button onClick={() => setShowReturnModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Вернуть в работу</button>
-                        <button className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Предложить новую заявку</button>
-                      </>
-                    ) : (
-                      <button onClick={() => setShowReturnModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Вернуть в работу</button>
-                    )}
-                  </>
-                )}
-                {sidePanelApp.badge && ['доступ открыт', 'отменил заявку', 'срок истёк'].includes(sidePanelApp.badge) && (
-                  <>
-                    {sidePanelApp.badge === 'доступ открыт' && (
-                      <button onClick={() => setShowPathPanel(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Посмотреть путь</button>
-                    )}
-                    {sidePanelApp.badge === 'срок истёк' && (
-                      <button onClick={() => setShowReturnModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Вернуть в работу</button>
-                    )}
-                  </>
-                )}
+                {/* Dynamic actions from data */}
+                {(sidePanelApp as any).actions ? (
+                  (sidePanelApp as any).actions.map((action: string) => {
+                    const isPrimary = ['Одобрить', 'Напомнить об оплате', 'Открыть доступ вручную'].includes(action);
+                    const isDanger = action === 'Открыть доступ вручную';
+                    return (
+                      <button
+                        key={action}
+                        onClick={() => {
+                          if (action === 'Одобрить') setShowApproveModal(true);
+                          else if (action === 'Задать уточнение') setShowClarifyModal(true);
+                          else if (action === 'Не принимать сейчас') setShowRejectModal(true);
+                          else if (action === 'Напомнить об уточнении' || action === 'Напомнить мягко') setShowRemindModal(true);
+                          else if (action === 'Закрыть') setShowDiscardConfirm(true);
+                          else if (action === 'Напомнить об оплате') setShowPaymentRemindModal(true);
+                          else if (action === 'Проверить оплату') setShowCheckPaymentModal(true);
+                          else if (action === 'Открыть Монетизацию') navigate('/leader/monetization');
+                          else if (action === 'Открыть доступ вручную') setShowOpenAccessModal(true);
+                          else if (action === 'Вернуть в работу') setShowReturnModal(true);
+                          else if (action === 'Открыть профиль') showToast('Профиль участника', 'info');
+                          else if (action === 'Открыть путь участника') setShowPathPanel(true);
+                        }}
+                        className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90"
+                        style={isDanger ? { backgroundColor: TERRACOTTA, color: '#fff' } : isPrimary ? { backgroundColor: 'var(--gold)', color: '#fff' } : { color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}
+                      >
+                        {action}
+                      </button>
+                    );
+                  })
+                ) : null}
               </div>
             </div>
           </div>
