@@ -5,6 +5,7 @@ import {
   AlertTriangle, ChevronRight, Check,
   X, Info, Zap,
   ChevronDown, Activity, ListChecks, HeartHandshake, UserPlus, ShieldAlert,
+  HandHeart, MessageCircle, UserCheck,
 } from 'lucide-react';
 
 /* ===== PREMIUM COLORS ===== */
@@ -103,6 +104,36 @@ const pulseUpItems = [
   'Завтра проходит встреча «Разбор пет-проектов».',
 ];
 
+const newcomers = [
+  {
+    id: 1,
+    name: 'Мария Козлова',
+    day: 2,
+    goal: 'Разобраться в архитектуре микросервисов',
+    firstStep: 'не получен',
+    helper: 'Анна Морозова',
+    helperWhy: 'Анна уже помогала 4 новичкам, специализируется на backend. Сейчас свободна.',
+  },
+  {
+    id: 2,
+    name: 'Пётр Семёнов',
+    day: 3,
+    goal: 'Найти первый проект для портфолио',
+    firstStep: 'не получен',
+    helper: 'Сергей Волков',
+    helperWhy: 'Сергей ведёт пет-проекты и помогает с первыми шагами. Сейчас не перегружен.',
+  },
+  {
+    id: 3,
+    name: 'Елена Новикова',
+    day: 1,
+    goal: 'Познакомиться с сообществом и найти направление',
+    firstStep: 'не получен',
+    helper: 'Анна Морозова',
+    helperWhy: 'Анна хорошо ведёт первый контакт. Уже помогала Елене на вводной встрече.',
+  },
+];
+
 const paramDescriptions = [
   { label: 'Первая связь', desc: 'Показывает, получают ли новички живой контакт после входа: ответ, отклик, встречу, благодарность, Помощника на старте или участника рядом.' },
   { label: 'Запросы', desc: 'Показывает, остаются ли вопросы участников без ответа и есть ли первые вопросы новичков, которые лучше не откладывать.' },
@@ -126,6 +157,10 @@ export default function LeaderConsoleMain() {
   const [showIndexInfo, setShowIndexInfo] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showAskConfirm, setShowAskConfirm] = useState(false);
+  const [askTarget, setAskTarget] = useState<{ newcomerName: string; helperName: string } | null>(null);
+  const [askedHelpers, setAskedHelpers] = useState<string[]>([]);
   const [advisorFocus, setAdvisorFocus] = useState<'payment' | 'newcomer' | 'applications'>('payment');
   const paramDescriptionsRef = useRef<HTMLDivElement>(null);
 
@@ -415,7 +450,7 @@ export default function LeaderConsoleMain() {
           <button
             onClick={() => {
               if (advisorFocus === 'payment') setShowPaymentModal(true);
-              if (advisorFocus === 'newcomer') { setActiveSection('plan'); setShowWhyId(2); }
+              if (advisorFocus === 'newcomer') setShowSupportModal(true);
               if (advisorFocus === 'applications') { setActiveSection('plan'); setShowWhyId(3); }
             }}
             className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80 mb-3"
@@ -705,6 +740,169 @@ export default function LeaderConsoleMain() {
               </button>
               <button onClick={() => { setShowPaymentModal(false); navigate('/leader/monetization'); }} className="w-full py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:opacity-80" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
                 Открыть в Монетизации
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: ПОДОБРАТЬ ОПОРУ НОВИЧКАМ ===== */}
+      {showSupportModal && (
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowSupportModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-xl w-full relative overflow-hidden my-8 max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowSupportModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
+
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Подобрать опору новичкам</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Три человека вошли в сообщество, но пока не получили живого отклика. По каждому можно спросить конкретного помощника — действие подтверждается отдельно.</p>
+            </div>
+
+            {/* Gradient divider */}
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
+              {/* Legend */}
+              <div className="flex items-center gap-4 mb-5">
+                <div className="flex items-center gap-1.5">
+                  <HandHeart className="w-3.5 h-3.5" style={{ color: 'var(--gold)' }} />
+                  <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>3 новичка</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <UserCheck className="w-3.5 h-3.5" style={{ color: SAGE }} />
+                  <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>2 помощника</span>
+                </div>
+              </div>
+
+              {/* Newcomer cards */}
+              <div className="space-y-4">
+                {newcomers.map((nc) => {
+                  const isAsked = askedHelpers.includes(nc.helper + '_' + nc.id);
+                  return (
+                    <div key={nc.id} className="rounded-xl p-5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{nc.name}</p>
+                          <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>День {nc.day} в сообществе</p>
+                        </div>
+                        <div className="px-2 py-0.5 rounded-md text-[10px] font-medium" style={{ backgroundColor: TERRACOTTA_LIGHT, color: TERRACOTTA, border: `1px solid ${TERRACOTTA_BORDER}` }}>
+                          первая связь
+                        </div>
+                      </div>
+
+                      {/* Goal */}
+                      <div className="mb-3">
+                        <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>Цель:</p>
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{nc.goal}</p>
+                      </div>
+
+                      {/* First step */}
+                      <div className="flex items-center gap-2 mb-3 p-2.5 rounded-lg" style={{ backgroundColor: TERRACOTTA_LIGHT, border: `1px solid ${TERRACOTTA_BORDER}` }}>
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: TERRACOTTA }} />
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Первый шаг: <span style={{ color: TERRACOTTA }}>{nc.firstStep}</span></p>
+                      </div>
+
+                      {/* Recommended helper */}
+                      <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: SAGE_LIGHT, border: `1px solid ${SAGE_BORDER}` }}>
+                        <p className="text-[11px] font-semibold mb-1" style={{ color: SAGE }}>Рекомендуемый помощник</p>
+                        <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{nc.helper}</p>
+                        <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{nc.helperWhy}</p>
+                      </div>
+
+                      {/* Action button */}
+                      {isAsked ? (
+                        <div className="flex items-center gap-2 py-2">
+                          <Check className="w-4 h-4" style={{ color: SAGE }} />
+                          <p className="text-xs font-medium" style={{ color: SAGE }}>Предложение отправлено</p>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setAskTarget({ newcomerName: nc.name, helperName: nc.helper }); setShowAskConfirm(true); }}
+                          className="w-full py-2 rounded-xl text-xs font-medium transition-all duration-200 hover:opacity-90 flex items-center justify-center gap-2"
+                          style={{ backgroundColor: 'var(--gold)', color: '#fff' }}
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          Спросить {nc.helper.split(' ')[0]}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Fixed Footer */}
+            <div className="shrink-0 px-6 md:px-8 py-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={() => setShowSupportModal(false)} className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: СПРОСИТЬ ПОМОЩНИКА ===== */}
+      {showAskConfirm && askTarget && (
+        <div className="modal-backdrop fixed inset-0 z-[70] flex items-start justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }} onClick={() => setShowAskConfirm(false)}>
+          <div className="modal-enter rounded-2xl max-w-md w-full relative overflow-hidden my-8 max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowAskConfirm(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
+
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h3 className="text-lg font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Спросить {askTarget.helperName.split(' ')[0]}?</h3>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Помощник получит сообщение с предложением поддержать новичка. Ответить нужно в течение 24 часов.</p>
+            </div>
+
+            {/* Gradient divider */}
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
+              {/* Message preview */}
+              <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сообщение помощнику</p>
+                <p className="text-xs leading-relaxed italic" style={{ color: 'var(--text-secondary)' }}>
+                  «Привет! {askTarget.newcomerName} вошёл в сообщество и пока не получил первой связи. Можешь взять его под опеку на первые 7 дней? Твой профиль хорошо подходит.»
+                </p>
+              </div>
+
+              {/* What happens */}
+              <div className="mb-4">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произойдёт</p>
+                <ul className="space-y-1.5">
+                  {[
+                    `${askTarget.helperName} получит уведомление с предложением`,
+                    'У помощника будет 24 часа на ответ',
+                    'Если согласится — получит контакт новичка и сценарий первой недели',
+                    'Если откажется — предложим следующего помощника из списка',
+                    'Лидер увидит статус в разделе «Вступление»',
+                  ].map((item, i) => (
+                    <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
+                      <Check className="w-3 h-3 shrink-0 mt-0.5" style={{ color: SAGE }} />{item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Fixed Footer */}
+            <div className="shrink-0 px-6 md:px-8 py-4 space-y-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button
+                onClick={() => {
+                  const nc = newcomers.find(n => n.name === askTarget.newcomerName);
+                  if (nc) setAskedHelpers(prev => [...prev, nc.helper + '_' + nc.id]);
+                  setShowAskConfirm(false);
+                  showToast(`Предложение отправлено ${askTarget.helperName.split(' ')[0]}. Ждём, готова ли она помочь ${askTarget.newcomerName.split(' ')[0]}.`, 'success');
+                }}
+                className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90"
+                style={{ backgroundColor: SAGE, color: '#fff' }}
+              >
+                Отправить предложение
+              </button>
+              <button onClick={() => setShowAskConfirm(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
+                Пока не спрашивать
               </button>
             </div>
           </div>
