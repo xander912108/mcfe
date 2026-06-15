@@ -15,6 +15,7 @@ const TERRACOTTA_BORDER = 'rgba(201,112,106,0.15)';
 const SAGE = '#6B9E7C';
 const SAGE_LIGHT = 'rgba(107,158,124,0.08)';
 const SAGE_BORDER = 'rgba(107,158,124,0.15)';
+const AMBER = '#D4A03A';
 const GOLD_GLOW = 'rgba(201,169,110,0.08)';
 const GOLD_BORDER = 'rgba(201,169,110,0.2)';
 
@@ -176,6 +177,7 @@ export default function LeaderConsoleMain() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showApplicationsModal, setShowApplicationsModal] = useState(false);
+  const [showLimitsModal, setShowLimitsModal] = useState(false);
   const [showAskConfirm, setShowAskConfirm] = useState(false);
   const [askTarget, setAskTarget] = useState<{ newcomerName: string; helperName: string } | null>(null);
   const [askedHelpers, setAskedHelpers] = useState<string[]>([]);
@@ -442,12 +444,12 @@ export default function LeaderConsoleMain() {
                     <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{risk.title}</h3>
                   </div>
                   <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>{risk.text}</p>
-                  <button className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>
+                  <button onClick={() => setShowLimitsModal(true)} className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: TERRACOTTA, color: '#fff' }}>
                     {risk.action}
                   </button>
                 </div>
               ))}
-              <button className="text-xs mt-4 transition-colors hover:opacity-80 flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+              <button className="text-xs mt-4 transition-colors hover:opacity-80 flex items-center gap-1" style={{ color: AMBER }}>
                 Открыть все риски <ChevronRight className="w-3 h-3" />
               </button>
             </div>
@@ -1061,6 +1063,107 @@ export default function LeaderConsoleMain() {
                 style={{ backgroundColor: 'var(--gold)', color: '#fff' }}
               >
                 Открыть все во Вступлении
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: ЛИМИТЫ ПОМОЩНИКА НА СТАРТЕ ===== */}
+      {showLimitsModal && (
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowLimitsModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden my-8 max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowLimitsModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
+
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Лимиты Помощника на старте</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Без лимита участника можно случайно перегрузить новыми назначениями. Лучше заранее указать, сколько новичков можно сопровождать одновременно.</p>
+            </div>
+
+            {/* Gradient divider */}
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
+              {/* Current state */}
+              <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: TERRACOTTA_LIGHT, border: `1px solid ${TERRACOTTA_BORDER}` }}>
+                <p className="text-[11px] font-semibold tracking-widest mb-2" style={{ color: TERRACOTTA, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Сейчас</p>
+                <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Лимит не задан</p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Помощнику можно назначить неограниченное количество новичков. Это создаёт риск перегрузки.</p>
+              </div>
+
+              {/* Recommended limit */}
+              <div className="mb-5">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Рекомендуемый лимит</p>
+                <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold" style={{ backgroundColor: SAGE_LIGHT, border: `1px solid ${SAGE_BORDER}`, color: SAGE }}>3</div>
+                    <div>
+                      <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>До 3 новичков одновременно</p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>на каждого Помощника</p>
+                    </div>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Этот лимит позволяет Помощнику уделять достаточно внимания каждому новичку, не перегружаясь. При достижении лимита система не будет предлагать новых назначений.</p>
+                </div>
+              </div>
+
+              <div className="h-px mb-5" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Why it matters */}
+              <div className="mb-5">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Почему это важно</p>
+                <ul className="space-y-2">
+                  {[
+                    'без лимита один Помощник может получить 5-7 новичков за неделю',
+                    'качество сопровождения падает с каждым новым назначением',
+                    'Помощник может не сказать о перегрузке — лучше защитить заранее',
+                    'лимит можно изменить в любой момент',
+                  ].map((item, i) => (
+                    <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
+                      <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: TERRACOTTA }} />{item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="h-px mb-5" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Active helpers */}
+              <div className="mb-2">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Активные Помощники</p>
+                <div className="space-y-2">
+                  {[
+                    { name: 'Анна Морозова', count: 1, limit: null },
+                    { name: 'Сергей Волков', count: 0, limit: null },
+                  ].map((h) => (
+                    <div key={h.name} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                      <div>
+                        <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{h.name}</p>
+                        <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{h.count} новичков сейчас</p>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-md" style={{ backgroundColor: TERRACOTTA_LIGHT, color: TERRACOTTA, border: `1px solid ${TERRACOTTA_BORDER}` }}>без лимита</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Fixed Footer */}
+            <div className="shrink-0 px-6 md:px-8 py-4 space-y-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button
+                onClick={() => { setShowLimitsModal(false); showToast('Лимит установлен: до 3 новичков одновременно на каждого Помощника.', 'success'); }}
+                className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90"
+                style={{ backgroundColor: SAGE, color: '#fff' }}
+              >
+                Установить лимит 3
+              </button>
+              <button
+                onClick={() => { setShowLimitsModal(false); navigate('/leader/settings'); }}
+                className="w-full py-2 text-xs transition-colors hover:opacity-80"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Открыть в Настройках
               </button>
             </div>
           </div>
