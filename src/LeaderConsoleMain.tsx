@@ -134,6 +134,23 @@ const newcomers = [
   },
 ];
 
+const staleApplications = [
+  {
+    id: 1,
+    name: 'Алина Сергеева',
+    hours: 28,
+    goal: 'перейти из верстки во frontend и собрать первый проект для портфолио',
+    note: 'запрос понятный, можно быстро принять решение или задать одно уточнение',
+  },
+  {
+    id: 2,
+    name: 'Максим Орлов',
+    hours: 26,
+    goal: 'разобраться с backend-разработкой и понять, с чего начать первый pet-проект',
+    note: 'кандидат уже описал запрос, но не указал опыт. Лучше задать уточнение перед одобрением',
+  },
+];
+
 const paramDescriptions = [
   { label: 'Первая связь', desc: 'Показывает, получают ли новички живой контакт после входа: ответ, отклик, встречу, благодарность, Помощника на старте или участника рядом.' },
   { label: 'Запросы', desc: 'Показывает, остаются ли вопросы участников без ответа и есть ли первые вопросы новичков, которые лучше не откладывать.' },
@@ -158,6 +175,7 @@ export default function LeaderConsoleMain() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showApplicationsModal, setShowApplicationsModal] = useState(false);
   const [showAskConfirm, setShowAskConfirm] = useState(false);
   const [askTarget, setAskTarget] = useState<{ newcomerName: string; helperName: string } | null>(null);
   const [askedHelpers, setAskedHelpers] = useState<string[]>([]);
@@ -462,7 +480,7 @@ export default function LeaderConsoleMain() {
             onClick={() => {
               if (advisorFocus === 'payment') setShowPaymentModal(true);
               if (advisorFocus === 'newcomer') setShowSupportModal(true);
-              if (advisorFocus === 'applications') { setActiveSection('plan'); setShowWhyId(3); }
+              if (advisorFocus === 'applications') setShowApplicationsModal(true);
             }}
             className="text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 hover:opacity-80 mb-3"
             style={{ color: 'var(--gold)', border: '1px solid var(--gold)' }}
@@ -950,6 +968,105 @@ export default function LeaderConsoleMain() {
               </button>
               <button onClick={() => setShowAskConfirm(false)} className="w-full py-2 text-xs transition-colors hover:opacity-80" style={{ color: 'var(--text-muted)' }}>
                 Пока не спрашивать
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL: ЗАЯВКИ ЖДУТ РЕШЕНИЯ ===== */}
+      {showApplicationsModal && (
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-start justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} onClick={() => setShowApplicationsModal(false)}>
+          <div className="modal-enter rounded-2xl max-w-lg w-full relative overflow-hidden my-8 max-h-[90vh] flex flex-col" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow-hover)' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowApplicationsModal(false)} className="absolute top-4 right-4 p-1 rounded-lg transition-colors z-10" style={{ color: 'var(--text-muted)' }}><X className="w-5 h-5" /></button>
+
+            {/* Fixed Header */}
+            <div className="shrink-0 px-6 md:px-8 pt-6 pb-4">
+              <h2 className="text-xl font-bold mb-1 heading-accent pr-8" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Заявки ждут решения</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Две заявки ждут ответа больше суток. Лучше ответить, пока интерес к сообществу ещё тёплый: одобрить вход, задать уточнение или мягко не принимать сейчас.</p>
+            </div>
+
+            {/* Gradient divider */}
+            <div className="shrink-0 px-6 md:px-8"><GradientDivider /></div>
+
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto modal-scroll px-6 md:px-8 py-4">
+              {/* Stale applications */}
+              <div className="mb-5">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Заявки старше суток</p>
+                <div className="space-y-3">
+                  {staleApplications.map((app) => (
+                    <div key={app.id} className="rounded-xl p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{app.name}</p>
+                          <p className="text-[11px]" style={{ color: TERRACOTTA }}>ждёт ответа · {app.hours} часов</p>
+                        </div>
+                      </div>
+                      <p className="text-xs leading-relaxed mb-1" style={{ color: 'var(--text-secondary)' }}><span style={{ color: 'var(--text-muted)' }}>Цель:</span> {app.goal}</p>
+                      <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-muted)' }}>Что важно: {app.note}</p>
+                      <button
+                        onClick={() => { setShowApplicationsModal(false); navigate('/leader/entry'); }}
+                        className="text-xs font-medium transition-colors hover:opacity-80 flex items-center gap-1"
+                        style={{ color: 'var(--gold)' }}
+                      >
+                        Открыть заявку <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px mb-5" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* Other applications */}
+              <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
+                <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Остальные заявки</p>
+                <p className="text-xs leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>Ещё 3 заявки ждут решения меньше суток. Их можно разобрать после заявок, которые уже задержались.</p>
+                <button
+                  onClick={() => { setShowApplicationsModal(false); navigate('/leader/entry'); }}
+                  className="text-xs font-medium transition-colors hover:opacity-80 flex items-center gap-1"
+                  style={{ color: 'var(--gold)' }}
+                >
+                  Открыть все заявки <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              <div className="h-px mb-5" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+
+              {/* What happens */}
+              <div className="mb-2">
+                <p className="text-[11px] font-semibold tracking-widest mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произойдёт</p>
+                <ul className="space-y-1.5">
+                  {[
+                    'при открытии конкретной заявки вы перейдёте во «Вступление → Заявки»',
+                    'откроется side panel выбранной заявки',
+                    'фильтр будет установлен на «Требуют ответа»',
+                    'решение по заявке будет принято уже там: одобрить, уточнить или не принимать сейчас',
+                  ].map((item, i) => (
+                    <li key={i} className="text-xs flex items-start gap-2" style={{ color: 'var(--text-secondary)' }}>
+                      <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: 'var(--gold)' }} />{item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Fixed Footer */}
+            <div className="shrink-0 px-6 md:px-8 py-4 space-y-2" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <button
+                onClick={() => { setShowApplicationsModal(false); navigate('/leader/entry'); }}
+                className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-200 hover:opacity-90"
+                style={{ backgroundColor: 'var(--gold)', color: '#fff' }}
+              >
+                Открыть все во Вступлении
+              </button>
+              <button
+                onClick={() => setShowApplicationsModal(false)}
+                className="w-full py-2 text-xs transition-colors hover:opacity-80"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Вернуться к Главному сейчас
               </button>
             </div>
           </div>
