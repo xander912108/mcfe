@@ -477,12 +477,16 @@ const newcomers = [
     firstStepName: 'загрузить портфолио для разбора',
     hasConnection: true,
     hasSupport: false,
+    needsSupport: true,
     firstResponseReceived: true,
+    supportRecommended: { name: 'Анна Морозова', role: 'Помощник на старте', tags: 'портфолио · frontend', load: 'комфортная' },
     statusLabel: 'первый шаг выбран' as const,
     statusColor: 'sage' as const,
-    timeline: ['заявка одобрена', 'доступ открыт', 'Ксения вошла', 'первый шаг выбран', 'первая связь появилась'],
-    nextStep: 'Ксения уже получила старт и не должна попадать в проблемные срезы.',
-    actions: ['Открыть путь', 'Посмотреть профиль'],
+    supportStatusLabel: 'нужна опора' as const,
+    supportStatusColor: 'terracotta' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Ксения вошла', 'первый шаг выбран', 'первая связь появилась', 'опора пока не подобрана'],
+    nextStep: 'Ксения уже сделала шаг и загрузила проект. Ей может помочь участник с похожим путём.',
+    actions: ['Открыть путь', 'Подобрать опору'],
   },
   {
     name: 'София Лебедева',
@@ -492,85 +496,20 @@ const newcomers = [
     hasFirstStep: true,
     hasConnection: true,
     hasSupport: false,
-    firstResponseReceived: true,
-    statusLabel: 'первая связь появилась' as const,
-    statusColor: 'sage' as const,
-    timeline: ['заявка одобрена', 'доступ открыт', 'София вошла', 'первый шаг выбран', 'первая связь появилась'],
-    nextStep: 'София уже получила живой контакт.',
-    actions: ['Открыть путь', 'Посмотреть профиль'],
-  },
-  {
-    name: 'Роман Ковалёв',
-    day: '6-й день',
-    goal: 'собрать архитектуру backend API',
-    hasGoal: true,
-    hasFirstStep: true,
-    hasConnection: true,
-    hasSupport: false,
-    firstResponseReceived: true,
-    statusLabel: 'старт идёт нормально' as const,
-    statusColor: 'sage' as const,
-    timeline: ['заявка одобрена', 'доступ открыт', 'Роман вошёл', 'первый шаг выбран', 'первая связь появилась'],
-    nextStep: 'Роман в первых 7 днях, но сейчас без критичных провалов.',
-    actions: ['Открыть путь', 'Посмотреть профиль'],
-  },
-  {
-    name: 'Ксения Романова (доп)',
-    day: '3-й день',
-    goal: 'подготовить портфолио к разбору',
-    hasGoal: true,
-    hasFirstStep: true,
-    hasConnection: true,
-    hasSupport: false,
-    needsSupport: true,
-    firstResponseReceived: true,
-    supportRecommended: { name: 'Анна Морозова', role: 'Помощник на старте', tags: 'портфолио · frontend', load: 'комфортная' },
-    statusLabel: 'нужна опора' as const,
-    statusColor: 'terracotta' as const,
-    timeline: ['первый шаг выбран', 'первая связь есть', 'опора пока не подобрана'],
-    nextStep: 'Ксении может помочь участник с похожим путём.',
-    actions: ['Подобрать опору'],
-    hidden: true,
-  },
-  {
-    name: 'Алексей Новиков (доп)',
-    day: '4-й день',
-    goal: 'освоить Docker и CI/CD',
-    hasGoal: true,
-    hasFirstStep: true,
-    hasConnection: true,
-    hasSupport: false,
-    needsSupport: true,
-    firstResponseReceived: true,
-    supportRecommended: { name: 'Сергей Волков', role: 'Участник рядом', tags: 'backend → DevOps · Docker', load: 'комфортная' },
-    statusLabel: 'нужна опора · есть рекомендация' as const,
-    statusColor: 'terracotta' as const,
-    timeline: ['первый шаг выбран', 'первая связь есть', 'опора пока не подтверждена'],
-    nextStep: 'Система рекомендует Сергея как участника рядом.',
-    actions: ['Спросить Сергея', 'Посмотреть другие варианты'],
-    hidden: true,
-  },
-  {
-    name: 'София Лебедева (доп)',
-    day: '5-й день',
-    goal: 'подготовить первый продуктовый кейс',
-    hasGoal: true,
-    hasFirstStep: true,
-    hasConnection: true,
-    hasSupport: false,
     needsSupport: true,
     firstResponseReceived: true,
     supportOfferSentTo: 'Сергей Волков',
-    supportStatus: 'ждём ответ',
-    statusLabel: 'ждём подтверждение опоры' as const,
-    statusColor: 'gold' as const,
-    timeline: ['первый шаг выбран', 'первая связь есть', 'предложение отправлено Сергею', 'ждём подтверждения'],
-    nextStep: 'Сергею отправлено предложение помочь Софии.',
-    actions: ['Напомнить Сергею', 'Выбрать другую опору'],
-    hidden: true,
+    supportOfferStatus: 'ждём ответ',
+    statusLabel: 'первая связь появилась' as const,
+    statusColor: 'sage' as const,
+    supportStatusLabel: 'ждём подтверждение опоры' as const,
+    supportStatusColor: 'gold' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'София вошла', 'первый шаг выбран', 'первая связь появилась', 'предложение отправлено Сергею'],
+    nextStep: 'Сергею отправлено предложение помочь Софии. Пока он не подтвердил, София ничего не получила.',
+    actions: ['Открыть путь', 'Напомнить Сергею', 'Выбрать другую опору'],
   },
   {
-    name: 'Роман Ковалёв (доп)',
+    name: 'Роман Ковалёв',
     day: '6-й день',
     goal: 'собрать архитектуру backend API',
     hasGoal: true,
@@ -581,12 +520,13 @@ const newcomers = [
     firstResponseReceived: true,
     prevHelperDeclined: 'Анна Морозова',
     declineReason: 'перегрузка',
-    statusLabel: 'нужна другая опора' as const,
-    statusColor: 'terracotta' as const,
-    timeline: ['первый шаг выбран', 'первая связь есть', 'Анна отказалась', 'нужна другая опора'],
-    nextStep: 'Анна не сможет помочь. Нужно выбрать другого человека.',
-    actions: ['Выбрать другую опору'],
-    hidden: true,
+    statusLabel: 'старт идёт нормально' as const,
+    statusColor: 'sage' as const,
+    supportStatusLabel: 'нужна другая опора' as const,
+    supportStatusColor: 'terracotta' as const,
+    timeline: ['заявка одобрена', 'доступ открыт', 'Роман вошёл', 'первый шаг выбран', 'первая связь появилась', 'Анна отказалась из-за нагрузки'],
+    nextStep: 'Анна не сможет помочь Роману. Нужно выбрать другого человека, не показывая Анну в рекомендациях.',
+    actions: ['Открыть путь', 'Выбрать другую опору'],
   },
 ];
 /* ===== DATA: WHAT WORKS ===== */
@@ -1226,20 +1166,22 @@ export default function LeaderConsoleEntry() {
 
             {/* Newcomer preview cards */}
             <div>
-              {visibleNewcomers.map((nc, i) => {
+              {visibleNewcomers.map((nc: any, i) => {
                 const badgeColors: Record<string, { bg: string; text: string; border: string }> = {
                   terracotta: { bg: TERRACOTTA_LIGHT, text: TERRACOTTA, border: TERRACOTTA_BORDER },
                   sage: { bg: SAGE_LIGHT, text: SAGE, border: SAGE_BORDER },
                   gold: { bg: 'rgba(212,175,55,0.08)', text: 'var(--gold)', border: 'rgba(212,175,55,0.2)' },
                 };
-                const bc = badgeColors[nc.statusColor] || badgeColors.terracotta;
+                const displayLabel = newcomerFilter === 'нужна опора' && nc.supportStatusLabel ? nc.supportStatusLabel : nc.statusLabel;
+                const displayColor = newcomerFilter === 'нужна опора' && nc.supportStatusColor ? nc.supportStatusColor : nc.statusColor;
+                const bc = badgeColors[displayColor] || badgeColors.terracotta;
                 return (
                   <div key={i} onClick={() => setNewcomerSidePanel(nc)} className="hover-border-gold transition-all duration-200 group flex items-center gap-4 px-5 py-3.5 rounded-xl cursor-pointer" style={{ border: '1px solid transparent' }}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>{nc.name.charAt(0)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>{nc.name}</h3>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ backgroundColor: bc.bg, color: bc.text, border: `1px solid ${bc.border}` }}>{nc.statusLabel}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ backgroundColor: bc.bg, color: bc.text, border: `1px solid ${bc.border}` }}>{displayLabel}</span>
                         {(nc as any).hasDraft && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ backgroundColor: 'rgba(212,175,55,0.08)', color: 'var(--gold)', border: '1px solid rgba(212,175,55,0.2)' }}>черновик ответа</span>
                         )}
