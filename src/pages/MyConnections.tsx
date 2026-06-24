@@ -32,6 +32,11 @@ function getRingLabel(nodeId: string, edges: GraphEdge[]): string {
 export default function MyConnections({ darkMode = true }: { darkMode?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [focusMode, setFocusMode] = useState(false);
+  useEffect(() => {
+    if (focusMode) document.body.classList.add('focus-mode-active');
+    else document.body.classList.remove('focus-mode-active');
+    return () => document.body.classList.remove('focus-mode-active');
+  }, [focusMode]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const topology = searchParams.get('tab') || 'star';
@@ -220,7 +225,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
 
   return (
     <div className={darkMode ? 'dark' : ''} style={{ height: '100%' }}>
-    <div className="h-full flex flex-col">
+    <div className={`h-full flex flex-col ${focusMode ? 'fixed inset-0 z-[100] bg-[var(--bg-main)]' : ''}`}>
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
         <div className="shrink-0 px-5 pt-4 pb-3">

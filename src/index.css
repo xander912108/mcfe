@@ -559,3 +559,15 @@
   max-height: 800px;
   opacity: 1;
 }
+
+/* ===== FOCUS MODE ===== */
+body.focus-mode-active header { display: none !important; }
+body.focus-mode-active aside { display: none !important; }
+body.focus-mode-active nav[class*="fixed"] { display: none !important; }
+body.focus-mode-active .max-w-\[1440px\] {
+  max-width: none !important;
+  padding: 0 !important;
+}
+body.focus-mode-active .max-w-\[1440px\] > div {
+  gap: 0 !important;
+}

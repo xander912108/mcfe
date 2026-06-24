@@ -29,6 +29,11 @@ import type { GraphNode } from '@/data/graphData';
 export default function LeaderConnections({ darkMode = true }: { darkMode?: boolean }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [focusMode, setFocusMode] = useState(false);
+  useEffect(() => {
+    if (focusMode) document.body.classList.add('focus-mode-active');
+    else document.body.classList.remove('focus-mode-active');
+    return () => document.body.classList.remove('focus-mode-active');
+  }, [focusMode]);
 
   const topology = searchParams.get('tab') || 'network';
   const setTopology = useCallback((value: string) => {
@@ -178,7 +183,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   /* ── render ────────────────────────────────────────────── */
   return (
     <div className={darkMode ? 'dark' : ''} style={{ height: '100%' }}>
-    <div className={`h-full flex flex-col ${focusMode ? 'fixed inset-0 z-50 bg-[var(--bg-main)]' : ''}`}>
+    <div className={`h-full flex flex-col ${focusMode ? 'fixed inset-0 z-[100] bg-[var(--bg-main)]' : ''}`}>
 
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
