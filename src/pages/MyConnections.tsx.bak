@@ -1,0 +1,563 @@
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router';
+import { Sparkles, ArrowRight, UserPlus, Maximize2, Minimize2, ChevronDown } from 'lucide-react';
+import { currentUser, participantNodes, participantEdges, recommendations, bridgeContexts } from '@/data/graphData';
+import { PremiumStarGraph } from '@/components/social-fabric/PremiumStarGraph';
+import { CirclesTopology } from '@/components/social-fabric/CirclesTopology';
+
+import { TopologySwitcher } from '@/components/social-fabric/TopologySwitcher';
+import { RingMetricsPanel } from '@/components/social-fabric/RingMetricsPanel';
+import { FilterPanel } from '@/components/social-fabric/FilterPanel';
+import { FocusLegendOverlay } from '@/components/social-fabric/FocusLegendOverlay';
+import { NodeCard } from '@/components/social-fabric/NodeCard';
+import { RingCard } from '@/components/social-fabric/RingCard';
+import { NodeTooltip } from '@/components/social-fabric/NodeTooltip';
+import { RecommendationPanel } from '@/components/social-fabric/RecommendationPanel';
+import { ConnectionList } from '@/components/social-fabric/ConnectionList';
+import { AdvisorTooltip } from '@/components/advisor/AdvisorTooltip';
+import { EmptyStateCanvas } from '@/components/social-fabric/EmptyStateCanvas';
+import type { GraphNode, GraphEdge, BridgeContext } from '@/data/graphData';
+
+function getRingLabel(nodeId: string, edges: GraphEdge[]): string {
+  const edge = edges.find((e) => (e.source === 'me' && e.target === nodeId) || (e.target === 'me' && e.source === nodeId));
+  const weight = edge?.weight ?? 0;
+  if (weight >= 7) return 'Опоры';
+  if (weight >= 5) return 'Близкие';
+  if (weight >= 3) return 'Коллеги';
+  if (weight >= 1) return 'Знакомые';
+  return 'Потенциальные';
+}
+
+export default function MyConnections({ darkMode = true }: { darkMode?: boolean }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [focusMode, setFocusMode] = useState(false);
+
+  const topology = searchParams.get('tab') || 'star';
+  const setTopology = useCallback((value: string) => {
+    setSearchParams({ tab: value }, { replace: true });
+  }, [setSearchParams]);
+  const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
+  const [hoveredScreenPos, setHoveredScreenPos] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredBridge, setHoveredBridge] = useState<BridgeContext | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [selectedRing, setSelectedRing] = useState<number | null>(null);
+  // Tab description accordions
+  const [starDescOpen, setStarDescOpen] = useState(false);
+  const [circlesDescOpen, setCirclesDescOpen] = useState(false);
+  const [listDescOpen, setListDescOpen] = useState(false);
+  // Default filters — map + list
+  const defaultFilters: Record<string, boolean> = {
+    // Map filters
+    helpedMe: true,
+    iHelped: true,
+    sameFlow: false,
+    sameStep: false,
+    gratitude: false,
+    helpReady: false,
+    mentors: false,
+    topicDesign: false,
+    topicMarketing: false,
+    topicProduct: false,
+    topicAnalytics: false,
+    topicLaunch: false,
+    online: false,
+    // List extended filters
+    ringOpora: false,
+    ringBlizkie: false,
+    ringKollegi: false,
+    ringZnakomye: false,
+    ringPotencial: false,
+  };
+  const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>(defaultFilters);
+  const [activePanel, setActivePanel] = useState<'rec' | 'tips' | null>(null);
+
+  // Smooth tab transition: fade + slide
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [displayTopology, setDisplayTopology] = useState(topology);
+  const [slideDir, setSlideDir] = useState<'left' | 'right'>('right');
+  const pendingTopologyRef = useRef<string | null>(null);
+
+  const tabOrder = ['star', 'circles', 'list'];
+
+  const handleTopologyChange = useCallback((value: string) => {
+    if (value === topology || isTransitioning) return;
+    const oldIdx = tabOrder.indexOf(topology);
+    const newIdx = tabOrder.indexOf(value);
+    setSlideDir(newIdx > oldIdx ? 'right' : 'left');
+    pendingTopologyRef.current = value;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setDisplayTopology(value);
+      setTopology(value);
+      requestAnimationFrame(() => {
+        setIsTransitioning(false);
+      });
+    }, 180);
+  }, [topology, isTransitioning, setTopology]);
+  const [advisorTips, setAdvisorTips] = useState([
+    {
+      level: 1 as const,
+      message: 'Петр и Иван проходят тот же трек. Вы можете обменяться опытом.',
+      action: 'Посмотреть',
+      context: 'Мы показываем это, потому что у вас совпадают цели в треке «Запуск продукта».',
+    },
+  ]);
+
+  // Use graph dimensions from container
+  const [canvasSize, setCanvasSize] = useState({ width: 1000, height: 700 });
+
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setCanvasSize({
+            width: entry.contentRect.width,
+            height: entry.contentRect.height,
+          });
+        }
+      });
+      observer.observe(node);
+    }
+  }, []);
+
+  // Compute active filter keys (outside useMemo for JSX access)
+  const activeFilterKeys = Object.entries(activeFilters)
+    .filter(([, v]) => v)
+    .map(([k]) => k);
+  const hasActiveFilters = activeFilterKeys.length > 0;
+
+  // Apply search + filters to nodes
+  const { filteredNodes, filteredEdges, highlightNodeIds } = useMemo(() => {
+    let nodes = participantNodes;
+
+    const nodeMeEdges = (nodeId: string) =>
+      participantEdges.filter(
+        (e) =>
+          (e.source === nodeId && e.target === 'me') ||
+          (e.target === nodeId && e.source === 'me')
+      );
+
+    const matchesFilters = (node: GraphNode): boolean => {
+      if (!hasActiveFilters) return true;
+      const ne = nodeMeEdges(node.id);
+      return activeFilterKeys.some((key) => {
+        switch (key) {
+          case 'helpReady': return node.isHelpReady;
+          case 'helpedMe': return ne.some((e) => e.source === node.id && e.target === 'me');
+          case 'iHelped': return ne.some((e) => e.source === 'me' && e.target === node.id);
+          case 'sameFlow': return ne.some((e) => e.type === 'flow');
+          case 'sameStep': return node.goals?.length > 0;
+          case 'gratitude': return ne.some((e) => e.type === 'gratitude');
+          case 'mentors':
+            return ['Куратор', 'Помощник на старт', 'Помощник по практике', 'Хранитель знаний'].includes(node.role || '');
+          case 'topicDesign': return node.competencies.some((c) => c.toLowerCase().includes('дизайн'));
+          case 'topicMarketing': return node.competencies.some((c) => c.toLowerCase().includes('маркетинг')) || node.competencies.some((c) => c.toLowerCase().includes('реклам'));
+          case 'topicProduct': return node.competencies.some((c) => c.toLowerCase().includes('продукт'));
+          case 'topicAnalytics': return node.competencies.some((c) => c.toLowerCase().includes('аналит'));
+          case 'topicLaunch': return node.goals.some((g) => g.toLowerCase().includes('запуск'));
+          case 'online': return node.isOnline;
+          default: return true;
+        }
+      });
+    };
+
+    const highlightIds = new Set<string>();
+    nodes.forEach((n) => {
+      if (matchesFilters(n)) highlightIds.add(n.id);
+    });
+
+    // For map topologies (star/circles): keep ALL nodes, just highlight matching ones
+    // For list: actually filter the nodes
+    const nodesAfterFilter = hasActiveFilters && topology === 'list'
+      ? nodes.filter((n) => highlightIds.has(n.id))
+      : nodes;
+
+    const nodeIds = new Set(nodesAfterFilter.map((n) => n.id));
+    const edges = participantEdges.filter(
+      (e) =>
+        (e.source === 'me' && nodeIds.has(e.target)) ||
+        (e.target === 'me' && nodeIds.has(e.source))
+    );
+
+    return { filteredNodes: nodesAfterFilter, filteredEdges: edges, highlightNodeIds: highlightIds };
+  }, [activeFilters, topology, participantNodes, participantEdges]);
+
+  const activeFilterCount = useMemo(
+    () => Object.values(activeFilters).filter(Boolean).length,
+    [activeFilters]
+  );
+
+  const handleNodeHover = useCallback((node: GraphNode | null) => {
+    setHoveredNode(node);
+  }, []);
+
+  const handleNodeClick = useCallback((node: GraphNode) => {
+    setSelectedNode(node);
+  }, []);
+
+  const handleDismissTip = (index: number) => {
+    setAdvisorTips((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Empty state
+  if (participantEdges.length === 0) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center px-8 text-center"
+        style={{ background: 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg-main) 50%, var(--hover-bg) 100%)' }}>
+        <div className="relative mb-8">
+          {/* Animated star */}
+          <div className="w-28 h-28 rounded-full flex items-center justify-center relative">
+            <div className="absolute inset-0 rounded-full bg-amber-500/10 animate-pulse" />
+            <div className="absolute inset-2 rounded-full bg-amber-500/15 animate-pulse" style={{ animationDelay: '0.5s' }} />
+            <div className="absolute inset-4 rounded-full bg-amber-500/20 flex items-center justify-center">
+              <Sparkles className="w-10 h-10 text-amber-300" />
+            </div>
+          </div>
+          {/* Orbiting dots */}
+          <div className="absolute -inset-4 animate-spin" style={{ animationDuration: '8s' }}>
+            <div className="absolute top-0 left-1/2 w-2 h-2 rounded-full bg-amber-400/60" />
+          </div>
+          <div className="absolute -inset-8 animate-spin" style={{ animationDuration: '12s', animationDirection: 'reverse' }}>
+            <div className="absolute bottom-0 left-1/3 w-1.5 h-1.5 rounded-full bg-amber-400/40" />
+          </div>
+        </div>
+        <h2 className="text-2xl font-light text-[var(--text-primary)] mb-3 tracking-wide">
+          Ваша карта только начинает загораться
+        </h2>
+        <p className="text-[var(--text-secondary)] max-w-md mb-10 leading-relaxed">
+          Сделайте первый шаг в треке — и здесь появятся люди, которые идут рядом или готовы помочь.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button className="flex items-center justify-center gap-2 px-8 py-3.5 bg-amber-600/90 hover:bg-amber-600 text-white rounded-2xl font-medium transition-all duration-300 shadow-lg shadow-amber-900/30 backdrop-blur-sm border border-amber-500/20">
+            <ArrowRight className="w-4 h-4" />
+            Начать первый трек
+          </button>
+          <button className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[var(--hover-bg)] hover:bg-[var(--hover-bg)] text-[var(--text-secondary)] border border-[var(--border-color)] rounded-2xl font-medium transition-all duration-300 backdrop-blur-sm">
+            <UserPlus className="w-4 h-4" />
+            Отметить, с чем нужна помощь
+          </button>
+        </div>
+        <div className="mt-10 flex gap-3">
+          {recommendations.map((rec) => (
+            <div
+              key={rec.id}
+              className="flex items-center gap-2.5 px-4 py-2.5 bg-[var(--hover-bg)] rounded-xl border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:bg-[var(--hover-bg)] transition-colors cursor-pointer backdrop-blur-sm"
+            >
+              <div className="w-7 h-7 rounded-full bg-amber-500/20 flex items-center justify-center text-xs font-bold text-amber-300">
+                {rec.name[0]}
+              </div>
+              <span>{rec.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ESC exits focus mode
+  useEffect(() => {
+    if (!focusMode) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFocusMode(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [focusMode]);
+
+  return (
+    <div className={darkMode ? 'dark' : ''} style={{ height: '100%' }}>
+    <div className={`h-full flex flex-col relative transition-all duration-500 canvas-deep-bg ${focusMode ? 'fixed inset-0 z-50' : ''}`}>
+      {/* Focus mode toggle */}
+      <button
+        onClick={() => setFocusMode(!focusMode)}
+        className="absolute top-3 right-4 z-[60] w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-300 border backdrop-blur"
+        style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
+        title={focusMode ? 'Выйти из фокуса (ESC)' : 'Фокус-режим'}
+      >
+        {focusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+      </button>
+
+      {/* Breadcrumbs + description + tabs + filter */}
+      <div className={`z-10 px-5 py-3 transition-all duration-500 ${focusMode ? 'opacity-0 pointer-events-none h-0 p-0 overflow-hidden' : ''}`} style={{ background: 'var(--bg-main)' }}>
+        {/* Breadcrumbs */}
+        <div className="flex items-center gap-1 text-micro mb-1">
+          <span className="text-[var(--text-muted)]">IT технологии</span>
+          <span className="text-[var(--text-muted)]">{'>'}</span>
+          <span className="text-[var(--text-secondary)]">Мои связи</span>
+        </div>
+        {/* Universal description for all tabs */}
+        <p className="text-micro text-[var(--text-muted)] leading-relaxed max-w-3xl mb-3">
+          Здесь собраны люди, связанные с вашим путём: кто уже помогал, кому вы можете быть полезны, кто проходил похожие шаги и кто готов поддержать. Карта не оценивает людей — она помогает находить поддержку и видеть вклад.
+        </p>
+        {/* Tabs */}
+        <div className="flex items-center mb-2">
+          <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="participant" />
+        </div>
+
+      </div>
+
+      {/* Filter icon — visible in ALL 3 tabs INCLUDING focus mode */}
+      <FilterPanel
+        mode="participant"
+        activeFilters={activeFilters}
+        activeCount={activeFilterCount}
+        onFilterChange={setActiveFilters}
+        topology={topology}
+      />
+
+      {/* Мой мир — expandable description */}
+        {topology === 'star' && (
+          <div className="max-w-3xl" style={{ paddingLeft: '20px' }}>
+            <p className="text-micro text-[var(--text-muted)] leading-relaxed">
+              Ваш личный круг: кто уже рядом, кто помогал, кому вы можете быть полезны и с кем можно продолжить связь.
+            </p>
+            <button
+              onClick={() => setStarDescOpen(!starDescOpen)}
+              className="flex items-center gap-1 mt-1 text-[10px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+            >
+              <span>Здесь участник видит</span>
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${starDescOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {starDescOpen && (
+              <ul className="mt-1.5 space-y-0.5 text-[11px] text-[var(--text-muted)] pl-3">
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />живые связи</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />старые связи</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />возможные новые связи</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />людей с ореолом</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />готовых помочь</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />онлайн</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />направление помощи</li>
+              </ul>
+            )}
+          </div>
+        )}
+        {/* Круги — expandable description */}
+        {topology === 'circles' && (
+          <div className="max-w-3xl" style={{ paddingLeft: '20px' }}>
+            <p className="text-micro text-[var(--text-muted)] leading-relaxed">
+              Круги показывают не «важность» людей, а близость живого взаимодействия: кто уже рядом, с кем связь слабее и с кем её можно мягко усилить.
+            </p>
+            <button
+              onClick={() => setCirclesDescOpen(!circlesDescOpen)}
+              className="flex items-center gap-1 mt-1 text-[10px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+            >
+              <span>Здесь участник понимает</span>
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${circlesDescOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {circlesDescOpen && (
+              <ul className="mt-1.5 space-y-0.5 text-[11px] text-[var(--text-muted)] pl-3">
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />есть ли у него опоры</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />много ли слабых связей</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />есть ли потенциальные новые контакты</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />где он может сделать следующий шаг</li>
+              </ul>
+            )}
+          </div>
+        )}
+        {/* Список — expandable description */}
+        {topology === 'list' && (
+          <div className="max-w-3xl" style={{ paddingLeft: '20px' }}>
+            <p className="text-micro text-[var(--text-muted)] leading-relaxed">
+              Быстрый способ найти человека, написать, поблагодарить, попросить совет или предложить помощь. Здесь уже не надо думать про граф.
+            </p>
+            <button
+              onClick={() => setListDescOpen(!listDescOpen)}
+              className="flex items-center gap-1 mt-1 text-[10px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+            >
+              <span>Просто</span>
+              <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${listDescOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {listDescOpen && (
+              <ul className="mt-1.5 space-y-0.5 text-[11px] text-[var(--text-muted)] pl-3">
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />кого поблагодарить</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />кому написать</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />у кого попросить совет</li>
+                <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-[var(--text-muted)] shrink-0" />кому я могу помочь</li>
+              </ul>
+            )}
+          </div>
+        )}
+
+      {/* Main content */}
+      <div className={`relative overflow-hidden transition-all duration-500 ${focusMode ? 'absolute inset-0' : 'flex-1'}`} ref={containerRef}>
+        {/* Legend overlay — hidden in list tab and when focusMode */}
+        {topology !== 'list' && (
+          <FocusLegendOverlay topology={topology} mode="participant" focusMode={focusMode} />
+        )}
+
+        {/* Empty state — no connections */}
+        {filteredNodes.length === 0 && topology !== 'list' && (
+          <EmptyStateCanvas
+            mode="participant"
+            hasFilters={activeFilterCount > 0}
+            onClearFilters={activeFilterCount > 0 ? () => setActiveFilters({}) : undefined}
+          />
+        )}
+
+        {/* Backdrop overlay — closes any open panel on click */}
+        {activePanel !== null && (
+          <div
+            className="absolute inset-0 z-30 bg-transparent"
+            onClick={() => setActivePanel(null)}
+          />
+        )}
+        {displayTopology === 'list' ? (
+          <div className="h-full" style={{ background: 'var(--bg-main)' }}>
+            <ConnectionList
+              nodes={filteredNodes}
+              edges={filteredEdges}
+              currentUserId="me"
+              onNodeClick={handleNodeClick}
+              onMessage={(node) => console.log('Message', node.name)}
+              selectedNodeId={selectedNode?.id || null}
+              activeFilters={activeFilters}
+              onQuickFilter={setActiveFilters}
+              highlightNodeIds={highlightNodeIds}
+            />
+          </div>
+        ) : (
+          <div
+            className="w-full h-full transition-all duration-200 ease-out"
+            style={{
+              opacity: isTransitioning ? 0 : 1,
+              transform: isTransitioning
+                ? `translateX(${slideDir === 'right' ? '-16px' : '16px'}) scale(0.985)`
+                : 'translateX(0) scale(1)',
+            }}
+          >
+            {displayTopology === 'circles' ? (
+          <div className="w-full h-full relative">
+            <RingMetricsPanel edges={filteredEdges} />
+            <CirclesTopology
+              centerNode={currentUser}
+              nodes={filteredNodes}
+              edges={filteredEdges}
+              onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
+              onNodeClick={handleNodeClick}
+              onRingClick={(ri) => setSelectedRing(ri)}
+              onHoverScreenPos={setHoveredScreenPos}
+              highlightNodeId={hoveredNode?.id || null}
+              highlightNodeIds={hasActiveFilters ? highlightNodeIds : null}
+              width={canvasSize.width}
+              height={canvasSize.height}
+              focusMode={focusMode}
+            />
+            {hoveredNode && !selectedNode && hoveredScreenPos && (
+              <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
+                <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+              </div>
+            )}
+            {!focusMode && (
+              <>
+                <RecommendationPanel recommendations={recommendations} onConnect={(id) => console.log('Connect', id)} isOpen={activePanel === 'rec'} onToggle={() => setActivePanel((p) => p === 'rec' ? null : 'rec')} />
+                <AdvisorTooltip tips={advisorTips} onDismiss={handleDismissTip} onAction={(tip) => console.log('Action', tip.action)} isOpen={activePanel === 'tips'} onToggle={() => setActivePanel((p) => p === 'tips' ? null : 'tips')} />
+              </>
+            )}
+          </div>
+        ) : (
+          <div
+            className="w-full h-full relative"
+            onMouseMove={(e) => setMousePos({ x: e.clientX - e.currentTarget.getBoundingClientRect().left, y: e.clientY - e.currentTarget.getBoundingClientRect().top })}
+          >
+            <PremiumStarGraph
+              centerNode={currentUser}
+              connectedNodes={filteredNodes}
+              edges={filteredEdges}
+              onNodeHover={handleNodeHover}
+              onNodeClick={handleNodeClick}
+              onBridgeHover={setHoveredBridge}
+              highlightNodeId={hoveredNode?.id || null}
+              highlightNodeIds={hasActiveFilters ? highlightNodeIds : null}
+              mode="participant"
+              width={canvasSize.width}
+              height={canvasSize.height}
+              focusMode={focusMode}
+              bridgeContexts={bridgeContexts}
+            />
+            {hoveredNode && !selectedNode && (
+              <div className="absolute z-50 pointer-events-none" style={{ left: (hoveredNode.x || 0) + 50, top: (hoveredNode.y || 0) - 30 }}>
+                <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+              </div>
+            )}
+            {hoveredBridge && !selectedNode && (
+              <div className="absolute z-50 pointer-events-none max-w-xs" style={{ left: mousePos.x + 16, top: mousePos.y - 10 }}>
+                <div className="px-3 py-2.5 rounded-xl" style={{ background: 'var(--bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--border-color)' }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                    <span className="text-[10px] font-semibold text-teal-400 uppercase tracking-wider">Возможная связь</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{hoveredBridge.description}</p>
+                </div>
+              </div>
+            )}
+            {!focusMode && (
+              <>
+                <RecommendationPanel recommendations={recommendations} onConnect={(id) => console.log('Connect', id)} isOpen={activePanel === 'rec'} onToggle={() => setActivePanel((p) => p === 'rec' ? null : 'rec')} />
+                <AdvisorTooltip tips={advisorTips} onDismiss={handleDismissTip} onAction={(tip) => console.log('Action', tip.action)} isOpen={activePanel === 'tips'} onToggle={() => setActivePanel((p) => p === 'tips' ? null : 'tips')} />
+              </>
+            )}
+          </div>
+        )}
+          </div>
+        )}
+
+        {/* Selected ring card */}
+        {selectedRing !== null && (
+          <>
+            <div
+              className="absolute inset-0 z-30"
+              style={{ background: 'rgba(0,0,0,0.15)' }}
+              onClick={() => setSelectedRing(null)}
+            />
+            <div className="absolute inset-y-0 right-0 z-40 flex">
+              <div className="w-px" style={{ background: 'linear-gradient(to bottom, transparent, var(--border-color), transparent)' }} />
+              <div className="w-80 h-full overflow-y-auto"
+                style={{ background: 'var(--bg-card)', backdropFilter: 'blur(24px)', borderLeft: '1px solid var(--border-color)' }}>
+                <RingCard
+                  ringIndex={selectedRing}
+                  ringLabel={['Опоры', 'Близкие', 'Коллеги', 'Знакомые', 'Потенциальные'][selectedRing]}
+                  nodes={filteredNodes}
+                  edges={filteredEdges}
+                  onClose={() => setSelectedRing(null)}
+                  onNodeClick={(node) => { setSelectedRing(null); setSelectedNode(node); }}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Selected node card - glassmorphism overlay */}
+        {selectedNode && (
+          <>
+            {/* Backdrop — closes card on click outside */}
+            <div
+              className="absolute inset-0 z-30"
+              style={{ background: 'rgba(0,0,0,0.15)' }}
+              onClick={() => setSelectedNode(null)}
+            />
+            <div className="absolute inset-y-0 right-0 z-40 flex">
+              <div className="w-px" style={{ background: 'linear-gradient(to bottom, transparent, var(--border-color), transparent)' }} />
+              <div className="w-80 h-full overflow-y-auto"
+                style={{ background: 'var(--bg-card)', backdropFilter: 'blur(24px)', borderLeft: '1px solid var(--border-color)' }}>
+                <NodeCard
+                  node={selectedNode}
+                  edges={filteredEdges.filter(
+                    (e) => e.source === selectedNode.id || e.target === selectedNode.id
+                  )}
+                  currentUserId="me"
+                  onClose={() => setSelectedNode(null)}
+                  mode="participant"
+                  ringLabel={topology === 'circles' ? getRingLabel(selectedNode.id, participantEdges) : undefined}
+                  bridgeContexts={bridgeContexts}
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+    </div>
+
+  );
+}

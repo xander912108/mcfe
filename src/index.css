@@ -1,8 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import './styles/deep-background.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Social Fabric — Premium Gold Theme Variables */
+@layer base {
+  :root {
+    /* Social Fabric Colors */
+    --sf-bg: #141416;
+    --sf-bg-deep: #0f0f12;
+    --sf-surface: rgba(255, 255, 255, 0.03);
+    --sf-surface-hover: rgba(255, 255, 255, 0.06);
+    --sf-border: rgba(255, 255, 255, 0.07);
+    --sf-border-hover: rgba(201, 169, 110, 0.2);
+    --sf-text: #E8E6E3;
+    --sf-text-secondary: #9A9895;
+    --sf-text-muted: #6A6865;
+    --sf-accent: #C9A96E;
+    --sf-accent-dim: rgba(201, 169, 110, 0.15);
+    --sf-accent-glow: rgba(201, 169, 110, 0.3);
+    --sf-online: #6B9E7C;
+    --sf-success: #6B9E7C;
+    --sf-warning: #d69e2e;
+    --sf-danger: #ef4444;
+    --sf-ring-gold: rgba(201, 169, 110, 0.22);
+    --sf-ring-sage: rgba(107, 158, 124, 0.12);
+    --sf-ring-muted: rgba(154, 152, 149, 0.08);
+  }
+}
 
 @layer utilities {
   .fw-normal {

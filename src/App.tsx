@@ -17,18 +17,19 @@ import LeaderConsoleConnections from './LeaderConsoleConnections';
 import LeaderConsoleContribution from './LeaderConsoleContribution';
 import LeaderConsoleMonetization from './LeaderConsoleMonetization';
 import LeaderConsoleSettings from './LeaderConsoleSettings';
+import MyConnections from './pages/MyConnections';
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
 /* ===== DATA ===== */
 const navItems = [
-  { icon: Map, label: 'Мой путь', active: false },
-  { icon: Users, label: 'Сообщество', active: false },
-  { icon: BookOpen, label: 'Обучение', active: false },
-  { icon: Calendar, label: 'Встречи', active: false },
-  { icon: Link2, label: 'Связи', active: false },
-  { icon: Lightbulb, label: 'Инсайты', active: false },
-  { icon: Heart, label: 'Вклад', active: false },
+  { icon: Map, label: 'Мой путь', active: false, path: null },
+  { icon: Users, label: 'Сообщество', active: false, path: null },
+  { icon: BookOpen, label: 'Обучение', active: false, path: null },
+  { icon: Calendar, label: 'Встречи', active: false, path: null },
+  { icon: Link2, label: 'Мои связи', active: false, path: '/connections' },
+  { icon: Lightbulb, label: 'Инсайты', active: false, path: null },
+  { icon: Heart, label: 'Вклад', active: false, path: null },
 ];
 
 
@@ -112,12 +113,13 @@ const faqItems = [
 ];
 
 /* ===== COMPONENT ===== */
-function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings' }) {
+function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings'; connectionsPage?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const leaderConsoleMode = leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry';
+  const leaderConsoleMode = !connectionsPage && (leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry');
   const activeConsoleTab = leaderMode ? leaderTab : 'main';
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') !== 'light');
+  useEffect(() => { localStorage.setItem('theme', darkMode ? 'dark' : 'light'); }, [darkMode]);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const [communityDropdownOpen, setCommunityDropdownOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -270,11 +272,19 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
               {!leaderConsoleMode && (
                 <div className="flex flex-col h-full">
                   <nav className="space-y-1 flex-1">
-                    {navItems.map((item, i) => (
-                      <div key={i} className={`nav-item ${item.active ? 'active' : ''}`}>
-                        <item.icon className="nav-icon" /><span>{item.label}</span>
-                      </div>
-                    ))}
+                    {navItems.map((item, i) => {
+                      const isActive = item.path === '/connections' && location.pathname === '/connections';
+                      return (
+                        <div
+                          key={i}
+                          className={`nav-item ${item.active || isActive ? 'active' : ''}`}
+                          onClick={() => item.path ? navigate(item.path) : undefined}
+                          style={{ cursor: item.path ? 'pointer' : 'default' }}
+                        >
+                          <item.icon className="nav-icon" /><span>{item.label}</span>
+                        </div>
+                      );
+                    })}
                   </nav>
                   {/* Leader Console CTA */}
                   <div className="pt-4 pb-2 px-1">
@@ -353,7 +363,7 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
                   switch (activeConsoleTab) {
                     case 'entry': return <LeaderConsoleEntry />;
                     case 'requests': return <LeaderConsoleRequests />;
-                    case 'connections': return <LeaderConsoleConnections />;
+                    case 'connections': return <LeaderConsoleConnections darkMode={darkMode} />;
                     case 'contribution': return <LeaderConsoleContribution />;
                     case 'monetization': return <LeaderConsoleMonetization />;
                     case 'settings': return <LeaderConsoleSettings />;
@@ -362,8 +372,15 @@ function App({ leaderMode = false, leaderTab = 'main' }: { leaderMode?: boolean;
                 })()
               )}
 
+              {/* ===== MY CONNECTIONS ===== */}
+              {connectionsPage && (
+                <main className="flex-1 min-w-0" style={{ height: 'calc(100vh - 104px)' }}>
+                  <MyConnections darkMode={darkMode} />
+                </main>
+              )}
+
               {/* ===== COMMUNITY PAGE ===== */}
-              {!leaderConsoleMode && (
+              {!leaderConsoleMode && !connectionsPage && (
               <>
               <main className="flex-1 min-w-0">
                 <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>

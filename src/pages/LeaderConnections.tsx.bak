@@ -1,0 +1,1183 @@
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router';
+import {
+  TrendingUp, TrendingDown, Users, AlertTriangle, Star, Zap,
+  Heart, Play, Info, X, ChevronLeft, ChevronRight,
+  Maximize2, Minimize2, Sun, Moon,
+} from 'lucide-react';
+import {
+  communityCenter, leaderNodes, leaderEdges, leaderSignals,
+  pulseMetricsByPeriod, metricDirections,
+} from '@/data/graphData';
+import { PremiumStarGraph } from '@/components/social-fabric/PremiumStarGraph';
+import { PulseTopology } from '@/components/social-fabric/PulseTopology';
+import {
+  ClustersTopology, findClusters, findBridges,
+  computeCentrality, getClusterName,
+} from '@/components/social-fabric/ClustersTopology';
+import { HealthTopology, STATUS_COLORS } from '@/components/social-fabric/HealthTopology';
+import { TopologySwitcher } from '@/components/social-fabric/TopologySwitcher';
+import { FilterPanel } from '@/components/social-fabric/FilterPanel';
+import { FocusLegendOverlay } from '@/components/social-fabric/FocusLegendOverlay';
+import { EmptyStateCanvas } from '@/components/social-fabric/EmptyStateCanvas';
+import { NodeCard } from '@/components/social-fabric/NodeCard';
+import { LeaderConnectionList } from '@/components/social-fabric/LeaderConnectionList';
+import type { GraphNode } from '@/data/graphData';
+
+export default function LeaderConnections() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [darkMode, setDarkMode] = useState(true);
+  const [focusMode, setFocusMode] = useState(false);
+
+  const topology = searchParams.get('tab') || 'network';
+  const setTopology = useCallback((value: string) => {
+    setSearchParams({ tab: value }, { replace: true });
+  }, [setSearchParams]);
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [selectedCluster, setSelectedCluster] = useState<{
+    id: number; name: string; members: GraphNode[];
+  } | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [filters, setFilters] = useState<Record<string, boolean>>({});
+  const [showPageInfo, setShowPageInfo] = useState(false);
+  const [pulsePeriod, setPulsePeriod] = useState(7);
+  const [fabricCollapsed, setFabricCollapsed] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ width: 900, height: 700 });
+
+  // Smooth tab transition: fade + slide
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [displayTopology, setDisplayTopology] = useState(topology);
+  const [slideDir, setSlideDir] = useState<'left' | 'right'>('right');
+  const pendingTopologyRef = useRef<string | null>(null);
+
+  const tabOrder = ['network', 'density', 'clusters', 'health'];
+
+  const handleTopologyChange = useCallback((value: string) => {
+    if (value === topology || isTransitioning) return;
+    const oldIdx = tabOrder.indexOf(topology);
+    const newIdx = tabOrder.indexOf(value);
+    setSlideDir(newIdx > oldIdx ? 'right' : 'left');
+    pendingTopologyRef.current = value;
+    setIsTransitioning(true);
+    // Phase 1: fade out (150ms)
+    setTimeout(() => {
+      setDisplayTopology(value);
+      setTopology(value);
+      // Phase 2: fade in after swap
+      requestAnimationFrame(() => {
+        setIsTransitioning(false);
+      });
+    }, 180);
+  }, [topology, isTransitioning, setTopology]);
+
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setCanvasSize({
+            width: entry.contentRect.width,
+            height: entry.contentRect.height,
+          });
+        }
+      });
+      observer.observe(node);
+    }
+  }, []);
+
+  const allNodes = useMemo(() => leaderNodes.filter((n) => n.id !== 'me'), []);
+
+  const activeFilterCount = useMemo(
+    () => Object.values(filters).filter(Boolean).length,
+    [filters]
+  );
+
+  // Status counts for Health tab inline filters
+  const statusCounts = useMemo(() => ({
+    active: allNodes.filter((n) => n.status === 'active').length,
+    stuck: allNodes.filter((n) => n.status === 'stuck').length,
+    burnout_risk: allNodes.filter((n) => n.status === 'burnout_risk').length,
+    inactive: allNodes.filter((n) => n.status === 'inactive').length,
+  }), [allNodes]);
+  const totalCount = allNodes.length;
+  const STATUS_FILTER_ORDER = ['', 'active', 'stuck', 'burnout_risk', 'inactive'] as const;
+  const filteredNodes = useMemo(() => {
+    let nodes = [...allNodes];
+    const activeFilters = Object.entries(filters)
+      .filter(([, v]) => v)
+      .map(([k]) => k);
+    if (activeFilters.length > 0) {
+      nodes = nodes.filter((n) =>
+        activeFilters.some((key) => {
+          switch (key) {
+            case 'active': return n.status === 'active';
+            case 'attention':
+              return n.status === 'inactive'
+                || n.status === 'stuck'
+                || n.status === 'burnout_risk';
+            case 'support': return n.status === 'stuck';
+            case 'stuck': return n.status === 'stuck';
+            case 'connectors': return n.role === 'Связующий';
+            case 'helpReady': return n.isHelpReady;
+            default: return true;
+          }
+        })
+      );
+    }
+    return nodes;
+  }, [allNodes, filters]);
+
+  const filteredEdges = useMemo(() => {
+    const nodeIds = new Set([...filteredNodes.map((n) => n.id), 'me']);
+    return leaderEdges.filter(
+      (e) => nodeIds.has(e.source) && nodeIds.has(e.target)
+    );
+  }, [filteredNodes]);
+
+  const handleNodeClick = useCallback((node: GraphNode) => {
+    setSelectedCluster(null);
+    setSelectedNode(node);
+  }, []);
+
+  const handleClusterClick = useCallback(
+    (clusterId: number, clusterName: string, members: GraphNode[]) => {
+      setSelectedNode(null);
+      setSelectedCluster({ id: clusterId, name: clusterName, members });
+    },
+    []
+  );
+
+  const signalIcons: Record<string, React.ReactNode> = {
+    isolation: <AlertTriangle className="w-4 h-4 text-red-400" />,
+    connector: <Star className="w-4 h-4 text-amber-400" />,
+    overload: <Zap className="w-4 h-4 text-orange-400" />,
+    potential: <Heart className="w-4 h-4 text-pink-400" />,
+  };
+
+  const sectionBorder = { borderBottom: '1px solid rgba(255,255,255,0.06)' };
+
+  // ESC exits focus mode
+  useEffect(() => {
+    if (!focusMode) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFocusMode(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [focusMode]);
+
+  /* ── render ────────────────────────────────────────────── */
+  return (
+    <div className={darkMode ? 'dark' : ''} style={{ height: '100%' }}>
+    <div className={`h-full flex flex-col transition-all duration-500 canvas-deep-bg ${focusMode ? 'fixed inset-0 z-50' : ''}`}>
+      {/* Filter + Focus mode toggle — visible in ALL tabs INCLUDING focus mode */}
+      <div className="absolute top-3 right-5 z-[60] flex items-center gap-2 pointer-events-auto">
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className="w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-300 border backdrop-blur"
+          style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
+          title={darkMode ? 'Светлая тема' : 'Тёмная тема'}
+        >
+          {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+        <div className="relative w-9 h-9">
+          <FilterPanel
+            mode="leader"
+            onFilterChange={setFilters}
+            activeCount={activeFilterCount}
+            buttonPositionClassName="top-0 right-0"
+            panelPositionClassName="top-12 right-0"
+            topology={topology}
+          />
+        </div>
+        <button
+          onClick={() => setFocusMode(!focusMode)}
+          className="w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-300 border backdrop-blur bg-slate-900/80 text-slate-400 border-slate-700/50 hover:text-slate-200 hover:border-slate-600"
+          title={focusMode ? 'Выйти из фокуса (ESC)' : 'Фокус-режим'}
+        >
+          {focusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+        </button>
+      </div>
+
+      {/* Header: breadcrumbs + tabs + filter + description */}
+      <div className={`shrink-0 z-10 px-5 py-3 transition-all duration-500 ${focusMode ? 'opacity-0 pointer-events-none h-0 p-0 overflow-hidden' : ''}`} style={{ background: '#080c1a' }}>
+        {/* Breadcrumbs */}
+        <div className="flex items-center gap-1 text-micro mb-1">
+          <span className="text-slate-600">Консоль лидера</span>
+          <span className="text-slate-700">{'>'}</span>
+          <span className="text-slate-400">Связи</span>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex items-center">
+          <TopologySwitcher
+            value={topology}
+            onChange={handleTopologyChange}
+            mode="leader"
+          />
+        </div>
+
+        {/* Description */}
+        <p className="text-micro text-slate-600 leading-relaxed mt-2">
+          {topology === 'network'
+            && 'Структура сообщества — где есть опора, где держится на лидере'}
+          {topology === 'density'
+            && `Пульс за ${pulsePeriod} дней — живые действия, не счётчик сообщений`}
+          {topology === 'clusters'
+            && 'Естественные группы: кто уже связан между собой, кто соединяет группы и кому нужна первая связь.'}
+          {topology === 'health'
+            && 'Состояние ткани — бережная диагностика участников и связей'}
+          {topology === 'list'
+            && 'Кому помочь, кого разгрузить, кого признать и где укрепить связи'}
+        </p>
+      </div>
+
+      {/* Canvas area — full width */}
+      <div className={`relative overflow-hidden transition-all duration-500 ${focusMode ? 'absolute inset-0' : 'flex-1'}`} ref={containerRef}>
+        {/* Empty state — no connections */}
+        {filteredNodes.length === 0 && topology !== 'list' && (
+          <EmptyStateCanvas
+            mode="leader"
+            hasFilters={activeFilterCount > 0}
+            onClearFilters={activeFilterCount > 0 ? () => setFilters({}) : undefined}
+          />
+        )}
+
+        {topology === 'list' ? (
+          <div className="h-full" style={{ background: '#080c1a' }}>
+            <LeaderConnectionList
+              nodes={filteredNodes}
+              edges={filteredEdges}
+              signals={leaderSignals}
+              currentUserId="me"
+              selectedNodeId={selectedNode?.id || null}
+              onNodeClick={handleNodeClick}
+              onMessage={(node) => console.log('Message', node.name)}
+              onRequestHelp={(node) => console.log('Help', node.name)}
+            />
+          </div>
+        ) : (
+          <div className="w-full h-full relative">
+            {/* Legend overlay — not shown in list tab */}
+            {topology !== 'list' && (
+              <FocusLegendOverlay topology={topology} mode="leader" focusMode={focusMode} />
+            )}
+
+            {/* Status filters — only on Health tab, centered at top of canvas */}
+            {topology === 'health' && (
+              <div className={`absolute z-30 flex items-center gap-2 transition-all duration-300 left-1/2 -translate-x-1/2 ${focusMode ? 'top-14' : 'top-3'}`}>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {STATUS_FILTER_ORDER.map((key) => {
+                    const sc = key ? STATUS_COLORS[key] : null;
+                    const count = key ? statusCounts[key as keyof typeof statusCounts] : totalCount;
+                    const label = key ? sc!.shortLabel : 'Все';
+                    const isActive = (key === '' && !statusFilter) || statusFilter === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setStatusFilter(key || null)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-micro font-medium transition-all duration-200 border ${
+                          isActive
+                            ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/25'
+                            : 'bg-slate-800/40 text-slate-500 border-slate-700/20 hover:text-slate-300 hover:border-slate-600/30'
+                        }`}
+                      >
+                        {sc && <div className="w-1.5 h-1.5 rounded-full" style={{ background: sc.border }} />}
+                        <span>{label}</span>
+                        <span className={isActive ? 'text-indigo-300/70' : 'text-slate-600'}>{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div
+              className="w-full h-full transition-all duration-200 ease-out"
+              style={{
+                opacity: isTransitioning ? 0 : 1,
+                transform: isTransitioning
+                  ? `translateX(${slideDir === 'right' ? '-16px' : '16px'}) scale(0.985)`
+                  : 'translateX(0) scale(1)',
+              }}
+            >
+              {displayTopology === 'density' ? (
+                <PulseTopology
+                  nodes={filteredNodes}
+                  edges={filteredEdges}
+                  onNodeHover={() => {}}
+                  onNodeClick={handleNodeClick}
+                  width={canvasSize.width}
+                  height={canvasSize.height}
+                  focusMode={focusMode}
+                  darkMode={darkMode}
+                />
+              ) : displayTopology === 'clusters' ? (
+                <ClustersTopology
+                  nodes={filteredNodes}
+                  edges={filteredEdges}
+                  onNodeHover={() => {}}
+                  onNodeClick={handleNodeClick}
+                  onClusterClick={handleClusterClick}
+                  width={canvasSize.width}
+                  height={canvasSize.height}
+                  focusMode={focusMode}
+                  darkMode={darkMode}
+                />
+              ) : displayTopology === 'health' ? (
+                <HealthTopology
+                  nodes={allNodes}
+                  edges={filteredEdges}
+                  onNodeHover={() => {}}
+                  onNodeClick={handleNodeClick}
+                  onStatusFilter={setStatusFilter}
+                  activeStatusFilter={statusFilter}
+                  width={canvasSize.width}
+                  height={canvasSize.height}
+                  focusMode={focusMode}
+                  darkMode={darkMode}
+                />
+              ) : (
+                <PremiumStarGraph
+                  centerNode={communityCenter}
+                  connectedNodes={filteredNodes}
+                  edges={filteredEdges}
+                  onNodeHover={() => {}}
+                  onNodeClick={handleNodeClick}
+                  mode="leader"
+                  width={canvasSize.width}
+                  height={canvasSize.height}
+                  centerLabel="MC"
+                  centerSubtitle="Mentori Club"
+                  focusMode={focusMode}
+                  darkMode={darkMode}
+                />
+              )}
+            </div>
+
+            {/* ═══ OVERLAY: "Ткань сообщества" panel ═══ */}
+            {/* Collapsed toggle — thin vertical bar on the left */}
+            {fabricCollapsed && !focusMode && (
+              <button
+                onClick={() => setFabricCollapsed(false)}
+                className="absolute left-3 top-3 z-30 flex items-center gap-1.5 px-2.5 py-2 rounded-lg transition-all duration-200 group"
+                style={{
+                  background: 'rgba(10, 14, 30, 0.85)',
+                  border: '1px solid var(--border-color)',
+                  backdropFilter: 'blur(12px)',
+                }}
+                title="Развернуть обзор"
+              >
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-300 transition-colors" />
+                <span className="text-micro text-slate-500 group-hover:text-slate-300 transition-colors tracking-wider uppercase">
+                  Обзор
+                </span>
+              </button>
+            )}
+
+            {/* Expanded overlay panel */}
+            <div
+              className="absolute left-0 top-0 bottom-0 z-30 flex flex-col overflow-y-auto transition-all duration-300"
+              style={{
+                width: fabricCollapsed || focusMode ? 0 : 320,
+                opacity: fabricCollapsed || focusMode ? 0 : 1,
+                background: 'rgba(10, 14, 30, 0.95)',
+                borderRight: '1px solid rgba(255,255,255,0.06)',
+                backdropFilter: 'blur(16px)',
+                pointerEvents: fabricCollapsed || focusMode ? 'none' : 'auto',
+              }}
+            >
+              {/* Header */}
+              <div className="px-5 py-4" style={sectionBorder}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-base font-medium text-slate-200 tracking-wide">
+                      Ткань сообщества
+                    </h1>
+                    <button
+                      onClick={() => setShowPageInfo(!showPageInfo)}
+                      className="text-slate-600 hover:text-amber-400 transition-colors"
+                      title="О странице"
+                    >
+                      <Info className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setFabricCollapsed(true)}
+                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-300 transition-all p-1.5 rounded-lg hover:bg-indigo-500/10 border border-transparent hover:border-indigo-500/20"
+                    title="Свернуть панель"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span className="text-micro">Свернуть</span>
+                  </button>
+                </div>
+
+                <p className="text-xs text-slate-500 mt-1">
+                  {leaderNodes.length} участников · обновлено 2 мин назад
+                </p>
+
+                {showPageInfo && (
+                  <div
+                    className="mt-2 p-2.5 rounded-lg"
+                    style={{
+                      background: 'rgba(245, 158, 11, 0.06)',
+                      border: '1px solid rgba(245, 158, 11, 0.1)',
+                    }}
+                  >
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Эта страница показывает, как участники связаны между собой:
+                      где уже появилась взаимная поддержка, где всё ещё держится на
+                      лидере, кто соединяет группы, кому нужна первая связь и где
+                      пора выращивать новые роли.
+                    </p>
+                    <p className="text-xs text-slate-600 mt-1.5 leading-relaxed italic">
+                      Не рейтинг участников и не контроль активности. Это карта
+                      заботы: она помогает лидеру вовремя увидеть, где нужна
+                      поддержка, где появился вклад и где сообщество уже начинает
+                      помогать себе само.
+                    </p>
+                  </div>
+                )}
+
+                <p className="text-xs text-slate-600 mt-2">
+                  Состояние ткани, метрики и сигналы заботы
+                </p>
+
+                {/* Period selector */}
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-micro text-slate-600">Период:</span>
+                  <div
+                    className={`flex items-center gap-0.5 rounded-lg p-0.5 border ${
+                      topology === 'density'
+                        ? 'bg-slate-800/60 border-slate-700/40'
+                        : 'bg-slate-800/30 border-slate-700/20'
+                    }`}
+                  >
+                    {[7, 30, 90].map((d) => (
+                      <button
+                        key={d}
+                        onClick={() =>
+                          topology === 'density' && setPulsePeriod(d)
+                        }
+                        disabled={topology !== 'density'}
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                          topology !== 'density'
+                            ? 'text-slate-600 cursor-not-allowed'
+                            : pulsePeriod === d
+                              ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                              : 'text-slate-500 hover:text-slate-300 hover:bg-slate-700/50'
+                        }`}
+                      >
+                        {d}д
+                      </button>
+                    ))}
+                  </div>
+                  {topology !== 'density' && (
+                    <span className="text-micro text-slate-700">
+                      для вкладки Пульс
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* What changed */}
+              <div className="px-5 py-3" style={sectionBorder}>
+                <p className="text-micro text-slate-500 uppercase tracking-wider mb-2">
+                  Что изменилось за {pulsePeriod} дней
+                </p>
+                <div
+                  className="p-3 rounded-xl transition-all duration-200"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--border-color)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                  }}
+                >
+                  <div className="space-y-1.5">
+                    {pulseMetricsByPeriod[pulsePeriod]?.changed.map(
+                      (item, i) => {
+                        const colorMap: Record<
+                          string,
+                          { text: string; dot: string }
+                        > = {
+                          emerald: { text: '#4ade80', dot: '#22c55e' },
+                          amber: { text: '#fbbf24', dot: '#f59e0b' },
+                          red: { text: '#f87171', dot: '#ef4444' },
+                          slate: { text: '#94a3b8', dot: '#64748b' },
+                        };
+                        const c = colorMap[item.color] || colorMap.slate;
+                        return (
+                          <div key={i} className="flex items-center gap-2">
+                            <div
+                              className="w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{ background: c.dot }}
+                            />
+                            <span className="text-xs" style={{ color: c.text }}>
+                              {item.label}
+                            </span>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Metrics */}
+              <div className="px-5 py-4" style={sectionBorder}>
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
+                  Метрики
+                </h3>
+                <div className="space-y-2">
+                  {(() => {
+                    const pm =
+                      pulseMetricsByPeriod[pulsePeriod]
+                      || pulseMetricsByPeriod[7];
+                    return [
+                      {
+                        key: 'density',
+                        label: 'Плотность связей',
+                        desc: 'Насколько участники связаны',
+                        value: `${pm.density}%`,
+                        trend: pm.trend.density,
+                        bar: pm.density,
+                        color: '#6366f1',
+                        accent: 'rgba(99,102,241,0.12)',
+                        border: 'rgba(99,102,241,0.15)',
+                        text: '#818cf8',
+                      },
+                      {
+                        key: 'leaderDependency',
+                        label: 'Зависимость от лидера',
+                        desc: 'Сигнал выращивать помощников',
+                        value: `${pm.leaderDependency}%`,
+                        trend: pm.trend.leaderDependency,
+                        bar: pm.leaderDependency,
+                        color:
+                          pm.leaderDependency > 60 ? '#f59e0b' : '#6366f1',
+                        accent:
+                          pm.leaderDependency > 60
+                            ? 'rgba(245,158,11,0.1)'
+                            : 'rgba(99,102,241,0.08)',
+                        border:
+                          pm.leaderDependency > 60
+                            ? 'rgba(245,158,11,0.15)'
+                            : 'rgba(99,102,241,0.12)',
+                        text:
+                          pm.leaderDependency > 60 ? '#fbbf24' : '#818cf8',
+                        warning: pm.leaderDependency > 60,
+                      },
+                      {
+                        key: 'isolation',
+                        label: 'Нужна первая связь',
+                        desc: 'Точка заботы для сообщества',
+                        value: `${pm.isolation} ${pm.isolation === 1 ? 'участник' : 'участникам'}`,
+                        trend: pm.trend.isolation,
+                        bar: pm.isolation * 25,
+                        color: '#ef4444',
+                        accent: 'rgba(239,68,68,0.08)',
+                        border: 'rgba(239,68,68,0.12)',
+                        text: '#f87171',
+                      },
+                      {
+                        key: 'decaying',
+                        label: 'Угасание связей',
+                        desc: 'Сигнал для мягкого ритуала',
+                        value: `${pm.decaying}`,
+                        trend: pm.trend.decaying,
+                        bar: pm.decaying * 20,
+                        color: '#f59e0b',
+                        accent: 'rgba(245,158,11,0.08)',
+                        border: 'rgba(245,158,11,0.12)',
+                        text: '#fbbf24',
+                      },
+                      {
+                        key: 'overloaded',
+                        label: 'Перегрузка помощников',
+                        desc: 'Стоит беречь и разгружать',
+                        value: `${pm.overload || 0}`,
+                        trend: pm.trend.overloaded || 0,
+                        bar: (pm.overload || 0) * 25,
+                        color: '#ed8936',
+                        accent: 'rgba(237,137,54,0.08)',
+                        border: 'rgba(237,137,54,0.12)',
+                        text: '#fb923c',
+                      },
+                    ];
+                  })().map((metric: any) => {
+                    const dir = metricDirections[metric.key] || 'neutral';
+                    const trendGood
+                      = dir === 'good'
+                        ? metric.trend > 0
+                        : dir === 'bad'
+                          ? metric.trend < 0
+                          : false;
+                    const trendBad
+                      = dir === 'good'
+                        ? metric.trend < 0
+                        : dir === 'bad'
+                          ? metric.trend > 0
+                          : false;
+                    return (
+                      <div
+                        key={metric.label}
+                        className="p-3 rounded-xl transition-all duration-200"
+                        style={{
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid var(--border-color)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background
+                            = 'rgba(255,255,255,0.06)';
+                          e.currentTarget.style.borderColor
+                            = 'rgba(255,255,255,0.08)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background
+                            = 'rgba(255,255,255,0.03)';
+                          e.currentTarget.style.borderColor
+                            = 'rgba(255,255,255,0.05)';
+                        }}
+                      >
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs text-slate-400">
+                            {metric.label}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {metric.trend > 0 ? (
+                              <TrendingUp
+                                className={`w-3 h-3 ${
+                                  trendGood
+                                    ? 'text-emerald-500'
+                                    : trendBad
+                                      ? 'text-red-400'
+                                      : 'text-slate-500'
+                                }`}
+                              />
+                            ) : metric.trend < 0 ? (
+                              <TrendingDown
+                                className={`w-3 h-3 ${
+                                  trendGood
+                                    ? 'text-emerald-500'
+                                    : trendBad
+                                      ? 'text-red-400'
+                                      : 'text-slate-500'
+                                }`}
+                              />
+                            ) : null}
+                            <span
+                              className={`text-xs font-medium ${
+                                metric.warning
+                                  ? 'text-amber-400'
+                                  : 'text-slate-200'
+                              }`}
+                            >
+                              {metric.value}
+                            </span>
+                            {metric.trend !== 0 && (
+                              <span
+                                className={`text-micro ${
+                                  trendGood
+                                    ? 'text-emerald-500'
+                                    : trendBad
+                                      ? 'text-red-400'
+                                      : 'text-slate-500'
+                                }`}
+                              >
+                                {metric.trend > 0 ? '+' : ''}
+                                {metric.trend}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed mb-2">
+                          {metric.desc}
+                        </p>
+                        <div
+                          className="h-1.5 rounded-full overflow-hidden"
+                          style={{ background: 'rgba(255,255,255,0.05)' }}
+                        >
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{
+                              width: `${Math.min(metric.bar, 100)}%`,
+                              background: metric.color,
+                            }}
+                          />
+                        </div>
+                        {metric.trend !== 0 && (
+                          <p className="text-micro text-slate-600 mt-1">
+                            к предыдущему периоду
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Signals */}
+              <div className="px-5 py-4" style={sectionBorder}>
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
+                  Сигналы ({leaderSignals.length})
+                </h3>
+                <div className="space-y-2">
+                  {leaderSignals.map((signal, i) => (
+                    <button
+                      key={i}
+                      className="w-full flex items-start gap-3 p-3 rounded-xl text-left group transition-all duration-200"
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.04)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background
+                          = 'rgba(255,255,255,0.06)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background
+                          = 'rgba(255,255,255,0.03)';
+                      }}
+                      onClick={() => {
+                        const node = leaderNodes.find(
+                          (n) => n.id === signal.nodeId
+                        );
+                        if (node) setSelectedNode(node);
+                      }}
+                    >
+                      {signalIcons[signal.type]}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-300 group-hover:text-slate-100 transition-colors">
+                          {signal.message}
+                        </p>
+                        {(signal as any).desc && (
+                          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                            {(signal as any).desc}
+                          </p>
+                        )}
+                        <button
+                          className="mt-2 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                          style={{
+                            background:
+                              signal.type === 'isolation'
+                                ? 'rgba(245,158,11,0.12)'
+                                : signal.type === 'overload'
+                                  ? 'rgba(239,68,68,0.1)'
+                                  : 'rgba(99,102,241,0.1)',
+                            color:
+                              signal.type === 'isolation'
+                                ? '#fbbf24'
+                                : signal.type === 'overload'
+                                  ? '#f87171'
+                                  : '#818cf8',
+                            border: `1px solid ${
+                              signal.type === 'isolation'
+                                ? 'rgba(245,158,11,0.2)'
+                                : signal.type === 'overload'
+                                  ? 'rgba(239,68,68,0.15)'
+                                  : 'rgba(99,102,241,0.15)'
+                            }`,
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log(
+                              'Action:',
+                              signal.action,
+                              signal.nodeId
+                            );
+                          }}
+                        >
+                          {signal.action.replace('Назначить', 'Подобрать')}
+                        </button>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="px-5 py-4">
+                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
+                  Действия
+                </h3>
+                <div className="space-y-2">
+                  {[
+                    {
+                      icon: <Users className="w-4 h-4" />,
+                      label: 'Welcome Loop',
+                      bg: 'rgba(99,102,241,0.12)',
+                      color: '#818cf8',
+                      border: 'rgba(99,102,241,0.2)',
+                    },
+                    {
+                      icon: <Play className="w-4 h-4" />,
+                      label: 'День разборов',
+                      bg: 'rgba(255,255,255,0.04)',
+                      color: '#94a3b8',
+                      border: 'rgba(255,255,255,0.08)',
+                    },
+                    {
+                      icon: <Heart className="w-4 h-4" />,
+                      label: 'Помощь-день',
+                      bg: 'rgba(255,255,255,0.04)',
+                      color: '#94a3b8',
+                      border: 'rgba(255,255,255,0.08)',
+                    },
+                    {
+                      icon: <AlertTriangle className="w-4 h-4" />,
+                      label: 'Назначить наставников',
+                      bg: 'rgba(245,158,11,0.1)',
+                      color: '#fbbf24',
+                      border: 'rgba(245,158,11,0.2)',
+                    },
+                  ].map((btn) => (
+                    <button
+                      key={btn.label}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                      style={{
+                        background: btn.bg,
+                        color: btn.color,
+                        border: `1px solid ${btn.border}`,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.filter = 'brightness(1.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.filter = 'brightness(1)';
+                      }}
+                    >
+                      {btn.icon}
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* ═══ end overlay panel ═══ */}
+          </div>
+        )}
+
+        {/* Selected cluster card */}
+        {selectedCluster && topology === 'clusters' && (
+          <>
+            <div
+              className="absolute inset-0 z-30"
+              style={{ background: 'rgba(0,0,0,0.15)' }}
+              onClick={() => setSelectedCluster(null)}
+            />
+            <div className="absolute inset-y-0 right-0 z-40 flex">
+            <div
+              className="w-px"
+              style={{
+                background:
+                  'linear-gradient(to bottom, transparent, rgba(255,255,255,0.08), transparent)',
+              }}
+            />
+            <div
+              className="w-80 h-full overflow-y-auto"
+              style={{
+                background: 'var(--bg-card)',
+                backdropFilter: 'blur(24px)',
+                borderLeft: '1px solid var(--border-color)',
+              }}
+            >
+              {(() => {
+                const cEdges = filteredEdges.filter(
+                  (e) =>
+                    selectedCluster.members.some(
+                      (m) => m.id === e.source
+                    )
+                    && selectedCluster.members.some(
+                      (m) => m.id === e.target
+                    )
+                );
+                const coreCount = selectedCluster.members.filter((m) => {
+                  const me = cEdges.filter(
+                    (e) => e.source === m.id || e.target === m.id
+                  );
+                  const tw = me.reduce((s, e) => s + e.weight, 0);
+                  return (
+                    me.length >= 2
+                    && tw / Math.max(me.length, 1) > 4
+                  );
+                }).length;
+                const bridgeCount = filteredEdges.filter((e) => {
+                  const sIn = selectedCluster.members.some(
+                    (m) => m.id === e.source
+                  );
+                  const tIn = selectedCluster.members.some(
+                    (m) => m.id === e.target
+                  );
+                  return sIn !== tIn;
+                }).length;
+                const isoCount = selectedCluster.members.filter((m) => {
+                  return (
+                    cEdges.filter(
+                      (e) => e.source === m.id || e.target === m.id
+                    ).length === 0
+                  );
+                }).length;
+                return (
+                  <div className="p-5">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="font-semibold text-slate-100 text-sm">
+                          {selectedCluster.name}
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-1">
+                          {selectedCluster.members.length} участников
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedCluster(null)}
+                        className="p-1.5 rounded-lg hover:bg-[var(--hover-bg)] text-slate-500 hover:text-slate-300 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div
+                      className="mb-4 pb-4"
+                      style={{
+                        borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      }}
+                    >
+                      <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
+                        Состав
+                      </h4>
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-center justify-between text-slate-400">
+                          <span>В ядре группы</span>
+                          <span className="text-slate-200 font-medium">
+                            {coreCount}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-slate-400">
+                          <span>На периферии</span>
+                          <span className="text-slate-200 font-medium">
+                            {selectedCluster.members.length
+                              - coreCount
+                              - isoCount}
+                          </span>
+                        </div>
+                        {isoCount > 0 && (
+                          <div className="flex items-center justify-between text-red-400">
+                            <span>Нужна первая связь</span>
+                            <span className="font-medium">{isoCount}</span>
+                          </div>
+                        )}
+                        {bridgeCount > 0 && (
+                          <div className="flex items-center justify-between text-amber-400">
+                            <span>Связей с другими группами</span>
+                            <span className="font-medium">
+                              {bridgeCount}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div
+                      className="mb-4 pb-4"
+                      style={{
+                        borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      }}
+                    >
+                      <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
+                        Участники
+                      </h4>
+                      <div className="space-y-1.5">
+                        {selectedCluster.members.map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => handleNodeClick(m)}
+                            className="w-full flex items-center gap-2.5 p-2 rounded-lg text-left transition-colors hover:bg-[var(--hover-bg)]"
+                          >
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
+                                m.isOnline
+                                  ? 'bg-slate-700 text-slate-200'
+                                  : 'bg-slate-800 text-slate-400'
+                              }`}
+                            >
+                              {m.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs text-slate-300 truncate">
+                                {m.name}
+                              </p>
+                              {m.role && (
+                                <p className="text-micro text-slate-600 truncate">
+                                  {m.role}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <button
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                        style={{
+                          background: 'rgba(99,102,241,0.15)',
+                          color: '#818cf8',
+                          border: '1px solid rgba(99,102,241,0.2)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background
+                            = 'rgba(99,102,241,0.25)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background
+                            = 'rgba(99,102,241,0.15)';
+                        }}
+                      >
+                        <Zap className="w-4 h-4" />
+                        Запустить разбор внутри группы
+                      </button>
+                      {isoCount > 0 && (
+                        <button
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                          style={{
+                            background: 'rgba(245,158,11,0.12)',
+                            color: '#fbbf24',
+                            border: '1px solid rgba(245,158,11,0.2)',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background
+                              = 'rgba(245,158,11,0.2)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background
+                              = 'rgba(245,158,11,0.12)';
+                          }}
+                        >
+                          <Users className="w-4 h-4" />
+                          Познакомить участников
+                        </button>
+                      )}
+                      {bridgeCount > 0 && (
+                        <button
+                          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                          style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            color: '#94a3b8',
+                            border: '1px solid var(--border-color)',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background
+                              = 'rgba(255,255,255,0.08)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background
+                              = 'rgba(255,255,255,0.05)';
+                          }}
+                        >
+                          <Star className="w-4 h-4" />
+                          Предложить роль связующему
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+          </>
+        )}
+
+        {/* Selected node card */}
+        {selectedNode && (() => {
+          const cMap = findClusters(filteredNodes, filteredEdges);
+          const bridges = findBridges(filteredEdges, cMap);
+          const cid = cMap.get(selectedNode.id) ?? -1;
+          const cNodes = filteredNodes.filter(
+            (n) => (cMap.get(n.id) ?? -1) === cid
+          );
+          const cName = cid === -1 ? null : getClusterName(cNodes);
+          const isBridge = bridges.has(selectedNode.id);
+          const centrality = computeCentrality(
+            selectedNode.id, filteredEdges
+          );
+          const cRole
+            = cid === -1
+              ? ('isolated' as const)
+              : isBridge
+                ? ('bridge' as const)
+                : centrality > 0.5
+                  ? ('core' as const)
+                  : ('periphery' as const);
+          return (
+            <>
+              <div
+                className="absolute inset-0 z-30"
+                style={{ background: 'rgba(0,0,0,0.15)' }}
+                onClick={() => setSelectedNode(null)}
+              />
+              <div className="absolute inset-y-0 right-0 z-40 flex">
+                <div
+                  className="w-px"
+                  style={{
+                    background:
+                      'linear-gradient(to bottom, transparent, rgba(255,255,255,0.08), transparent)',
+                  }}
+                />
+                <div
+                  className="w-80 h-full overflow-y-auto"
+                  style={{
+                    background: 'var(--bg-card)',
+                    backdropFilter: 'blur(24px)',
+                    borderLeft: '1px solid var(--border-color)',
+                  }}
+                >
+                <NodeCard
+                  node={selectedNode}
+                  edges={filteredEdges.filter(
+                    (e) =>
+                      e.source === selectedNode.id
+                      || e.target === selectedNode.id
+                  )}
+                  currentUserId="me"
+                  onClose={() => setSelectedNode(null)}
+                  mode="leader"
+                  period={pulsePeriod}
+                  clusterName={cName || undefined}
+                  clusterRole={cRole}
+                  statusExplanation={(() => {
+                    const s = selectedNode.status;
+                    const name = selectedNode.name.split(' ')[0];
+                    const ne = filteredEdges.filter(
+                      (e) =>
+                        e.source === selectedNode.id
+                        || e.target === selectedNode.id
+                    );
+                    if (s === 'inactive')
+                      return `${name} пока не вошла в живые связи сообщества — нет устойчивых контактов, через которые она регулярно взаимодействует. Это не ярлык, а задача заботы для лидера. Стоит мягко подобрать наставника или включить в Welcome Loop.`;
+                    if (s === 'stuck')
+                      return `${name} задержалась на шаге — у неё ${ne.length} связей, но движение приостановилось. Нет новых живых действий за последние дни. Может помочь мягкий разбор или новый импульс через ритуал.`;
+                    if (s === 'burnout_risk')
+                      return `${name} активно помогает другим и близка к ядру группы, но берёт на себя много запросов (${ne.length} связей помощи). Ей может понадобиться разгрузка — распределить часть запросов на другого помощника.`;
+                    return `${name} стабильно участвует в группе — ${ne.length} связей, устойчивое движение. Может стать мягкой опорой для новичков.`;
+                  })()}
+                />
+              </div>
+            </div>
+            </>
+          );
+        })()}
+      </div>
+    </div>
+    </div>
+  );
+}
