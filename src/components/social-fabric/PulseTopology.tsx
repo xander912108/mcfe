@@ -14,6 +14,7 @@ interface PulseTopologyProps {
   darkMode?: boolean;
   period?: number;
   onPeriodChange?: (period: number) => void;
+  camera?: ReturnType<typeof useCamera>;
 }
 
 interface SimNode extends GraphNode {
@@ -54,10 +55,11 @@ function tempColor(t: number): string {
 
 export function PulseTopology({
   nodes, edges, onNodeHover, onNodeClick, width, height,
-  darkMode = true, period = 7, onPeriodChange,
+  darkMode = true, period = 7, onPeriodChange, camera: externalCamera,
 }: PulseTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const cam = useCamera(width, height);
+  const internalCam = useCamera(width, height);
+  const cam = externalCamera ?? internalCam;
   const simRef = useRef<Map<string, SimNode>>(new Map());
   const animRef = useRef<number>(0);
   const hoveredRef = useRef<string | null>(null);
@@ -107,9 +109,9 @@ export function PulseTopology({
 
       // Background — screen coords (before camera transform)
       const bgGrad = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height) * 0.7);
-      bgGrad.addColorStop(0, darkMode ? '#1a1814' : '#FDFBF7');
-      bgGrad.addColorStop(0.5, darkMode ? '#141416' : '#FAFAF8');
-      bgGrad.addColorStop(1, darkMode ? '#0f0f12' : '#F5F4F0');
+      bgGrad.addColorStop(0, darkMode ? '#151310' : '#F3EFE8');
+      bgGrad.addColorStop(0.5, darkMode ? '#0E0D0B' : '#EDE9E0');
+      bgGrad.addColorStop(1, darkMode ? '#0A0908' : '#E8E3D8');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -367,7 +369,7 @@ export function PulseTopology({
   // Empty state
   if (nodes.length === 0 || edges.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full" style={{ background: darkMode ? '#141416' : '#FAFAF8' }}>
+      <div className="flex flex-col items-center justify-center h-full" style={{ background: darkMode ? '#0E0D0B' : '#EDE9E0' }}>
         <div className="text-center px-8 max-w-sm">
           <p className="text-subtitle text-stone-400 mb-2">Пульс пока формируется</p>
           <p className="text-caption text-stone-600 leading-relaxed">

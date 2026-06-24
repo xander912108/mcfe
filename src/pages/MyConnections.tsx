@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router';
 import { Sparkles, ArrowRight, UserPlus, Maximize2, Minimize2, Lightbulb, Search, Users, Zap, MessageCircle } from 'lucide-react';
+import { useCamera } from '@/hooks/useCamera';
 import { currentUser, participantNodes, participantEdges, recommendations, bridgeContexts } from '@/data/graphData';
 import { PremiumStarGraph } from '@/components/social-fabric/PremiumStarGraph';
 import { CirclesTopology } from '@/components/social-fabric/CirclesTopology';
@@ -98,6 +99,9 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     return () => observer.disconnect();
   }, [displayTopology]); // Re-observe when tab changes
 
+  // Camera for zoom controls (shared across all canvas tabs)
+  const cam = useCamera(canvasSize.width, canvasSize.height, 0.82);
+
   const activeFilterKeys = Object.entries(activeFilters).filter(([, v]) => v).map(([k]) => k);
   const hasActiveFilters = activeFilterKeys.length > 0;
 
@@ -136,7 +140,12 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
 
     nodes = nodes.filter(matchesFilters);
     const nodeIds = new Set(nodes.map((n) => n.id));
-    const edges = participantEdges.filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target));
+    // Include edges between filtered nodes AND edges connecting to 'me' (center)
+    const edges = participantEdges.filter((e) =>
+      (nodeIds.has(e.source) && nodeIds.has(e.target)) ||
+      (e.source === 'me' && nodeIds.has(e.target)) ||
+      (e.target === 'me' && nodeIds.has(e.source))
+    );
     const hIds = hasActiveFilters ? new Set(nodes.map((n) => n.id)) : null;
     return { filteredNodes: nodes, filteredEdges: edges, highlightNodeIds: hIds };
   }, [activeFilters, hasActiveFilters, activeFilterKeys]);
@@ -390,6 +399,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                       height={canvasSize.height}
                       focusMode={focusMode}
                       darkMode={darkMode}
+                      camera={cam}
                     />
                     {hoveredNode && !selectedNode && hoveredScreenPos && (
                       <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
@@ -417,6 +427,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                       focusMode={focusMode}
                       bridgeContexts={bridgeContexts}
                       darkMode={darkMode}
+                      camera={cam}
                     />
                     {hoveredNode && !selectedNode && (
                       <div className="absolute z-50 pointer-events-none" style={{ left: (hoveredNode.x || 0) + 50, top: (hoveredNode.y || 0) - 30 }}>
@@ -442,9 +453,9 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
             {/* Zoom controls — only for canvas tabs */}
             {topology !== 'list' && (
               <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
-                <ZoomButton label="Увеличить">+</ZoomButton>
-                <ZoomButton label="Уменьшить">{'\u2212'}</ZoomButton>
-                <ZoomButton label="Сбросить вид">{'\u2316'}</ZoomButton>
+                <ZoomButton label="Увеличить" onClick={cam.zoomIn}>+</ZoomButton>
+                <ZoomButton label="Уменьшить" onClick={cam.zoomOut}>{'\u2212'}</ZoomButton>
+                <ZoomButton label="Сбросить вид" onClick={cam.reset}>{'\u2316'}</ZoomButton>
               </div>
             )}
           </div>

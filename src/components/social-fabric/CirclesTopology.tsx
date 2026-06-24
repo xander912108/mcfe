@@ -18,6 +18,7 @@ interface CirclesTopologyProps {
   height: number;
   focusMode?: boolean;
   darkMode?: boolean;
+  camera?: ReturnType<typeof useCamera>;
 }
 
 interface RenderNode extends GraphNode {
@@ -28,34 +29,27 @@ interface RenderNode extends GraphNode {
   radius: number;
   opacity: number;
   pulsePhase: number;
-  pulseOffset: number; // individual breathing offset in ms (0–5000)
+  pulseOffset: number;
   ringIndex: number;
   ringLabel: string;
-  distanceInRing: number; // 0=inner, 1=outer within ring
 }
+
+const RING_CONFIG = [
+  { label: 'Опоры', desc: 'Устойчивые связи: можно попросить совет.', color: '#C9A96E', bg: 'rgba(201,169,110,0.10)', strokeAlpha: 'bb', fillAlpha: '18' },
+  { label: 'Близкие', desc: 'Тёплые связи — написать, продолжить контакт.', color: '#B89cc0', bg: 'rgba(184,156,192,0.08)', strokeAlpha: 'aa', fillAlpha: '14' },
+  { label: 'Коллеги', desc: 'Общий контекст — обменяться опытом.', color: '#6B9E7C', bg: 'rgba(107,158,124,0.07)', strokeAlpha: '99', fillAlpha: '12' },
+  { label: 'Знакомые', desc: 'Слабая связь — мягко оживить.', color: '#9A9895', bg: 'rgba(154,152,149,0.06)', strokeAlpha: '88', fillAlpha: '10' },
+  { label: 'Потенциальные', desc: 'Связи ещё нет — познакомиться.', color: '#787673', bg: 'rgba(120,118,115,0.05)', strokeAlpha: '66', fillAlpha: '0c' },
+];
 
 function getColors(dark: boolean) {
   return {
-    bgGradient: dark ? ['#1a1814', '#141416', '#0f0f12'] : ['#FDFBF7', '#FAFAF8', '#F5F4F0'],
-    center: { fill: dark ? '#5a4a2a' : '#8a7a4a', glow: dark ? 'rgba(201, 169, 110, 0.35)' : 'rgba(201, 169, 110, 0.25)', pulse: dark ? 'rgba(212, 184, 122, 0.15)' : 'rgba(201, 169, 110, 0.12)', text: '#ffffff', border: '#C9A96E' },
+    bgGradient: dark ? ['#151310', '#0E0D0B', '#0A0908'] : ['#F3EFE8', '#EDE9E0', '#E8E3D8'],
+    center: { fill: dark ? '#5a4a2a' : '#8a7a4a', text: '#ffffff', border: '#C9A96E' },
     nodes: {
-      online: { fill: dark ? '#3a3020' : '#f5efe3', glow: dark ? 'rgba(201, 169, 110, 0.5)' : 'rgba(201, 169, 110, 0.4)', border: '#C9A96E' },
-      offline: { fill: dark ? '#1c1c1f' : '#f0eeea', glow: dark ? 'rgba(120, 113, 108, 0.15)' : 'rgba(120, 113, 108, 0.1)', border: dark ? '#4a4a4e' : '#c8c5bf' },
-      stuck: { fill: '#3c2a1e', glow: 'rgba(237, 137, 54, 0.25)', border: '#ed8936' },
-      burnout: { fill: '#3c1e1e', glow: 'rgba(245, 101, 101, 0.2)', border: '#f56565' },
+      online: { fill: dark ? '#3a3020' : '#f5efe3', border: '#C9A96E' },
+      offline: { fill: dark ? '#1c1c1f' : '#f0eeea', border: dark ? '#4a4a4e' : '#c8c5bf' },
     },
-    edges: {
-      help: '#7a8faf', review: '#6B9E7C', flow: '#ed8936',
-      mentorship: '#B89cc0', gratitude: '#ecc94b', mutual: '#38b2ac',
-      default: dark ? '#2a2a2e' : '#d8d5cf', decaying: dark ? '#1a1a1e' : '#e8e5df',
-    },
-    rings: [
-      { color: 'rgba(201, 169, 110, 0.22)', stroke: 'rgba(201, 169, 110, 0.90)', label: 'Опоры', desc: 'Устойчивые связи: можно попросить совет.' },
-      { color: 'rgba(184, 156, 192, 0.15)', stroke: 'rgba(184, 156, 192, 0.85)', label: 'Близкие', desc: 'Тёплые связи — написать, продолжить контакт.' },
-      { color: 'rgba(107, 158, 124, 0.12)', stroke: 'rgba(107, 158, 124, 0.80)', label: 'Коллеги', desc: 'Общий контекст — обменяться опытом.' },
-      { color: 'rgba(154, 152, 149, 0.08)', stroke: 'rgba(154, 152, 149, 0.70)', label: 'Знакомые', desc: 'Слабая связь — мягко оживить.' },
-      { color: 'rgba(106, 104, 101, 0.05)', stroke: 'rgba(106, 104, 101, 0.45)', label: 'Потенциальные', desc: 'Связи ещё нет — познакомиться.' },
-    ],
     roleColors: {
       'Помощник по практике': '#C9A96E', 'Помощник на старт': '#B89cc0',
       'Хранитель знаний': '#d69e2e', 'Куратор': '#ed64a6',
@@ -64,28 +58,12 @@ function getColors(dark: boolean) {
   };
 }
 
-// Activity freshness helpers
-function daysSince(dateStr: string): number {
-  const d = new Date(dateStr);
-  const now = new Date('2026-06-17');
-  return Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-}
-function isRecent(dateStr: string, days: number = 7): boolean {
-  return daysSince(dateStr) <= days;
-}
-function isStale(dateStr: string, days: number = 30): boolean {
-  return daysSince(dateStr) > days;
-}
-
-function getRingIndex(node: GraphNode, edge?: GraphEdge): number {
-  if (!edge) return 4; // No connection = Потенциальные
-  if (node.role === 'Помощник по практике' || node.role === 'Помощник на старт' || node.role === 'Куратор') return 0;
-  const weight = edge.weight;
-  if (weight >= 7) return 0; // Опоры
-  if (weight >= 5) return 1; // Близкие
-  if (weight >= 3) return 2; // Коллеги
-  if (weight >= 1) return 3; // Знакомые (вес 1-2)
-  return 4; // Потенциальные (вес 0)
+function getRingIndexByWeight(weight: number): number {
+  if (weight >= 7) return 0;      // Опоры
+  if (weight >= 5) return 1;      // Близкие
+  if (weight >= 3) return 2;      // Коллеги
+  if (weight >= 1) return 3;      // Знакомые
+  return 4;                       // Потенциальные (weight 0 or no edge)
 }
 
 function getNodeRadius(contributionLevel: number): number {
@@ -96,71 +74,67 @@ function getNodeRadius(contributionLevel: number): number {
 }
 
 export function CirclesTopology({
-  centerNode, nodes, edges, onNodeHover, onNodeClick, onRingClick, onHoverScreenPos, highlightNodeId, highlightNodeIds, dimOpacity = 0.2, width, height,
-darkMode = true,
+  centerNode, nodes, edges, onNodeHover, onNodeClick, onRingClick: _onRingClick, onHoverScreenPos: _onHoverScreenPos,
+  highlightNodeId, highlightNodeIds, dimOpacity = 0.2, width, height,
+  darkMode = true, camera: externalCamera,
 }: CirclesTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodesRef = useRef<Map<string, RenderNode>>(new Map());
   const animRef = useRef<number>(0);
   const hoveredRef = useRef<string | null>(null);
-  const timeRef = useRef(0);
-  const activeRingsRef = useRef<boolean[]>([true, true, true, true, true]);
-  const adaptiveRingRadiiRef = useRef<number[]>([0, 0, 0, 0, 0]);
+  const ringNodesRef = useRef<string[][]>([[], [], [], [], []]);
 
   const COLORS = getColors(darkMode);
-  const cam = useCamera(width, height, 0.82);
+  const internalCam = useCamera(width, height, 0.82);
+  const cam = externalCamera ?? internalCam;
 
   const cx = width / 2;
   const cy = height / 2;
-  const maxR = Math.min(width, height) * 0.46;
-  // Wider spacing between rings so each zone is clearly distinct
-  const ringRadii = [maxR * 0.16, maxR * 0.34, maxR * 0.54, maxR * 0.76, maxR * 0.95];
+  const maxR = Math.min(width, height) * 0.42;
+  // Fixed ring radii — always 5 visible rings
+  const ringRadii = [maxR * 0.18, maxR * 0.36, maxR * 0.55, maxR * 0.75, maxR * 0.94];
 
+  // Distribute nodes into rings based on their max edge weight to center
   useEffect(() => {
+    // Build map: nodeId -> max weight connecting to center
+    const nodeMaxWeight = new Map<string, number>();
+    edges.forEach((e) => {
+      const isToCenter = e.source === centerNode.id || e.target === centerNode.id;
+      if (!isToCenter) return;
+      const otherId = e.source === centerNode.id ? e.target : e.source;
+      if (otherId === centerNode.id) return;
+      const current = nodeMaxWeight.get(otherId) ?? -1;
+      if (e.weight > current) nodeMaxWeight.set(otherId, e.weight);
+    });
+
+    // Distribute ALL nodes into 5 rings
+    const ringPositions: string[][] = [[], [], [], [], []];
+    nodes.forEach((node) => {
+      const weight = nodeMaxWeight.get(node.id) ?? -1;
+      const ri = weight < 0 ? 4 : getRingIndexByWeight(weight);
+      ringPositions[ri].push(node.id);
+    });
+    ringNodesRef.current = ringPositions;
+
+    // Place center node
     const centerRn: RenderNode = {
       ...centerNode, x: cx, y: cy, targetX: cx, targetY: cy,
-      radius: 36, opacity: 0, pulsePhase: 0, pulseOffset: 0, ringIndex: -1, ringLabel: '', distanceInRing: 0,
+      radius: 34, opacity: 1, pulsePhase: 0, pulseOffset: 0, ringIndex: -1, ringLabel: '',
     };
     nodesRef.current.set(centerNode.id, centerRn);
 
-    const ringPositions: string[][] = [[], [], [], [], []];
-    nodes.forEach((node) => {
-      const edge = edges.find(
-        (e) => (e.source === centerNode.id && e.target === node.id) ||
-               (e.target === centerNode.id && e.source === node.id)
-      );
-      let ri = getRingIndex(node, edge);
-      // Ensure p7 (Dmitry N.) is always in ring 3 (Acquaintances)
-      if (node.id === 'p7') ri = 3;
-      ringPositions[ri].push(node.id);
-    });
-
-    // Update active rings (hide empty ones)
-    activeRingsRef.current = ringPositions.map((ids) => ids.length > 0);
-
+    // Place nodes in their rings
     ringPositions.forEach((nodeIds, ri) => {
-      if (nodeIds.length === 0) return; // Skip empty rings
-      const baseR = ringRadii[ri];
-      // Adaptive radius: expand ring if too many nodes to fit without overlap
-      const maxNodeR = Math.max(...nodeIds.map((nid) => {
-        const n = nodes.find((nn) => nn.id === nid);
-        return n ? getNodeRadius(n.contributionLevel) : 20;
-      }));
-      const spacing = 1.45; // 45% gap between node edges
-      const minR = (nodeIds.length * maxNodeR * spacing) / Math.PI;
-      const r = Math.max(baseR, minR);
-      adaptiveRingRadiiRef.current[ri] = r; // Store for rendering
-
+      const r = ringRadii[ri];
       nodeIds.forEach((nid, i) => {
-        const node = nodes.find((n) => n.id === nid)!;
+        const node = nodes.find((n) => n.id === nid);
+        if (!node) return;
         const angle = (2 * Math.PI * i) / Math.max(nodeIds.length, 1) - Math.PI / 2;
         const existing = nodesRef.current.get(nid);
-        const ringChanged = existing ? existing.ringIndex !== ri : false;
-
         nodesRef.current.set(nid, {
           ...node,
-          x: ringChanged ? cx : (existing?.x ?? cx),
-          y: ringChanged ? cy : (existing?.y ?? cy),
+          x: existing?.x ?? cx + r * 0.5 * Math.cos(angle),
+          y: existing?.y ?? cy + r * 0.5 * Math.sin(angle),
           targetX: cx + r * Math.cos(angle),
           targetY: cy + r * Math.sin(angle),
           radius: getNodeRadius(node.contributionLevel),
@@ -168,30 +142,28 @@ darkMode = true,
           pulsePhase: Math.random() * Math.PI * 2,
           pulseOffset: Math.random() * 5000,
           ringIndex: ri,
-          ringLabel: COLORS.rings[ri].label,
-          distanceInRing: 0,
+          ringLabel: RING_CONFIG[ri].label,
         });
       });
     });
-  }, [centerNode, nodes, edges, width, height, cx, cy, maxR, ringRadii]);
+  }, [centerNode, nodes, edges, cx, cy, ringRadii]);
 
+  // Render
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    if (canvas.width <= 0 || canvas.height <= 0) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = width * dpr;
     canvas.height = height * dpr;
 
     const animate = (ts: number) => {
-      timeRef.current = ts;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
-      // Background — screen coords (before camera transform)
+      // Background
       const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(width, height) * 0.7);
       bgGrad.addColorStop(0, COLORS.bgGradient[0]);
       bgGrad.addColorStop(0.5, COLORS.bgGradient[1]);
@@ -202,427 +174,248 @@ darkMode = true,
       ctx.save();
       cam.applyTransform(ctx);
 
-      // Ambient glow behind center
-      const ambientGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 150);
-      ambientGlow.addColorStop(0, 'rgba(201, 169, 110, 0.06)');
-      ambientGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = ambientGlow;
-      ctx.fillRect(cx - 180, cy - 180, 360, 360);
+      // ─── ALL 5 RINGS (always visible) ───
+      ringRadii.forEach((r, i) => {
+        const cfg = RING_CONFIG[i];
+        const nodeCount = ringNodesRef.current[i]?.length ?? 0;
 
-      // Draw RING CIRCLES (adaptive radius, skip empty rings)
-      adaptiveRingRadiiRef.current.forEach((r, i) => {
-        if (!activeRingsRef.current[i]) return; // Skip empty rings
-        const ringPulse = Math.sin(ts * 0.0008 + i * 1.2) * 2;
-        // Ring glow area
-        const glowInner = Math.max(0, r - 18);
-        const ringGlow = ctx.createRadialGradient(cx, cy, glowInner, cx, cy, r + 18);
-        ringGlow.addColorStop(0, 'rgba(0,0,0,0)');
-        ringGlow.addColorStop(0.5, COLORS.rings[i].color);
-        ringGlow.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = ringGlow;
+        // 1. Fill band — brighter
+        const prevR = i > 0 ? ringRadii[i - 1] : ringRadii[0] * 0.35;
+        const bandGrad = ctx.createRadialGradient(cx, cy, prevR, cx, cy, r);
+        bandGrad.addColorStop(0, cfg.color + cfg.fillAlpha);
+        bandGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = bandGrad;
         ctx.beginPath();
-        ctx.arc(cx, cy, r + 20, 0, Math.PI * 2);
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        if (i > 0) ctx.arc(cx, cy, prevR, 0, Math.PI * 2, true);
+        else ctx.arc(cx, cy, ringRadii[0] * 0.35, 0, Math.PI * 2, true);
         ctx.fill();
 
-        // Ring line (dashed)
-        ctx.strokeStyle = COLORS.rings[i].stroke;
-        ctx.lineWidth = 1.2;
-        ctx.setLineDash([5, 7]);
+        // 2. Ring circle line — thicker, brighter
+        const pulse = Math.sin(ts * 0.0008 + i * 1.2) * 1.5;
+        ctx.strokeStyle = cfg.color + (darkMode ? cfg.strokeAlpha : '77');
+        ctx.lineWidth = nodeCount > 0 ? 2 : 1;
+        ctx.setLineDash(nodeCount > 0 ? [] : [5, 5]);
         ctx.beginPath();
-        ctx.arc(cx, cy, r + ringPulse, 0, Math.PI * 2);
+        ctx.arc(cx, cy, r + pulse, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Ring label — all on left side, staggered vertically to avoid overlap
+        // 3. Glow — brighter for all rings
+        const glow = ctx.createRadialGradient(cx, cy, r - 2, cx, cy, r + 14);
+        glow.addColorStop(0, 'rgba(0,0,0,0)');
+        glow.addColorStop(0.4, cfg.color + (darkMode ? (nodeCount > 0 ? '35' : '18') : (nodeCount > 0 ? '28' : '12')));
+        glow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 14, 0, Math.PI * 2);
+        ctx.arc(cx, cy, Math.max(0, r - 2), 0, Math.PI * 2, true);
+        ctx.fill();
+
+        // 4. Ring label
         const labelX = cx - r - 14;
-        const labelOffsetsY = [-22, -8, 6, 20, 34];
+        const labelOffsetsY = [-24, -10, 8, 22, 36];
         const labelY = cy + labelOffsetsY[i];
+        ctx.font = 'bold 10px Inter, system-ui, sans-serif';
+        const labelW = ctx.measureText(cfg.label).width;
+        // Pill bg
+        ctx.fillStyle = darkMode ? 'rgba(14,13,11,0.85)' : 'rgba(243,239,232,0.88)';
+        ctx.strokeStyle = cfg.color + '30';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.roundRect(labelX - labelW - 6, labelY - 9, labelW + 20, 18, 4);
+        ctx.fill();
+        ctx.stroke();
+        // Text
+        ctx.fillStyle = cfg.color;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
-        const labelText = COLORS.rings[i].label;
-        ctx.font = 'bold 11px Inter, system-ui, sans-serif';
-        const labelWidth = ctx.measureText(labelText).width;
-        // Label background for readability
-        ctx.fillStyle = 'rgba(20, 20, 22, 0.92)';
-        ctx.beginPath();
-        ctx.roundRect(labelX - labelWidth - 8, labelY - 10, labelWidth + 16, 20, 4);
-        ctx.fill();
-        // Label text
-        ctx.fillStyle = COLORS.rings[i].stroke;
-        ctx.font = 'bold 11px Inter, system-ui, sans-serif';
-        ctx.fillText(labelText, labelX, labelY);
-        // Small dot indicator
-        ctx.beginPath();
-        ctx.arc(labelX + 8, labelY, 3, 0, Math.PI * 2);
-        ctx.fillStyle = COLORS.rings[i].stroke;
-        ctx.fill();
-
+        ctx.fillText(cfg.label, labelX + 4, labelY);
+        // Count badge
+        if (nodeCount > 0) {
+          ctx.fillStyle = cfg.color;
+          ctx.font = 'bold 9px Inter, system-ui, sans-serif';
+          ctx.fillText(String(nodeCount), labelX + 16, labelY);
+        }
       });
 
-      // Draw EDGES — only on hover/click (Circles = balance view, not connection map)
-      const hoveredNodeId = hoveredRef.current;
-      edges.forEach((edge) => {
-        const src = nodesRef.current.get(edge.source);
-        const tgt = nodesRef.current.get(edge.target);
-        if (!src || !tgt) return;
-
-        const isHovered = hoveredRef.current === edge.source || hoveredRef.current === edge.target;
-        const isHighlighted = highlightNodeId === edge.source || highlightNodeId === edge.target;
-        const isCenterEdge = edge.source === centerNode.id || edge.target === centerNode.id;
-
-        // Skip if no hover/click — lines appear on demand in Circles
-        if (!hoveredNodeId && !highlightNodeId) return;
-
-        ctx.save();
-        const edgeOpacity = isHovered || isHighlighted ? 0.9 : isCenterEdge ? 0.55 : 0.18;
-        const edgeColor = COLORS.edges[edge.type as keyof typeof COLORS.edges] || COLORS.edges.default;
-        const lineWidth = isHovered ? Math.max(1.2, edge.weight * 0.4) : Math.max(0.5, edge.weight * 0.22);
-
-        // Line style: dashed = potential connection (weight <= 2)
-        // Brightness = activity freshness (recent = bright, stale = dim)
-        const recent = isRecent(edge.lastInteraction, 7);
-        const stale = isStale(edge.lastInteraction, 30);
-        const isPotential = edge.weight <= 2;
-
-        if (isPotential) {
-          ctx.setLineDash([4, 6]);
-          ctx.globalAlpha = edgeOpacity * (stale ? 0.3 : 0.5);
-        } else {
-          ctx.setLineDash([]);
-          ctx.globalAlpha = edgeOpacity * (recent ? 1.0 : stale ? 0.3 : 0.7);
-        }
-
-        ctx.strokeStyle = edgeColor + Math.floor(edgeOpacity * 140).toString(16).padStart(2, '0');
-        ctx.lineWidth = lineWidth;
-        ctx.lineCap = 'round';
+      // ─── RADIAL TICKS ───
+      const tickCount = 24;
+      const innerTickR = ringRadii[0] * 0.35;
+      const outerTickR = ringRadii[4] + 8;
+      for (let t = 0; t < tickCount; t++) {
+        const angle = (2 * Math.PI * t) / tickCount - Math.PI / 2;
+        const isMajor = t % 6 === 0;
+        const x1 = cx + innerTickR * Math.cos(angle);
+        const y1 = cy + innerTickR * Math.sin(angle);
+        const x2 = cx + outerTickR * Math.cos(angle);
+        const y2 = cy + outerTickR * Math.sin(angle);
+        ctx.strokeStyle = darkMode
+          ? `rgba(201,169,110,${isMajor ? 0.1 : 0.03})`
+          : `rgba(160,128,64,${isMajor ? 0.08 : 0.02})`;
+        ctx.lineWidth = isMajor ? 0.8 : 0.3;
         ctx.beginPath();
-        ctx.moveTo(src.x, src.y);
-        ctx.lineTo(tgt.x, tgt.y);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
         ctx.stroke();
-
-        if (isHovered || isCenterEdge) {
-          ctx.globalAlpha = edgeOpacity * 0.12;
-          ctx.strokeStyle = edgeColor;
-          ctx.lineWidth = lineWidth * 4;
+        // Major tick cap
+        if (isMajor) {
           ctx.beginPath();
-          ctx.moveTo(src.x, src.y);
-          ctx.lineTo(tgt.x, tgt.y);
-          ctx.stroke();
-        }
-
-        // Arrowhead
-        if (edge.type !== 'mutual' && edge.type !== 'flow') {
-          const angle = Math.atan2(tgt.y - src.y, tgt.x - src.x);
-          const arrowLen = isHovered ? 10 : 7;
-          const distToEdge = tgt.radius + 4;
-          const arrowX = tgt.x - distToEdge * Math.cos(angle);
-          const arrowY = tgt.y - distToEdge * Math.sin(angle);
-          ctx.globalAlpha = edgeOpacity;
-          ctx.fillStyle = edgeColor;
-          ctx.beginPath();
-          ctx.moveTo(arrowX, arrowY);
-          ctx.lineTo(arrowX - arrowLen * Math.cos(angle - 0.4), arrowY - arrowLen * Math.sin(angle - 0.4));
-          ctx.lineTo(arrowX - arrowLen * Math.cos(angle + 0.4), arrowY - arrowLen * Math.sin(angle + 0.4));
-          ctx.closePath();
+          ctx.arc(x2, y2, 2, 0, Math.PI * 2);
+          ctx.fillStyle = darkMode ? 'rgba(201,169,110,0.12)' : 'rgba(160,128,64,0.08)';
           ctx.fill();
         }
+      }
 
-        ctx.restore();
-      });
-
-      // Draw NODES
+      // ─── NODES ───
       nodesRef.current.forEach((node) => {
-        node.x += (node.targetX - node.x) * 0.07;
-        node.y += (node.targetY - node.y) * 0.07;
-        node.opacity = Math.min(1, node.opacity + 0.015);
+        if (node.id === centerNode.id) {
+          // Center node
+          node.x = cx; node.y = cy;
+        } else {
+          node.x += (node.targetX - node.x) * 0.08;
+          node.y += (node.targetY - node.y) * 0.08;
+          node.opacity = Math.min(1, node.opacity + 0.02);
+        }
 
         const isCenter = node.id === centerNode.id;
         const isHovered = hoveredRef.current === node.id;
-        const isHoverDimmed = hoveredRef.current && hoveredRef.current !== node.id && hoveredRef.current !== centerNode.id;
+        const isDimmed = hoveredRef.current && hoveredRef.current !== node.id && hoveredRef.current !== centerNode.id;
         const isFilterDimmed = highlightNodeIds && !highlightNodeIds.has(node.id) && !isCenter;
 
         ctx.save();
-        ctx.globalAlpha = isHoverDimmed ? 0.55 : isFilterDimmed ? dimOpacity : node.opacity;
+        ctx.globalAlpha = isDimmed ? 0.4 : isFilterDimmed ? dimOpacity : node.opacity;
 
-        let nodeScheme = COLORS.nodes.offline;
-        if (isCenter) nodeScheme = COLORS.center;
-        else if (node.status === 'stuck') nodeScheme = COLORS.nodes.stuck;
-        else if (node.status === 'burnout_risk') nodeScheme = COLORS.nodes.burnout;
-        else if (node.isOnline) nodeScheme = COLORS.nodes.online;
-
-        // All nodes render as full circles — no dot-only mode for periphery
-
-        // Online indicator drawn after border (see below)
-
-        // Center multi-ring
+        // Body
         if (isCenter) {
-          const op = Math.sin(ts * 0.0012) * 4;
           ctx.beginPath();
-          ctx.arc(node.x, node.y, node.radius + 12 + op, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(201, 169, 110, 0.15)';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, node.radius + 6 + Math.sin(ts * 0.0018 + 1) * 2, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(201, 169, 110, 0.22)';
-          ctx.lineWidth = 1;
-          ctx.stroke();
+          ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+          const cg = ctx.createRadialGradient(node.x - 5, node.y - 5, 2, node.x, node.y, node.radius);
+          cg.addColorStop(0, '#7a6a3a');
+          cg.addColorStop(1, '#4a3f20');
+          ctx.fillStyle = cg;
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 14px Inter, system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('Я', node.x, node.y);
+        } else {
+          drawNodeAvatar(ctx, node.x, node.y, node.radius, node.id, node.name, node.avatar);
         }
+
+        // Border
+        const borderColor = isCenter ? '#C9A96E' : node.role ? (COLORS.roleColors[node.role] || COLORS.roleColors.default) : (node.isOnline ? COLORS.nodes.online.border : COLORS.nodes.offline.border);
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = isCenter ? 2.5 : 2;
+        ctx.stroke();
 
         // Hover ring
         if (isHovered) {
           ctx.beginPath();
           ctx.arc(node.x, node.y, node.radius + 10, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+          ctx.strokeStyle = 'rgba(255,255,255,0.25)';
           ctx.lineWidth = 1;
           ctx.stroke();
         }
 
-        // Node body
-        if (isCenter) {
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-          const cg = ctx.createRadialGradient(node.x - 6, node.y - 6, 2, node.x, node.y, node.radius);
-          cg.addColorStop(0, '#7a6a3a');
-          cg.addColorStop(1, '#4a3f20');
-          ctx.fillStyle = cg;
-          ctx.fill();
-        } else {
-          // Avatar — circular gradient placeholder (photo-ready)
-          drawNodeAvatar(ctx, node.x, node.y, node.radius, node.id, node.name, node.avatar);
-        }
-
-        // Border
-        const borderColor = isCenter ? '#C9A96E' : node.role ? COLORS.roleColors[node.role] || COLORS.roleColors.default : nodeScheme.border;
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = borderColor;
-        ctx.lineWidth = isCenter ? 2.5 : 1.8;
-        ctx.stroke();
-
-        // RECENT ACTIVITY — role-colored glow outside circle (Level 1)
-        if (!isCenter && node.role) {
-          const nodeEdges = edges.filter(
-            (e) => (e.source === node.id && e.target === centerNode.id) ||
-                   (e.target === node.id && e.source === centerNode.id)
-          );
-          const hasRecent = nodeEdges.some((e) => {
-            const d = new Date(e.lastInteraction);
-            const now = new Date('2026-06-17');
-            const days = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-            return days <= 7;
-          });
-          if (hasRecent) {
-            const glowR = node.radius + 10;
-            const glowGrad = ctx.createRadialGradient(node.x, node.y, node.radius + 2, node.x, node.y, glowR);
-            glowGrad.addColorStop(0, borderColor + '40');
-            glowGrad.addColorStop(0.6, borderColor + '18');
-            glowGrad.addColorStop(1, borderColor + '00');
-            ctx.fillStyle = glowGrad;
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, glowR, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-
-        // ONLINE breathing — interval pulse with individual offset
+        // Online pulse
         if (node.isOnline && !isCenter) {
           const CYCLE = 5000;
-          const PULSE_DURATION = 2000;
           const t = (ts + node.pulseOffset) % CYCLE;
-
-          if (t < PULSE_DURATION) {
-            const phase = t / PULSE_DURATION;
-            const envelope = Math.sin(phase * Math.PI) ** 2;
-            const alpha = envelope * 0.85;
-            const radius1 = node.radius + 3 + envelope * 2;
-            const radius2 = node.radius + 5 + envelope * 3;
-
+          if (t < 2000) {
+            const env = Math.sin((t / 2000) * Math.PI) ** 2;
             ctx.beginPath();
-            ctx.arc(node.x, node.y, radius1, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(201, 169, 110, ${alpha})`;
+            ctx.arc(node.x, node.y, node.radius + 3 + env * 2, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(201,169,110,${env * 0.7})`;
             ctx.lineWidth = 1.5;
             ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, radius2, 0, Math.PI * 2);
-            ctx.strokeStyle = `rgba(201, 169, 110, ${alpha * 0.25})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
           }
         }
 
-        // Text
-        if (isCenter) {
-          ctx.fillStyle = COLORS.center.text;
-          ctx.font = 'bold 15px Inter, system-ui, sans-serif';
+        // Labels (when zoomed in or hovered)
+        const showLabel = !isCenter && (isHovered || cam.cameraRef.current.zoom > 0.85);
+        if (showLabel) {
+          ctx.font = '9px Inter, system-ui, sans-serif';
+          const nw = ctx.measureText(node.name).width;
+          const ny = node.y + node.radius + 14;
+          ctx.fillStyle = darkMode ? 'rgba(14,13,11,0.9)' : 'rgba(243,239,232,0.92)';
+          ctx.beginPath();
+          ctx.roundRect(node.x - nw / 2 - 4, ny - 7, nw + 8, 14, 3);
+          ctx.fill();
+          ctx.fillStyle = darkMode ? '#ccc' : '#555';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText('Я', node.x, node.y);
-          // Label below center node intentionally hidden
-        }
+          ctx.fillText(node.name, node.x, ny);
 
-        // Help ready badge — gold to match theme
-        if (node.isHelpReady && !isCenter) {
-          const bx = node.x + node.radius * 0.7;
-          const by = node.y - node.radius * 0.7;
-          ctx.beginPath();
-          ctx.arc(bx, by, 9, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(201, 169, 110, 0.35)';
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(bx, by, 6.5, 0, Math.PI * 2);
-          ctx.fillStyle = '#C9A96E';
-          ctx.fill();
-          ctx.strokeStyle = '#141416';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        }
-
-        // NAME + ROLE LABELS — zoom-dependent: show only when zoomed in or hovered
-        // Center node name ("Анна К.") intentionally hidden — only "Я" shown inside circle
-        const showLabels = !isCenter && (isHovered || cam.cameraRef.current.zoom > 0.82);
-        if (showLabels) {
-          ctx.font = '10px Inter, system-ui, sans-serif';
-          const nameWidth = ctx.measureText(node.name).width;
-          const namePadding = 5;
-          const nameY = node.y + node.radius + 14;
-
-          // Draw pill background
-          ctx.beginPath();
-          ctx.roundRect(node.x - nameWidth / 2 - namePadding, nameY - 9, nameWidth + namePadding * 2, 15, 4);
-          ctx.fillStyle = isHovered ? 'rgba(20, 20, 22, 0.95)' : 'rgba(20, 20, 22, 0.88)';
-          ctx.fill();
-
-          // Draw name text
-          ctx.fillStyle = isHovered ? '#ffffff' : '#9A9895';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(node.name, node.x, nameY);
-
-          // ROLE LABEL — smaller, with colored pill background
-          if (node.role) {
-            const roleFont = '8px Inter, system-ui, sans-serif';
-            ctx.font = roleFont;
-            const roleWidth = ctx.measureText(node.role).width;
-            const rolePadding = 3;
-            const roleY = node.y + node.radius + 32;
-
-            // Draw pill background
-            ctx.beginPath();
-            ctx.roundRect(node.x - roleWidth / 2 - rolePadding, roleY - 6, roleWidth + rolePadding * 2, 12, 3);
-            const roleColor = COLORS.roleColors[node.role] || COLORS.roleColors.default;
-            ctx.fillStyle = roleColor + '20';
-            ctx.fill();
-            ctx.strokeStyle = roleColor + '35';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-
-            // Draw role text
-            ctx.fillStyle = roleColor + 'cc';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(node.role, node.x, roleY);
+          // Ring label on hover
+          if (isHovered) {
+            ctx.fillStyle = RING_CONFIG[node.ringIndex]?.color || '#999';
+            ctx.font = '9px Inter, system-ui, sans-serif';
+            ctx.fillText(node.ringLabel, node.x, ny + 14);
           }
         }
 
-        // Ring badge (show which ring on hover)
-        if (isHovered && !isCenter) {
-          ctx.font = '11px Inter, system-ui, sans-serif';
-          ctx.fillStyle = COLORS.rings[node.ringIndex].stroke;
-          ctx.fillText(node.ringLabel, node.x, node.y + node.radius + 44);
-        }
+        ctx.restore();
       });
 
-      ctx.restore(); // end camera transform
-
+      ctx.restore();
       animRef.current = requestAnimationFrame(animate);
     };
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [centerNode, edges, width, height, cx, cy, maxR, ringRadii, highlightNodeId]);
+  }, [centerNode, nodes, edges, width, height, cx, cy, ringRadii, highlightNodeId, highlightNodeIds, dimOpacity, darkMode, cam, COLORS]);
+
+  // Mouse handlers
+  const getWorldPos = useCallback((e: React.MouseEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    return cam.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+  }, [cam]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    if (cam.updatePan(e.clientX, e.clientY)) {
-      canvas.style.cursor = 'grabbing';
-      return;
-    }
-
-    const rect = canvas.getBoundingClientRect();
-    const world = cam.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+    if (cam.updatePan(e.clientX, e.clientY)) { canvas.style.cursor = 'grabbing'; return; }
+    const world = getWorldPos(e);
+    if (!world) return;
     let nearest: string | null = null;
     let minDist = Infinity;
-    let nearestScreenPos = { x: 0, y: 0 };
     nodesRef.current.forEach((node) => {
-      const hitR = node.radius + 10;
-      const dist = Math.hypot(node.x - world.x, node.y - world.y);
-      if (dist < hitR && dist < minDist) {
-        minDist = dist;
-        nearest = node.id;
-        // Compute screen position for tooltip
-        const cx2 = width / 2;
-        const cy2 = height / 2;
-        const cam2 = cam.cameraRef.current;
-        nearestScreenPos = {
-          x: (node.x - cx2) * cam2.zoom + cx2 + cam2.x,
-          y: (node.y - cy2) * cam2.zoom + cy2 + cam2.y,
-        };
-      }
+      const d = Math.hypot(node.x - world.x, node.y - world.y);
+      if (d < node.radius + 8 && d < minDist) { minDist = d; nearest = node.id; }
     });
     if (nearest !== hoveredRef.current) {
       hoveredRef.current = nearest;
-      const node = nearest ? nodesRef.current.get(nearest) ?? null : null;
-      onNodeHover(node);
-      onHoverScreenPos?.(nearest ? nearestScreenPos : null);
+      onNodeHover(nearest ? nodesRef.current.get(nearest) ?? null : null);
       canvas.style.cursor = nearest ? 'pointer' : 'grab';
     }
-  }, [onNodeHover, onHoverScreenPos, cam, width, height]);
+  }, [onNodeHover, cam, getWorldPos]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
     cam.startPan(e.clientX, e.clientY);
-    canvas.style.cursor = 'grabbing';
+    canvasRef.current && (canvasRef.current.style.cursor = 'grabbing');
   }, [cam]);
 
   const handleMouseUp = useCallback(() => {
     cam.endPan();
-    const canvas = canvasRef.current;
-    if (canvas) canvas.style.cursor = hoveredRef.current ? 'pointer' : 'grab';
+    const c = canvasRef.current;
+    if (c) c.style.cursor = hoveredRef.current ? 'pointer' : 'grab';
   }, [cam]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (cam.wasDrag(e.clientX, e.clientY)) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const world = cam.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
-    const found = Array.from(nodesRef.current.values()).find((n) => {
-      return Math.hypot(n.x - world.x, n.y - world.y) < n.radius + 10;
-    });
-    if (found && found.id !== 'me') {
-      onNodeClick(found);
-      return;
-    }
-    // Ring hit-test: check if click landed on a ring circle (but not on a node)
-    if (onRingClick) {
-      const cx = width / 2;
-      const cy = height / 2;
-      const distFromCenter = Math.hypot(world.x - cx, world.y - cy);
-      for (let ri = 0; ri < adaptiveRingRadiiRef.current.length; ri++) {
-        const r = adaptiveRingRadiiRef.current[ri];
-        if (!activeRingsRef.current[ri]) continue;
-        // Hit zone: ring line ±12px
-        if (Math.abs(distFromCenter - r) < 14) {
-          onRingClick(ri);
-          return;
-        }
-      }
-    }
-  }, [onNodeClick, cam]);
+    const world = getWorldPos(e);
+    if (!world) return;
+    const found = Array.from(nodesRef.current.values()).find((n) =>
+      Math.hypot(n.x - world.x, n.y - world.y) < n.radius + 8
+    );
+    if (found && found.id !== centerNode.id) onNodeClick(found);
+  }, [onNodeClick, cam, getWorldPos, centerNode.id]);
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
     cam.handleWheel(e, canvasRef.current);
@@ -641,7 +434,6 @@ darkMode = true,
         onWheel={handleWheel}
         className="cursor-grab active:cursor-grabbing"
       />
-
-      </div>
+    </div>
   );
 }

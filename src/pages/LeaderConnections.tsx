@@ -23,6 +23,7 @@ import { NodeCard } from '@/components/social-fabric/NodeCard';
 import { LeaderConnectionList } from '@/components/social-fabric/LeaderConnectionList';
 import { SkeletonList, SkeletonCanvas } from '@/components/social-fabric/SkeletonLoader';
 import { ZoomButton } from '@/components/social-fabric/ZoomButton';
+import { useCamera } from '@/hooks/useCamera';
 import type { GraphNode } from '@/data/graphData';
 
 export default function LeaderConnections({ darkMode = true }: { darkMode?: boolean }) {
@@ -43,6 +44,9 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   const [pulsePeriod, setPulsePeriod] = useState(7);
   const [searchQuery, setSearchQuery] = useState('');
   const [canvasSize, setCanvasSize] = useState({ width: 900, height: 700 });
+
+  // Camera for zoom controls
+  const cam = useCamera(canvasSize.width, canvasSize.height, 0.82);
 
   // Smooth tab transition: fade + slide
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -352,6 +356,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     darkMode={darkMode}
                     period={pulsePeriod}
                     onPeriodChange={setPulsePeriod}
+                    camera={cam}
                   />
                 ) : displayTopology === 'clusters' ? (
                   <ClustersTopology
@@ -364,6 +369,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     height={canvasSize.height}
                     focusMode={focusMode}
                     darkMode={darkMode}
+                    camera={cam}
                   />
                 ) : displayTopology === 'health' ? (
                   <HealthTopology
@@ -377,6 +383,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     height={canvasSize.height}
                     focusMode={focusMode}
                     darkMode={darkMode}
+                    camera={cam}
                   />
                 ) : (
                   <PremiumStarGraph
@@ -392,6 +399,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     centerSubtitle="Mentori Club"
                     focusMode={focusMode}
                     darkMode={darkMode}
+                    camera={cam}
                   />
                 )}
               </div>
@@ -399,9 +407,9 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
             {/* Zoom controls */}
             <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
-              <ZoomButton label="Увеличить">+</ZoomButton>
-              <ZoomButton label="Уменьшить">{'\u2212'}</ZoomButton>
-              <ZoomButton label="Сбросить вид">{'\u2316'}</ZoomButton>
+              <ZoomButton label="Увеличить" onClick={cam.zoomIn}>+</ZoomButton>
+              <ZoomButton label="Уменьшить" onClick={cam.zoomOut}>{'\u2212'}</ZoomButton>
+              <ZoomButton label="Сбросить вид" onClick={cam.reset}>{'\u2316'}</ZoomButton>
             </div>
           </div>
           </div>{/* gold border wrapper */}

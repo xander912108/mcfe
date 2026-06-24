@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
+import { useCamera } from '@/hooks/useCamera';
 import type { GraphNode, GraphEdge, BridgeContext } from '@/data/graphData';
 
 // Activity freshness helpers
@@ -25,8 +26,8 @@ interface PremiumStarGraphProps {
   onNodeClick: (node: GraphNode) => void;
   onBridgeHover?: (bridge: BridgeContext | null) => void;
   highlightNodeId?: string | null;
-  highlightNodeIds?: Set<string> | null; // for filter highlighting
-  dimOpacity?: number; // opacity for non-highlighted nodes
+  highlightNodeIds?: Set<string> | null;
+  dimOpacity?: number;
   mode: 'participant' | 'leader';
   width: number;
   height: number;
@@ -35,6 +36,7 @@ interface PremiumStarGraphProps {
   focusMode?: boolean;
   bridgeContexts?: BridgeContext[];
   darkMode?: boolean;
+  camera?: ReturnType<typeof useCamera>;
 }
 
 interface RenderNode extends GraphNode {
@@ -52,7 +54,7 @@ interface RenderNode extends GraphNode {
 function getColors(dark: boolean) {
   return {
     bg: dark ? '#141416' : '#FAFAF8',
-    bgGradient: dark ? ['#1a1814', '#141416', '#0f0f12'] : ['#FDFBF7', '#FAFAF8', '#F5F4F0'],
+    bgGradient: dark ? ['#151310', '#0E0D0B', '#0A0908'] : ['#F3EFE8', '#EDE9E0', '#E8E3D8'],
     center: {
       fill: dark ? '#5a4a2a' : '#8a7a4a',
       glow: dark ? 'rgba(201, 169, 110, 0.35)' : 'rgba(201, 169, 110, 0.25)',
@@ -110,6 +112,7 @@ export function PremiumStarGraph({
   centerLabel,
   centerSubtitle: _centerSubtitle,
   darkMode = true,
+  camera: externalCamera,
 }: PremiumStarGraphProps) {
   const COLORS = getColors(darkMode);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -118,8 +121,9 @@ export function PremiumStarGraph({
   const hoveredRef = useRef<string | null>(null);
   const timeRef = useRef(0);
 
-  // Camera: pan + zoom
-  const cameraRef = useRef({ x: 0, y: 0, zoom: 1 });
+  // Camera: pan + zoom — use external if provided, else internal
+  const internalCameraRef = useRef({ x: 0, y: 0, zoom: 1 });
+  const cameraRef = externalCamera?.cameraRef ?? internalCameraRef;
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
   const cameraStartRef = useRef({ x: 0, y: 0 });
