@@ -6,6 +6,13 @@ interface CommunityFabricDrawerProps {
   onClose: () => void;
   leaderNodes: any[];
   setSelectedNode: (node: any) => void;
+  topology: string;
+  setPulsePeriod: (p: string) => void;
+  pulsePeriod: string;
+  pulseMetricsByPeriod: Record<string, any[]>;
+  metricDirections: Record<string, string>;
+  leaderSignals: any[];
+  signalIcons: Record<string, any>;
 }
 
 export const CommunityFabricDrawer: React.FC<CommunityFabricDrawerProps> = ({
@@ -13,6 +20,13 @@ export const CommunityFabricDrawer: React.FC<CommunityFabricDrawerProps> = ({
   onClose,
   leaderNodes,
   setSelectedNode,
+  topology,
+  setPulsePeriod,
+  pulsePeriod,
+  pulseMetricsByPeriod,
+  metricDirections,
+  leaderSignals,
+  signalIcons,
 }) => {
   const [showPageInfo, setShowPageInfo] = React.useState(false);
 
