@@ -430,7 +430,6 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
         {/* ═══ RIGHT SIDEBAR: Ткань сообщества ═══ */}
         {!focusMode && (
-          {!focusMode && (
             <aside
               className="hidden lg:flex w-[240px] flex-shrink-0 flex-col overflow-y-auto rounded-2xl self-start"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
