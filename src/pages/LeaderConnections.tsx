@@ -163,19 +163,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     setSelectedNode(node);
   }, []);
 
-  // Принудительное обновление размеров при возврате с вкладки Список
-  useEffect(() => {
-    if (displayTopology === 'list') return;
-    const node = containerDivRef.current;
-    if (!node) return;
-    const timer = setTimeout(() => {
-      setCanvasSize({
-        width: node.clientWidth,
-        height: node.clientHeight,
-      });
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [displayTopology]);
+
 
   const handleClusterClick = useCallback(
     (clusterId: number, clusterName: string, members: GraphNode[]) => {
@@ -255,8 +243,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex min-h-0 ${focusMode ? 'h-full p-0 gap-0' : 'gap-4 md:gap-6 overflow-hidden'}`}>
-        <main className={`${focusMode ? 'w-full h-full' : 'flex-1 min-w-0 overflow-hidden'}`}>
+      <div className={`flex-1 flex min-h-0 overflow-hidden ${focusMode ? 'h-full p-0 gap-0' : 'gap-4 md:gap-6'}`}>
+        <main className='w-full h-full overflow-hidden'>
 
           {/* Toolbar */}
           <div className={`flex items-center ${focusMode ? 'justify-end p-3' : 'justify-between'}`}>
@@ -341,7 +329,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
             {/* Canvas content — with key for guaranteed remount */}
             {topology === 'list' ? (
-              <div key="list-view" className="w-full h-full flex flex-col overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+              <div className="w-full h-full flex flex-col overflow-hidden" style={{ background: 'var(--bg-card)' }}>
                 <div className="flex-1 min-h-0 overflow-y-auto">
                 <LeaderConnectionList
                   nodes={searchFilteredNodes}
@@ -358,8 +346,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             ) : (
               <div className="w-full h-full">
                 {displayTopology === 'density' ? (
-                  <PulseTopology key={displayTopology}
-                    nodes={filteredNodes}
+                  <PulseTopology nodes={filteredNodes}
                     edges={filteredEdges}
                     onNodeHover={() => {}}
                     onNodeClick={handleNodeClick}
@@ -372,8 +359,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     camera={cam}
                   />
                 ) : displayTopology === 'clusters' ? (
-                  <ClustersTopology key={displayTopology}
-                    nodes={filteredNodes}
+                  <ClustersTopology nodes={filteredNodes}
                     edges={filteredEdges}
                     onNodeHover={() => {}}
                     onNodeClick={handleNodeClick}
@@ -385,8 +371,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     camera={cam}
                   />
                 ) : displayTopology === 'health' ? (
-                  <HealthTopology key={displayTopology}
-                    nodes={allNodes}
+                  <HealthTopology nodes={allNodes}
                     edges={filteredEdges}
                     onNodeHover={() => {}}
                     onNodeClick={handleNodeClick}
@@ -399,8 +384,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     camera={cam}
                   />
                 ) : (
-                  <PremiumStarGraph key={displayTopology}
-                    centerNode={communityCenter}
+                  <PremiumStarGraph centerNode={communityCenter}
                     connectedNodes={filteredNodes}
                     edges={filteredEdges}
                     onNodeHover={() => {}}
