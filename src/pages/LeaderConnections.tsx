@@ -48,7 +48,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   const [showPageInfo, setShowPageInfo] = useState(false);
   const [pulsePeriod, setPulsePeriod] = useState(7);
   const [searchQuery, setSearchQuery] = useState('');
-  const [canvasSize, setCanvasSize] = useState({ width: 900, height: 600 });
+  const [canvasSize, setCanvasSize] = useState({ width: 900, height: 700 });
 
   // Camera for zoom controls
   const cam = useCamera(canvasSize.width, canvasSize.height, 0.82);
@@ -182,8 +182,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
   /* ── render ────────────────────────────────────────────── */
   return (
-    <div className={darkMode ? 'dark' : ''} style={{ height: '100%', overflow: focusMode ? 'hidden' : 'auto' }}>
-    <div className={`h-full flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`} style={{ overflow: focusMode ? 'hidden' : 'visible' }}>
+    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
+    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
 
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
@@ -233,11 +233,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 min-h-0 overflow-hidden ${focusMode ? 'absolute inset-0 z-[100]' : ''}`}>
-        <main className={`flex-1 min-w-0 space-y-6 overflow-hidden ${focusMode ? 'h-screen p-0' : ''}`}>
+      <div className={`flex-1 flex gap-4 md:gap-6 min-h-0 ${focusMode ? 'h-full p-0' : 'overflow-hidden'}`}>
+        <main className={`flex-1 min-w-0 space-y-6 ${focusMode ? 'h-full' : 'overflow-hidden'}`}>
 
           {/* Toolbar */}
-          <div className={`flex items-center ${focusMode ? 'justify-end absolute top-4 right-4 z-[110]' : 'justify-between'}`}>
+          <div className={`flex items-center ${focusMode ? 'justify-end p-3' : 'justify-between'}`}>
             {!focusMode && (
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="leader" />
@@ -282,11 +282,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`flex-1 relative isolate ${focusMode ? '' : 'rounded-2xl p-px'}`} style={focusMode ? {} : { background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className="flex-1 relative rounded-2xl p-px isolate" style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
-              className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
-              style={{ background: 'var(--bg-card)', maxHeight: focusMode ? '100vh' : 'calc(100vh - 180px)' }}
+              className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'h-full rounded-2xl'}`}
+              style={{ background: 'var(--bg-card)' }}
             >
             {filteredNodes.length === 0 && topology !== 'list' && (
               <EmptyStateCanvas mode="leader" hasFilters={activeFilterCount > 0} onClearFilters={activeFilterCount > 0 ? () => setFilters({}) : undefined} />
@@ -335,8 +335,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
             {/* Canvas content — with key for guaranteed remount */}
             {topology === 'list' ? (
-              <div key="list-view" className="h-full overflow-hidden flex flex-col" style={{ background: 'var(--bg-card)' }}>
-                <div className="flex-1 min-h-0 overflow-y-auto">
+              <div key="list-view" className="h-full overflow-y-auto" style={{ background: 'var(--bg-card)' }}>
                 <LeaderConnectionList
                   nodes={searchFilteredNodes}
                   edges={filteredEdges}
@@ -347,7 +346,6 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                   onMessage={(node) => console.log('Message', node.name)}
                   onRequestHelp={(node) => console.log('Help', node.name)}
                 />
-                </div>
               </div>
             ) : (
               <div key={displayTopology} className="w-full h-full">
@@ -413,7 +411,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             )}
 
             {/* Zoom controls */}
-            <div className={`absolute bottom-4 right-4 flex flex-col gap-1 ${focusMode ? 'z-[110]' : 'z-20'}`}>
+            <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
               <ZoomButton label="Увеличить" onClick={cam.zoomIn}>+</ZoomButton>
               <ZoomButton label="Уменьшить" onClick={cam.zoomOut}>{'\u2212'}</ZoomButton>
               <ZoomButton label="Сбросить вид" onClick={cam.reset}>{'\u2316'}</ZoomButton>
@@ -684,3 +682,5 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     </div>
   );
 }
+
+

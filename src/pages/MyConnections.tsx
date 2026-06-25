@@ -89,7 +89,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     },
   ]);
 
-  const [canvasSize, setCanvasSize] = useState({ width: 1000, height: 600 });
+  const [canvasSize, setCanvasSize] = useState({ width: 1000, height: 700 });
   const containerDivRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -224,8 +224,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   }
 
   return (
-    <div className={darkMode ? 'dark' : ''} style={{ height: '100%', overflow: focusMode ? 'hidden' : 'auto' }}>
-    <div className={`h-full flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`} style={{ overflow: focusMode ? 'hidden' : 'visible' }}>
+    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
+    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
         <div className="shrink-0 px-5 pt-4 pb-3">
@@ -264,11 +264,11 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 overflow-hidden ${focusMode ? 'absolute inset-0 z-[100]' : 'px-5 pb-4'}`}>
+      <div className={`flex-1 flex gap-4 min-h-0 ${focusMode ? '' : 'px-5 pb-4'}`}>
         {/* Left: Canvas area */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Toolbar: tabs + filter + focus + search */}
-          <div className={`flex items-center mb-3 shrink-0 ${focusMode ? 'justify-end absolute top-4 right-4 z-[110]' : 'justify-between'}`}>
+          <div className={`flex items-center mb-3 shrink-0 ${focusMode ? 'justify-end absolute top-3 right-3 z-50' : 'justify-between'}`}>
             {!focusMode && (
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="participant" />
@@ -314,11 +314,11 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`relative isolate flex-1 min-h-0 ${focusMode ? '' : 'rounded-2xl p-px'}`} style={focusMode ? {} : { background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className="flex-1 relative rounded-2xl p-px isolate" style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
-              className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
-              style={{ background: 'var(--bg-card)', maxHeight: focusMode ? '100vh' : 'calc(100vh - 160px)' }}
+              className="relative rounded-2xl overflow-hidden h-full"
+              style={{ background: 'var(--bg-card)' }}
             >
             {filteredNodes.length === 0 && topology !== 'list' && (
               <EmptyStateCanvas mode="participant" hasFilters={activeFilterCount > 0} onClearFilters={activeFilterCount > 0 ? () => setActiveFilters({}) : undefined} />
@@ -337,9 +337,9 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
             )}
 
             {displayTopology === 'list' ? (
-              <div className="h-full flex flex-col" style={{ background: 'var(--bg-card)' }}>
+              <div className="h-full overflow-y-auto" style={{ background: 'var(--bg-card)' }}>
                 {/* Filter bar */}
-                <div className="shrink-0 py-3 px-5" style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)' }}>
+                <div className="sticky top-0 z-10 py-3 px-5" style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)' }}>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {[
                       { key: '', label: 'Все', count: filteredNodes.length },
@@ -367,7 +367,6 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                     Сегодня можно сделать 3 мягких действия: поблагодарить одного участника, попросить совет и создать новую связь.
                   </p>
                 </div>
-                <div className="flex-1 min-h-0 overflow-y-auto">
                 <ConnectionList
                   nodes={searchFilteredNodes}
                   edges={filteredEdges}
@@ -379,7 +378,6 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                   onQuickFilter={setActiveFilters}
                   highlightNodeIds={highlightNodeIds ?? undefined}
                 />
-                </div>
               </div>
             ) : (
               <div
@@ -459,7 +457,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
 
             {/* Zoom controls — only for canvas tabs */}
             {topology !== 'list' && (
-              <div className={`absolute bottom-4 right-4 flex flex-col gap-1 ${focusMode ? 'z-[110]' : 'z-20'}`}>
+              <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
                 <ZoomButton label="Увеличить" onClick={cam.zoomIn}>+</ZoomButton>
                 <ZoomButton label="Уменьшить" onClick={cam.zoomOut}>{'\u2212'}</ZoomButton>
                 <ZoomButton label="Сбросить вид" onClick={cam.reset}>{'\u2316'}</ZoomButton>

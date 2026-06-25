@@ -571,17 +571,15 @@ body.focus-mode-active .max-w-\[1440px\] {
 body.focus-mode-active .max-w-\[1440px\] > div {
   gap: 0 !important;
 }
-/* Prevent body scroll in focus mode */
-body.focus-mode-active {
-  overflow: hidden !important;
-  height: 100vh !important;
+
+/* ===== FOCUS MODE ===== */
+body.focus-mode-active header { display: none !important; }
+body.focus-mode-active aside { display: none !important; }
+body.focus-mode-active nav[class*="fixed"] { display: none !important; }
+body.focus-mode-active .max-w-\[1440px\] {
+  max-width: none !important;
+  padding: 0 !important;
 }
-body.focus-mode-active > div {
-  overflow: hidden !important;
-  height: 100vh !important;
-}
-/* Center canvas in focus mode */
-body.focus-mode-active canvas {
-  display: block;
-  margin: 0 auto;
+body.focus-mode-active .max-w-\[1440px\] > div {
+  gap: 0 !important;
 }
