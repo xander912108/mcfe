@@ -163,7 +163,8 @@ export const CommunityFabricDrawer: React.FC<CommunityFabricDrawerProps> = ({
 
             {/* Signals */}
             <div className="px-4 py-3 shrink-0" style={{ borderBottom: '1px solid var(--border-color)' }}>
-              <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">Сигналы ({leaderSignals.length})</p>
+              <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">Сигналы</p>
+                <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">({leaderSignals.length})</p>
               <div className="space-y-2">
                 {leaderSignals.map((signal, i) => (
                   <button
@@ -196,6 +197,7 @@ export const CommunityFabricDrawer: React.FC<CommunityFabricDrawerProps> = ({
             {/* Actions */}
             <div className="px-4 py-3">
               <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">Действия</p>
+                <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3"></p>
               <div className="space-y-2">
                 {[
                   { icon: <Users className="w-4 h-4" />, label: 'Welcome Loop', color: 'var(--gold)' },
@@ -214,6 +216,7 @@ export const CommunityFabricDrawer: React.FC<CommunityFabricDrawerProps> = ({
                 ))}
               </div>
             </div>
+          </div>
       </div>
     </>
   );
