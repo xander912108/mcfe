@@ -242,7 +242,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
       <div className={`flex-1 flex gap-4 md:gap-6 min-h-0 ${focusMode ? 'h-full p-0' : 'overflow-hidden'}`}>
-        <main className={`flex-1 min-w-0 space-y-6 ${focusMode ? 'h-full' : 'overflow-hidden'}`}>
+        <main className={`flex-1 min-w-0 ${focusMode ? 'h-full' : 'overflow-hidden'}`}>
 
           {/* Toolbar */}
           <div className={`flex items-center ${focusMode ? 'justify-end p-3' : 'justify-between'}`}>
@@ -274,10 +274,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className="flex-1 relative rounded-2xl p-px isolate" style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`flex-1 relative ${focusMode ? '' : 'rounded-2xl p-px'} isolate`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
-              className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'h-full rounded-2xl'}`}
+              className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
               style={{ background: 'var(--bg-card)' }}
             >
             {filteredNodes.length === 0 && topology !== 'list' && (
@@ -327,7 +327,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
             {/* Canvas content — with key for guaranteed remount */}
             {topology === 'list' ? (
-              <div key="list-view" className="h-full flex flex-col overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+              <div key="list-view" className="w-full h-full flex flex-col overflow-hidden" style={{ background: 'var(--bg-card)' }}>
                 <div className="flex-1 min-h-0 overflow-y-auto">
                 <LeaderConnectionList
                   nodes={searchFilteredNodes}
@@ -417,7 +417,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         {/* ═══ RIGHT SIDEBAR: Ткань сообщества ═══ */}
         {!focusMode && (
           <aside
-            className="hidden lg:flex w-[240px] flex-shrink-0 flex-col overflow-y-auto rounded-2xl lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)]"
+            className="hidden lg:flex w-[240px] flex-shrink-0 flex-col overflow-y-auto rounded-2xl self-start"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
           >
             {/* Header */}
