@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router';
 import {
   TrendingUp, TrendingDown, Users, AlertTriangle, Star, Zap,
@@ -56,7 +56,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   const [showPageInfo, setShowPageInfo] = useState(false);
   const [pulsePeriod, setPulsePeriod] = useState(7);
   const [searchQuery] = useState('');
-  const [canvasSize, setCanvasSize] = useState({ width: 900, height: 700 });
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
   // Camera for zoom controls
   const cam = useCamera(canvasSize.width, canvasSize.height, 0.82);
