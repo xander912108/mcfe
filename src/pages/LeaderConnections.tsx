@@ -1,12 +1,13 @@
 import { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { CommunityFabricDrawer } from '../components/social-fabric/CommunityFabricDrawer';
 import { useSearchParams } from 'react-router';
 import {
-  TrendingUp, TrendingDown, Users, AlertTriangle, Star, Zap,
-  Heart, Play, Info, X, Maximize2, Minimize2, Activity,
+  Users, AlertTriangle, Star, Zap,
+  Heart, X, Maximize2, Minimize2, Activity,
 } from 'lucide-react';
 import {
   communityCenter, leaderNodes, leaderEdges, leaderSignals,
-  pulseMetricsByPeriod, metricDirections,
+  pulseMetricsByPeriod,
 } from '@/data/graphData';
 import { PremiumStarGraph } from '@/components/social-fabric/PremiumStarGraph';
 import { PulseTopology } from '@/components/social-fabric/PulseTopology';
@@ -181,12 +182,6 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     []
   );
 
-  const signalIcons: Record<string, React.ReactNode> = {
-    isolation: <AlertTriangle className="w-4 h-4 text-red-400" />,
-    connector: <Star className="w-4 h-4 text-amber-400" />,
-    overload: <Zap className="w-4 h-4 text-orange-400" />,
-    potential: <Heart className="w-4 h-4 text-pink-400" />,
-  };
 
   // ESC exits focus mode
   useEffect(() => {
