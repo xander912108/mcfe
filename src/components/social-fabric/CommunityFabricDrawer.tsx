@@ -54,7 +54,7 @@ export const CommunityFabricDrawer: React.FC<CommunityFabricDrawerProps> = ({
             <X className="w-4 h-4" />
           </button>
         </div>
-              className="w-full lg:w-[240px] shrink-0 space-y-5 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto"
+              <div className="w-full lg:w-[240px] shrink-0 space-y-5 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
           >
             {/* Header */}
