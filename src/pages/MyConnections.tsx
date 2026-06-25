@@ -45,7 +45,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       document.body.style.overflow = '';
     };
   }, [focusMode]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery] = useState('');
 
   const topology = searchParams.get('tab') || 'star';
   const setTopology = useCallback((value: string) => {
