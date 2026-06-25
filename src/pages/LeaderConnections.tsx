@@ -197,13 +197,13 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
-        <div className="shrink-0 px-5 pt-4 pb-3">
-          <div className="flex items-center gap-2 text-xs mb-2">
+        <div className="shrink-0 px-5 pb-3">
+          <div className="flex items-center gap-2 text-xs">
             <span className="text-[var(--text-muted)]">Консоль лидера</span>
             <span className="text-[var(--gold)]">{'>'}</span>
             <span className="text-[var(--text-secondary)] font-medium">Связи</span>
           </div>
-          <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-1 tracking-tight">
+          <h1 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">
             {topology === 'network' ? 'Структура сообщества'
               : topology === 'density' ? 'Пульс сообщества'
               : topology === 'clusters' ? 'Естественные группы'
@@ -244,7 +244,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
       <div className={`flex-1 flex min-h-0 overflow-hidden ${focusMode ? 'h-full p-0 gap-0' : 'gap-4 md:gap-6'}`}>
-        <main className='w-full h-full overflow-hidden'>
+        <main className={`${focusMode ? 'w-full h-full' : 'flex-1 min-w-0'} overflow-hidden`}>
 
           {/* Toolbar */}
           <div className={`flex items-center ${focusMode ? 'justify-end p-3' : 'justify-between'}`}>
