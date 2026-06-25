@@ -531,7 +531,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         signalIcons={{
           'new-connection': <Zap className="w-3 h-3" />,
           'gratitude': <Heart className="w-3 h-3" />,
-          'decay-warning': <TrendingDown className="w-3 h-3" />,
+          'decay-warning': <ArrowDown className="w-3 h-3" />,
           'first-connection': <AlertTriangle className="w-3 h-3" />,
           'helper-overload': <AlertTriangle className="w-3 h-3" />,
         }}
