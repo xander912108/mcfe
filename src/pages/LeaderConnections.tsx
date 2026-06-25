@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import {
   communityCenter, leaderNodes, leaderEdges, leaderSignals,
-  pulseMetricsByPeriod,
+  pulseMetricsByPeriod, metricDirections,
 } from '@/data/graphData';
 import { PremiumStarGraph } from '@/components/social-fabric/PremiumStarGraph';
 import { PulseTopology } from '@/components/social-fabric/PulseTopology';
@@ -255,6 +255,24 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             {!focusMode && (
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="leader" />
+                <button
+                  onClick={() => setFabricDrawerOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-secondary)',
+                    borderColor: 'var(--border-color)',
+                  }}
+                  title="Ткань сообщества"
+                >
+                  <span className="relative flex h-2 w-2">
+                    {leaderSignals.length > 0 && (
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    )}
+                    <span className={`relative inline-flex rounded-full h-2 w-2 ${leaderSignals.length > 0 ? 'bg-emerald-500' : 'bg-[var(--text-muted)]'}`} />
+                  </span>
+                  Ткань
+                </button>
               </div>
             )}
             <div className="flex items-center gap-2">
@@ -514,20 +532,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       <CommunityFabricDrawer
         isOpen={fabricDrawerOpen}
         onClose={() => setFabricDrawerOpen(false)}
-
-
         topology={displayTopology}
         setPulsePeriod={setPulsePeriod}
         pulsePeriod={pulsePeriod}
         pulseMetricsByPeriod={pulseMetricsByPeriod}
-        metricDirections={{
-          'density': 'up',
-          'leader-dependency': 'down',
-          'new-connections': 'up',
-          'decay': 'down',
-          'first-connection': 'down',
-          'helper-overload': 'up',
-        }}
+        metricDirections={metricDirections}
         leaderSignals={leaderSignals}
         signalIcons={{
           'new-connection': <Zap className="w-3 h-3" />,
@@ -536,7 +545,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           'first-connection': <AlertTriangle className="w-3 h-3" />,
           'helper-overload': <AlertTriangle className="w-3 h-3" />,
         }}
-      /></div>
+      />
+    </div>
   );
 }
 
