@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router';
 import {
   Users, AlertTriangle, Zap,
   Heart, X, Maximize2, Minimize2, Activity,
-} from 'lucide-react';
+, ArrowDown } from 'lucide-react';
 import {
   communityCenter, leaderNodes, leaderEdges, leaderSignals,
   pulseMetricsByPeriod,
@@ -513,8 +513,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       <CommunityFabricDrawer
         isOpen={fabricDrawerOpen}
         onClose={() => setFabricDrawerOpen(false)}
-        leaderNodes={leaderNodes}
-        setSelectedNode={setSelectedNode}
+
+
         topology={displayTopology}
         setPulsePeriod={setPulsePeriod}
         pulsePeriod={pulsePeriod}
