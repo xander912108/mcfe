@@ -4,7 +4,8 @@ import { useSearchParams } from 'react-router';
 import {
   Users, AlertTriangle, Zap,
   Heart, X, Maximize2, Minimize2, Activity,
-, ArrowDown } from 'lucide-react';
+  ArrowDown,
+} from 'lucide-react';
 import {
   communityCenter, leaderNodes, leaderEdges, leaderSignals,
   pulseMetricsByPeriod,
