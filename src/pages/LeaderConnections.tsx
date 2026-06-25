@@ -163,6 +163,14 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     setSelectedNode(node);
   }, []);
 
+  // Force correct canvas size immediately on mount and tab switch
+  useLayoutEffect(() => {
+    const node = containerDivRef.current;
+    if (!node) return;
+    const rect = node.getBoundingClientRect();
+    setCanvasSize({ width: rect.width, height: rect.height });
+  }, [displayTopology]);
+
 
 
   const handleClusterClick = useCallback(
