@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router';
-import { Sparkles, ArrowRight, UserPlus, Maximize2, Minimize2, Lightbulb, Search, Users, Zap, MessageCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, UserPlus, Maximize2, Minimize2, Lightbulb, Users, Zap, MessageCircle } from 'lucide-react';
 import { useCamera } from '@/hooks/useCamera';
 import { currentUser, participantNodes, participantEdges, recommendations, bridgeContexts } from '@/data/graphData';
 import { PremiumStarGraph } from '@/components/social-fabric/PremiumStarGraph';
