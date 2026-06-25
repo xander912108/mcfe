@@ -54,8 +54,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, boolean>>({});
-  const [showPageInfo, setShowPageInfo] = useState(false);
-  const [pulsePeriod, setPulsePeriod] = useState(7);
+    const [pulsePeriod, setPulsePeriod] = useState(7);
   const [searchQuery] = useState('');
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
@@ -521,6 +520,26 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         onClose={() => setFabricDrawerOpen(false)}
         leaderNodes={leaderNodes}
         setSelectedNode={setSelectedNode}
+        topology={displayTopology}
+        setPulsePeriod={setPulsePeriod}
+        pulsePeriod={pulsePeriod}
+        pulseMetricsByPeriod={pulseMetricsByPeriod}
+        metricDirections={{
+          'density': 'up',
+          'leader-dependency': 'down',
+          'new-connections': 'up',
+          'decay': 'down',
+          'first-connection': 'down',
+          'helper-overload': 'up',
+        }}
+        leaderSignals={leaderSignals}
+        signalIcons={{
+          'new-connection': <Zap className="w-3 h-3" />,
+          'gratitude': <Heart className="w-3 h-3" />,
+          'decay-warning': <TrendingDown className="w-3 h-3" />,
+          'first-connection': <AlertTriangle className="w-3 h-3" />,
+          'helper-overload': <AlertTriangle className="w-3 h-3" />,
+        }}
       /></div>
   );
 }
