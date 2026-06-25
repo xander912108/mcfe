@@ -80,7 +80,7 @@ const METRIC_CONFIG = [
 ] as const;
 
 export function RingMetricsPanel({ edges }: RingMetricsPanelProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [position, setPosition] = useState({ x: 0, y: 16 }); // y=16px from top
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0 });

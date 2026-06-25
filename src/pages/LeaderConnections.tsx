@@ -243,11 +243,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex min-h-0 overflow-hidden ${focusMode ? 'h-full p-0 gap-0' : 'gap-4 md:gap-6'}`}>
+      <div className={`flex-1 flex min-h-0 overflow-hidden ${focusMode ? 'h-full p-4 gap-0' : 'gap-4 md:gap-6'}`}>
         <main className={`${focusMode ? 'w-full h-full' : 'flex-1 min-w-0'} overflow-hidden`}>
 
           {/* Toolbar */}
-          <div className={`flex items-center ${focusMode ? 'justify-end p-3' : 'justify-between'}`}>
+          <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-between'}`}>
             {!focusMode && (
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="leader" />
@@ -415,7 +415,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         {/* ═══ RIGHT SIDEBAR: Ткань сообщества ═══ */}
         {!focusMode && (
             <aside
-              className="hidden lg:flex w-[240px] flex-shrink-0 flex-col overflow-y-auto rounded-2xl self-start"
+              className="hidden lg:flex w-[240px] flex-shrink-0 flex-col overflow-y-auto rounded-2xl self-start pt-4 scrollbar-thin"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
           >
             {/* Header */}
