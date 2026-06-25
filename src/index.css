@@ -571,3 +571,17 @@ body.focus-mode-active .max-w-\[1440px\] {
 body.focus-mode-active .max-w-\[1440px\] > div {
   gap: 0 !important;
 }
+/* Prevent body scroll in focus mode */
+body.focus-mode-active {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+body.focus-mode-active > div {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+/* Center canvas in focus mode */
+body.focus-mode-active canvas {
+  display: block;
+  margin: 0 auto;
+}
