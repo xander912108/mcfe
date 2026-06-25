@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router';
 import {
   TrendingUp, TrendingDown, Users, AlertTriangle, Star, Zap,
-  Heart, Play, Info, X, Maximize2, Minimize2, Search, Activity,
+  Heart, Play, Info, X, Maximize2, Minimize2, Activity,
 } from 'lucide-react';
 import {
   communityCenter, leaderNodes, leaderEdges, leaderSignals,
@@ -30,9 +30,17 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   const [searchParams, setSearchParams] = useSearchParams();
   const [focusMode, setFocusMode] = useState(false);
   useEffect(() => {
-    if (focusMode) document.body.classList.add('focus-mode-active');
-    else document.body.classList.remove('focus-mode-active');
-    return () => document.body.classList.remove('focus-mode-active');
+    if (focusMode) {
+      document.body.classList.add('focus-mode-active');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('focus-mode-active');
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.classList.remove('focus-mode-active');
+      document.body.style.overflow = '';
+    };
   }, [focusMode]);
 
   const topology = searchParams.get('tab') || 'network';
@@ -47,7 +55,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   const [filters, setFilters] = useState<Record<string, boolean>>({});
   const [showPageInfo, setShowPageInfo] = useState(false);
   const [pulsePeriod, setPulsePeriod] = useState(7);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery] = useState('');
   const [canvasSize, setCanvasSize] = useState({ width: 900, height: 700 });
 
   // Camera for zoom controls
@@ -241,22 +249,6 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             {!focusMode && (
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="leader" />
-                {/* Search — only for list tab */}
-                {topology === 'list' && (
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} />
-                    <input
-                      type="text"
-                      placeholder="Поиск по имени, роли..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs outline-none transition-all"
-                      style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
-                      onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--gold)'; }}
-                      onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
-                    />
-                  </div>
-                )}
               </div>
             )}
             <div className="flex items-center gap-2">
@@ -335,7 +327,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
             {/* Canvas content — with key for guaranteed remount */}
             {topology === 'list' ? (
-              <div key="list-view" className="h-full overflow-y-auto" style={{ background: 'var(--bg-card)' }}>
+              <div key="list-view" className="h-full flex flex-col overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+                <div className="flex-1 min-h-0 overflow-y-auto">
                 <LeaderConnectionList
                   nodes={searchFilteredNodes}
                   edges={filteredEdges}
@@ -346,6 +339,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                   onMessage={(node) => console.log('Message', node.name)}
                   onRequestHelp={(node) => console.log('Help', node.name)}
                 />
+                </div>
               </div>
             ) : (
               <div key={displayTopology} className="w-full h-full">

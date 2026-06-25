@@ -33,9 +33,17 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   const [searchParams, setSearchParams] = useSearchParams();
   const [focusMode, setFocusMode] = useState(false);
   useEffect(() => {
-    if (focusMode) document.body.classList.add('focus-mode-active');
-    else document.body.classList.remove('focus-mode-active');
-    return () => document.body.classList.remove('focus-mode-active');
+    if (focusMode) {
+      document.body.classList.add('focus-mode-active');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('focus-mode-active');
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.classList.remove('focus-mode-active');
+      document.body.style.overflow = '';
+    };
   }, [focusMode]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -264,11 +272,11 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 ${focusMode ? '' : 'px-5 pb-4'}`}>
+      <div className={`flex-1 flex gap-4 min-h-0 overflow-hidden ${focusMode ? 'h-full p-0' : 'px-5 pb-4'}`}>
         {/* Left: Canvas area */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Toolbar: tabs + filter + focus + search */}
-          <div className={`flex items-center mb-3 shrink-0 ${focusMode ? 'justify-end absolute top-3 right-3 z-50' : 'justify-between'}`}>
+          <div className={`flex items-center mb-3 shrink-0 ${focusMode ? 'justify-end' : 'justify-between'}`}>
             {!focusMode && (
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="participant" />
@@ -314,10 +322,10 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className="flex-1 relative rounded-2xl p-px isolate" style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`flex-1 relative isolate min-h-0 ${focusMode ? 'h-full' : 'rounded-2xl p-px'}`} style={focusMode ? {} : { background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
-              className="relative rounded-2xl overflow-hidden h-full"
+              className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'h-full rounded-2xl'}`}
               style={{ background: 'var(--bg-card)' }}
             >
             {filteredNodes.length === 0 && topology !== 'list' && (
@@ -337,9 +345,9 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
             )}
 
             {displayTopology === 'list' ? (
-              <div className="h-full overflow-y-auto" style={{ background: 'var(--bg-card)' }}>
+              <div className="h-full flex flex-col overflow-hidden" style={{ background: 'var(--bg-card)' }}>
                 {/* Filter bar */}
-                <div className="sticky top-0 z-10 py-3 px-5" style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)' }}>
+                <div className="shrink-0 py-3 px-5" style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)' }}>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {[
                       { key: '', label: 'Все', count: filteredNodes.length },
@@ -367,6 +375,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                     Сегодня можно сделать 3 мягких действия: поблагодарить одного участника, попросить совет и создать новую связь.
                   </p>
                 </div>
+                <div className="flex-1 min-h-0 overflow-y-auto">
                 <ConnectionList
                   nodes={searchFilteredNodes}
                   edges={filteredEdges}
@@ -378,6 +387,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                   onQuickFilter={setActiveFilters}
                   highlightNodeIds={highlightNodeIds ?? undefined}
                 />
+                </div>
               </div>
             ) : (
               <div
@@ -469,7 +479,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
 
         {/* Right sidebar: recommendations + advisor */}
         {!focusMode && (
-          <aside className="hidden lg:flex w-[240px] shrink-0 flex-col gap-4 overflow-y-auto lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)]">
+          <aside className="hidden lg:flex w-[240px] shrink-0 flex-col gap-3 self-start">
             {/* ===== РЕКОМЕНДАЦИИ ===== */}
             <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
               <div className="flex items-center gap-2 mb-3">
