@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef } fr
 import { CommunityFabricDrawer } from '../components/social-fabric/CommunityFabricDrawer';
 import { useSearchParams } from 'react-router';
 import {
-  Users, AlertTriangle, Star, Zap,
+  Users, AlertTriangle, Zap,
   Heart, X, Maximize2, Minimize2, Activity,
 } from 'lucide-react';
 import {
