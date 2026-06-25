@@ -418,7 +418,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             </div>
           </div>
           </div>{/* gold border wrapper */}
-        </div>
+        </main>
 
         {/* ═══ RIGHT SIDEBAR: Ткань сообщества ═══ */}
         {!focusMode && (
