@@ -226,7 +226,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               : 'Кому помочь, кого разгрузить, кого признать и где укрепить связи.'}
           </p>
           {/* Micro-stats */}
-          <div className="flex items-center gap-4 mt-2">
+          <div className="flex items-center gap-4">
             <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
               <Users className="w-3.5 h-3.5" /> <strong style={{ color: 'var(--text-primary)' }}>{allNodes.length}</strong> участников
             </span>
@@ -251,8 +251,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : 'px-5 pb-4'}`}>
-        <div className="flex-1 min-w-0 flex flex-col">
+      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : 'px-5 pb-4'}`}>
+        <main className="flex-1 min-w-0 space-y-6">
 
           {/* Toolbar */}
           <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-between'}`}>
@@ -423,7 +423,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         {/* ═══ RIGHT SIDEBAR: Ткань сообщества ═══ */}
         {!focusMode && (
             <aside
-              className="hidden lg:flex w-[240px] shrink-0 flex-col gap-3 self-start"
+              className="w-full lg:w-[240px] shrink-0 space-y-5 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
           >
             {/* Header */}
