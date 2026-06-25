@@ -224,8 +224,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   }
 
   return (
-    <div className={darkMode ? 'dark' : ''} style={{ height: '100%', overflow: 'hidden' }}>
-    <div className={`h-full flex flex-col ${focusMode ? 'fixed inset-0 z-[100] bg-[var(--bg-main)]' : ''}`} style={{ overflow: 'hidden' }}>
+    <div className={darkMode ? 'dark' : ''} style={{ height: '100%', overflow: focusMode ? 'hidden' : 'auto' }}>
+    <div className={`h-full flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`} style={{ overflow: focusMode ? 'hidden' : 'visible' }}>
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
         <div className="shrink-0 px-5 pt-4 pb-3">
@@ -264,11 +264,11 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 overflow-hidden ${focusMode ? '' : 'px-5 pb-4'}`}>
+      <div className={`flex-1 flex gap-4 min-h-0 overflow-hidden ${focusMode ? 'absolute inset-0 z-[100]' : 'px-5 pb-4'}`}>
         {/* Left: Canvas area */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Toolbar: tabs + filter + focus + search */}
-          <div className={`flex items-center mb-3 shrink-0 ${focusMode ? 'justify-end absolute top-3 right-3 z-50' : 'justify-between'}`}>
+          <div className={`flex items-center mb-3 shrink-0 ${focusMode ? 'justify-end absolute top-4 right-4 z-[110]' : 'justify-between'}`}>
             {!focusMode && (
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="participant" />
@@ -314,11 +314,11 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className="relative rounded-2xl p-px isolate flex-1 min-h-0" style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`relative isolate flex-1 min-h-0 ${focusMode ? '' : 'rounded-2xl p-px'}`} style={focusMode ? {} : { background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
-              className="relative rounded-2xl overflow-hidden w-full h-full"
-              style={{ background: 'var(--bg-card)', maxHeight: 'calc(100vh - 160px)' }}
+              className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
+              style={{ background: 'var(--bg-card)', maxHeight: focusMode ? '100vh' : 'calc(100vh - 160px)' }}
             >
             {filteredNodes.length === 0 && topology !== 'list' && (
               <EmptyStateCanvas mode="participant" hasFilters={activeFilterCount > 0} onClearFilters={activeFilterCount > 0 ? () => setActiveFilters({}) : undefined} />
@@ -459,7 +459,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
 
             {/* Zoom controls — only for canvas tabs */}
             {topology !== 'list' && (
-              <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
+              <div className={`absolute bottom-4 right-4 flex flex-col gap-1 ${focusMode ? 'z-[110]' : 'z-20'}`}>
                 <ZoomButton label="Увеличить" onClick={cam.zoomIn}>+</ZoomButton>
                 <ZoomButton label="Уменьшить" onClick={cam.zoomOut}>{'\u2212'}</ZoomButton>
                 <ZoomButton label="Сбросить вид" onClick={cam.reset}>{'\u2316'}</ZoomButton>
