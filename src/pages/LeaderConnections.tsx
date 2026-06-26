@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router';
 import {
   Users, AlertTriangle, Zap,
   Heart, X, Maximize2, Minimize2, Activity,
-  ArrowDown,
+  ArrowDown, RefreshCw,
 } from 'lucide-react';
 import {
   communityCenter, leaderNodes, leaderEdges, leaderSignals,
