@@ -198,7 +198,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   /* ── render ────────────────────────────────────────────── */
   return (
     <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
-    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+    <div className={`${focusMode ? 'h-screen' : 'h-full flex flex-col lg:flex-row gap-4 md:gap-6'} ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+      <main className={`${focusMode ? 'h-full' : 'h-full'} flex-1 min-w-0 flex flex-col`}>
 
       {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
@@ -559,6 +560,9 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </>
         );
       })()}
+      </main>
+
+      {!focusMode && <aside className="w-full lg:w-[240px] shrink-0" aria-hidden="true" />}
     </div>
     
       <CommunityFabricDrawer
