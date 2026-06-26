@@ -97,7 +97,7 @@ export function PulseTopology({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    if (canvas.width <= 0 || canvas.height <= 0) return;
+    if (width <= 0 || height <= 0) return;
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = width * dpr;
