@@ -319,7 +319,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`relative isolate ${focusMode ? 'h-full p-0' : 'rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`relative isolate ${focusMode ? 'h-full p-4' : 'rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
               className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'rounded-2xl'}`}
@@ -447,6 +447,26 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
             {/* Zoom controls */}
             <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+            <div className="relative w-9 h-9">
+              <FilterPanel
+                mode="leader"
+                onFilterChange={setFilters}
+                activeCount={activeFilterCount}
+                buttonPositionClassName="top-0 right-0"
+                panelPositionClassName="top-10 right-0"
+                topology={topology}
+              />
+            </div>
+            <button
+              onClick={() => setFocusMode(false)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all border"
+              style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
+              title="Выйти из фокуса (ESC)"
+            >
+              <Minimize2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
             <div className="relative w-9 h-9">
               <FilterPanel
                 mode="leader"
