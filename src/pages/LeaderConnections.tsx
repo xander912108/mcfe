@@ -568,7 +568,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         }}
       />
     </div>
-    </>
+    </div>
   );
 }
 
