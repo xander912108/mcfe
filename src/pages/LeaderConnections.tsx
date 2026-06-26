@@ -89,15 +89,16 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     if (!node) return;
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        setCanvasSize({
-          width: entry.contentRect.width,
-          height: entry.contentRect.height,
-        });
+        const w = entry.contentRect.width;
+        const h = entry.contentRect.height;
+        // Canvas height >= width for all tabs except list
+        const finalH = topology !== 'list' ? Math.max(h, w) : h;
+        setCanvasSize({ width: w, height: finalH });
       }
     });
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [topology]);
 
   const allNodes = useMemo(() => leaderNodes.filter((n) => n.id !== 'me'), []);
 
@@ -169,10 +170,13 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     const node = containerDivRef.current;
     if (!node) return;
     const rect = node.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      setCanvasSize({ width: rect.width, height: rect.height });
+    if (rect.width > 0) {
+      const w = rect.width;
+      const h = rect.height;
+      const finalH = topology !== 'list' ? Math.max(h, w) : h;
+      setCanvasSize({ width: w, height: finalH });
     }
-  }, []);
+  }, [topology]);
 
 
 
@@ -197,8 +201,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
   /* ── render ────────────────────────────────────────────── */
   return (
-    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
-    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+    <div className={darkMode ? 'dark' : ''}>
+    <div className={`${focusMode ? 'h-screen flex flex-col' : 'flex flex-col'} ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
 
       {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
@@ -267,8 +271,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : 'px-5 pb-4'}`}>
-        <main className="flex-1 min-w-0 flex flex-col gap-6 min-h-0">
+      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 ${focusMode ? 'h-full p-4' : 'px-5 pb-4'}`}>
+        <main className="flex-1 min-w-0 space-y-6">
 
           {/* Toolbar — icons top-right over canvas */}
           <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-end'}`}>
@@ -315,11 +319,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`flex-1 relative isolate min-h-0 ${focusMode ? 'h-full p-0' : 'rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`relative isolate ${focusMode ? 'h-full p-0' : 'rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
-              className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
-              style={{ background: 'var(--bg-card)' }}
+              className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'rounded-2xl'}`}
+              style={{ background: 'var(--bg-card)', minHeight: '100%' }}
             >
             {filteredNodes.length === 0 && topology !== 'list' && (
               <EmptyStateCanvas mode="leader" hasFilters={activeFilterCount > 0} onClearFilters={activeFilterCount > 0 ? () => setFilters({}) : undefined} />
