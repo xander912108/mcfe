@@ -201,12 +201,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
   /* ── render ────────────────────────────────────────────── */
   return (
-    <div>
-    <div className={`${focusMode ? 'h-screen flex flex-col bg-[var(--bg-main)]' : 'flex flex-col gap-4 md:gap-6'}`}>
+    <div className={`${focusMode ? 'h-screen flex flex-col bg-[var(--bg-main)]' : 'flex flex-col lg:flex-row gap-4 md:gap-6'}`}>
 
       {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
-        <div className="shrink-0">
           <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
             <div className="px-6 md:px-8 pt-8 pb-6">
               <div className="flex items-center gap-2 text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
@@ -267,11 +265,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 </button>
               );
             })}
-          </div>        </div>
+          </div>
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 ${focusMode ? 'h-full p-4' : ''}`}>
         <main className="flex-1 min-w-0 space-y-6">
 
           {/* Toolbar — icons top-right over canvas */}
@@ -455,7 +452,6 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>{/* gold border wrapper */}
         </main>
 
-      </div>
 
       {/* ═══ SLIDE-OVER PANELS ═══ */}
       {/* Selected cluster */}
