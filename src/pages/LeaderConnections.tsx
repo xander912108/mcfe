@@ -198,7 +198,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   /* ── render ────────────────────────────────────────────── */
   return (
     <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
-    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+    <div className={`${focusMode ? 'h-screen' : 'h-full lg:pr-[264px]'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
 
       {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
