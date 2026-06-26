@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
 import { X, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import type { GraphNode } from '@/data/graphData';
 
 export interface SignalItem {
   type: string;
@@ -172,7 +171,7 @@ export const CommunityFabricDrawer: React.FC<CommunityFabricDrawerProps> = ({
                 const trendBad = m.dir === 'good' ? m.trend < 0 : m.dir === 'bad' ? m.trend > 0 : false;
                 const isGood = m.dir === 'good';
                 const isBad = m.dir === 'bad';
-                const barColor = isGood ? 'rgba(16,185,129,0.8)' : isBad ? 'rgba(239,68,68,0.7)' : 'rgba(100,116,139,0.6)'';
+                const barColor = isGood ? 'rgba(16,185,129,0.8)' : isBad ? 'rgba(239,68,68,0.7)' : 'rgba(100,116,139,0.6)';
                 return (
                   <div key={m.rawKey} className="p-3 rounded-xl" style={{ background: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                     <div className="flex items-center justify-between mb-1.5">
