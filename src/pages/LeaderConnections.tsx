@@ -460,7 +460,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       {/* ═══ SLIDE-OVER PANELS ═══ */}
       {/* Selected cluster */}
       {selectedCluster && topology === 'clusters' && (
-        <>
+        <div>
           <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedCluster(null)} />
           <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             {(() => {
@@ -522,7 +522,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         const centrality = computeCentrality(selectedNode.id, filteredEdges);
         const cRole = cid === -1 ? ('isolated' as const) : isBridge ? ('bridge' as const) : centrality > 0.5 ? ('core' as const) : ('periphery' as const);
         return (
-          <>
+          <div>
             <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
             <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
               <NodeCard
@@ -545,7 +545,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 })()}
               />
             </div>
-          </>
+          </div>
         );
       })()}
     </div>
