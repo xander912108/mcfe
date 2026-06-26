@@ -98,7 +98,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [displayTopology]);
+  }, []);
 
   const allNodes = useMemo(() => leaderNodes.filter((n) => n.id !== 'me'), []);
 
@@ -169,9 +169,14 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   useLayoutEffect(() => {
     const node = containerDivRef.current;
     if (!node) return;
-    const rect = node.getBoundingClientRect();
-    setCanvasSize({ width: rect.width, height: rect.height });
-  }, [displayTopology]);
+    // Даём браузеру время рассчитать flex-размеры перед первым измерением
+    requestAnimationFrame(() => {
+      const rect = node.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setCanvasSize({ width: rect.width, height: rect.height });
+      }
+    });
+  }, []);
 
 
 
