@@ -17,7 +17,6 @@ import {
   computeCentrality, getClusterName,
 } from '@/components/social-fabric/ClustersTopology';
 import { HealthTopology, STATUS_COLORS } from '@/components/social-fabric/HealthTopology';
-import { TopologySwitcher } from '@/components/social-fabric/TopologySwitcher';
 import { FilterPanel } from '@/components/social-fabric/FilterPanel';
 import { FocusLegendOverlay } from '@/components/social-fabric/FocusLegendOverlay';
 import { EmptyStateCanvas } from '@/components/social-fabric/EmptyStateCanvas';
@@ -201,49 +200,69 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
     <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
 
-      {/* ═══ PAGE HEADER ═══ */}
+      {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
         <div className="shrink-0 px-5 pb-3">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-[var(--text-muted)]">Консоль лидера</span>
-            <span className="text-[var(--gold)]">{'>'}</span>
-            <span className="text-[var(--text-secondary)] font-medium">Связи</span>
+          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
+            <div className="px-6 md:px-8 pt-8 pb-6">
+              <div className="flex items-center gap-2 text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+                <span>Консоль лидера</span>
+                <span style={{ color: 'var(--gold)' }}>{'>'}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Связи</span>
+              </div>
+              <h1 className="text-2xl md:text-[30px] font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                {topology === 'network' ? 'Структура сообщества'
+                  : topology === 'density' ? 'Пульс сообщества'
+                  : topology === 'clusters' ? 'Естественные группы'
+                  : topology === 'health' ? 'Состояние ткани'
+                  : 'Список действий'}
+              </h1>
+              <p className="text-sm leading-relaxed max-w-3xl" style={{ color: 'var(--text-secondary)' }}>
+                {topology === 'network' ? 'Где есть опора, где всё держится на лидере, кто соединяет группы и кому нужна поддержка.'
+                  : topology === 'density' ? 'Живые действия за 7 дней — не счётчик сообщений, а реальная активность.'
+                  : topology === 'clusters' ? 'Кто уже связан между собой, кто соединяет группы и кому нужна первая связь.'
+                  : topology === 'health' ? 'Бережная диагностика участников и связей — кто в ядре, кто на периферии, кто нуждается в поддержке.'
+                  : 'Кому помочь, кого разгрузить, кого признать и где укрепить связи.'}
+              </p>
+              <div className="flex items-center gap-2 mt-4 text-xs" style={{ color: 'var(--text-muted)' }}>
+                <span>Обновлено 4 минуты назад</span>
+                <span>·</span>
+                <button className="flex items-center gap-1 transition-colors hover:opacity-80" style={{ color: 'var(--text-secondary)' }}>
+                  <RefreshCw className="w-3 h-3" />Обновить
+                </button>
+              </div>
+            </div>
           </div>
-          <h1 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">
-            {topology === 'network' ? 'Структура сообщества'
-              : topology === 'density' ? 'Пульс сообщества'
-              : topology === 'clusters' ? 'Естественные группы'
-              : topology === 'health' ? 'Состояние ткани'
-              : 'Список действий'}
-          </h1>
-          <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-2xl">
-            {topology === 'network' ? 'Где есть опора, где держится на лидере, кто соединяет группы и кому нужна поддержка.'
-              : topology === 'density' ? `Живые действия за ${pulsePeriod} дней — не счётчик сообщений, а реальная активность.`
-              : topology === 'clusters' ? 'Кто уже связан между собой, кто соединяет группы и кому нужна первая связь.'
-              : topology === 'health' ? 'Бережная диагностика участников и связей — кто в ядре, кто на периферии, кто нуждается в поддержке.'
-              : 'Кому помочь, кого разгрузить, кого признать и где укрепить связи.'}
-          </p>
-          {/* Micro-stats */}
-          <div className="flex items-center gap-4">
-            <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-              <Users className="w-3.5 h-3.5" /> <strong style={{ color: 'var(--text-primary)' }}>{allNodes.length}</strong> участников
-            </span>
-            <span className="w-px h-3" style={{ background: 'var(--border-color)' }} />
-            <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-              <Activity className="w-3.5 h-3.5" /> <strong style={{ color: 'var(--gold)' }}>{(pulseMetricsByPeriod[pulsePeriod] || pulseMetricsByPeriod[7]).density}%</strong> плотность
-            </span>
-            <span className="w-px h-3" style={{ background: 'var(--border-color)' }} />
-            <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-              <AlertTriangle className="w-3.5 h-3.5" /> <strong style={{ color: '#f59e0b' }}>{leaderSignals.length}</strong> сигналов
-            </span>
-            {activeFilterCount > 0 && (
-              <>
-                <span className="w-px h-3" style={{ background: 'var(--border-color)' }} />
-                <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--gold)' }}>
-                  <Zap className="w-3.5 h-3.5" /> <strong>{activeFilterCount}</strong> фильтров
-                </span>
-              </>
-            )}
+
+          {/* ═══ NAVIGATION CARDS ═══ */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
+            {[
+              { key: 'network', label: 'Сеть', main: `${(pulseMetricsByPeriod[pulsePeriod] || pulseMetricsByPeriod[7]).density}% плотность`, sub: `${leaderSignals.length} сигнала в ткани`, icon: Activity },
+              { key: 'density', label: 'Пульс', main: `+${(pulseMetricsByPeriod[pulsePeriod]?.changed?.filter(c => c.label.includes('связ')) || []).length || 6} новых связей`, sub: `+${(pulseMetricsByPeriod[pulsePeriod]?.changed?.filter(c => c.label.includes('благодар')) || []).length || 3} благодарности`, icon: Zap },
+              { key: 'clusters', label: 'Кластеры', main: `${(() => { const c = findClusters(filteredNodes, filteredEdges); return new Set(c.values()).size; })()} группы`, sub: `${findBridges(filteredEdges, findClusters(filteredNodes, filteredEdges)).size} связующих участника`, icon: Users },
+              { key: 'health', label: 'Состояние', main: `${allNodes.filter(n => n.status === 'active').length} в движении`, sub: `${allNodes.filter(n => ['stuck', 'burnout_risk', 'inactive'].includes(n.status)).length} точки заботы`, icon: Heart },
+              { key: 'list', label: 'Список', main: `${leaderSignals.length} действия`, sub: 'по порядку сегодня', icon: ArrowDown },
+            ].map((card) => {
+              const Icon = card.icon;
+              const isActive = topology === card.key;
+              return (
+                <button
+                  key={card.key}
+                  onClick={() => handleTopologyChange(card.key)}
+                  className={`text-left p-4 rounded-xl transition-all duration-200 border ${isActive ? 'ring-1' : 'hover:translate-y-[-2px]'}`}
+                  style={{
+                    backgroundColor: isActive ? 'var(--bg-card)' : 'var(--hover-bg)',
+                    borderColor: isActive ? 'var(--gold)' : 'var(--border-color)',
+                    boxShadow: isActive ? 'var(--card-shadow)' : 'none',
+                  }}
+                >
+                  <Icon className="w-4 h-4 mb-2" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }} />
+                  <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{card.label}</p>
+                  <p className="text-[11px] font-medium" style={{ color: isActive ? 'var(--gold)' : 'var(--text-secondary)' }}>{card.main}</p>
+                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{card.sub}</p>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -252,11 +271,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : 'px-5 pb-4'}`}>
         <main className="flex-1 min-w-0 flex flex-col gap-6 min-h-0">
 
-          {/* Toolbar */}
-          <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-between'}`}>
-            {!focusMode && (
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <TopologySwitcher value={topology} onChange={handleTopologyChange} mode="leader" />
+          {/* Toolbar — icons top-right over canvas */}
+          <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-end'}`}>
+            <div className="flex items-center gap-2">
+              {!focusMode && (
                 <button
                   onClick={() => setFabricDrawerOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all border hover:scale-[1.02] active:scale-[0.98]"
@@ -275,9 +293,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                   </span>
                   Ткань
                 </button>
-              </div>
-            )}
-            <div className="flex items-center gap-2">
+              )}
               <div className="relative w-9 h-9">
                 <FilterPanel
                   mode="leader"
