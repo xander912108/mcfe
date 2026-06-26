@@ -201,7 +201,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
   /* ── render ────────────────────────────────────────────── */
   return (
-    <>
+    <div>
     <div className={`${focusMode ? 'h-screen flex flex-col bg-[var(--bg-main)]' : 'flex flex-col gap-4 md:gap-6'}`}>
 
       {/* ═══ HERO BLOCK ═══ */}
@@ -508,7 +508,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               );
             })()}
           </div>
-        </>
+        </div>
       )}
 
       {/* Selected node */}
