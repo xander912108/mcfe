@@ -235,6 +235,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               </div>
             </div>
           </div>
+      )}
 
           {/* ═══ NAVIGATION CARDS ═══ */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
@@ -266,7 +267,6 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               );
             })}
           </div>
-      )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
         <main className="flex-1 min-w-0 space-y-6">
