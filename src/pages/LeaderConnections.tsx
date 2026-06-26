@@ -446,7 +446,27 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             )}
 
             {/* Zoom controls */}
-            <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
+            <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+            <div className="relative w-9 h-9">
+              <FilterPanel
+                mode="leader"
+                onFilterChange={setFilters}
+                activeCount={activeFilterCount}
+                buttonPositionClassName="top-0 right-0"
+                panelPositionClassName="top-10 right-0"
+                topology={topology}
+              />
+            </div>
+            <button
+              onClick={() => setFocusMode(false)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all border"
+              style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
+              title="Выйти из фокуса (ESC)"
+            >
+              <Minimize2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
               <ZoomButton label="Увеличить" onClick={cam.zoomIn}>+</ZoomButton>
               <ZoomButton label="Уменьшить" onClick={cam.zoomOut}>{'\u2212'}</ZoomButton>
               <ZoomButton label="Сбросить вид" onClick={cam.reset}>{'\u2316'}</ZoomButton>
