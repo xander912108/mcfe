@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router';
 import {
   Users, AlertTriangle, Zap,
   Heart, X, Maximize2, Minimize2, Activity,
-  ArrowDown,
+  ArrowDown, RefreshCw,
 } from 'lucide-react';
 import {
   communityCenter, leaderNodes, leaderEdges, leaderSignals,
@@ -235,50 +235,35 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* ═══ NAVIGATION CARDS ═══ */}
-          {(() => {
-            const clusterMap = findClusters(filteredNodes, filteredEdges);
-            const clusterCount = new Set(clusterMap.values()).size;
-            const bridgeCount = findBridges(filteredEdges, clusterMap).size;
-            const changed = pulseMetricsByPeriod[pulsePeriod]?.changed || [];
-            const newLinks = changed.filter(c => c.label.includes('связ')).length || 6;
-            const thanks = changed.filter(c => c.label.includes('благодар')).length || 3;
-            const activeCount = allNodes.filter(n => n.status === 'active').length;
-            const careCount = allNodes.filter(n => ['stuck', 'burnout_risk', 'inactive'].includes(n.status)).length;
-            const density = (pulseMetricsByPeriod[pulsePeriod] || pulseMetricsByPeriod[7]).density;
-            const cards = [
-              { key: 'network', label: 'Сеть', main: `${density}% плотность`, sub: `${leaderSignals.length} сигнала в ткани`, icon: Activity },
-              { key: 'density', label: 'Пульс', main: `+${newLinks} новых связей`, sub: `+${thanks} благодарности`, icon: Zap },
-              { key: 'clusters', label: 'Кластеры', main: `${clusterCount} группы`, sub: `${bridgeCount} связующих участника`, icon: Users },
-              { key: 'health', label: 'Состояние', main: `${activeCount} в движении`, sub: `${careCount} точки заботы`, icon: Heart },
-              { key: 'list', label: 'Список', main: `${leaderSignals.length} действия`, sub: 'по порядку сегодня', icon: ArrowDown },
-            ];
-            return (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
-                {cards.map((card) => {
-                  const Icon = card.icon;
-                  const isActive = topology === card.key;
-                  return (
-                    <button
-                      key={card.key}
-                      onClick={() => handleTopologyChange(card.key)}
-                      className={`text-left p-4 rounded-xl transition-all duration-200 border ${isActive ? 'ring-1' : 'hover:translate-y-[-2px]'}`}
-                      style={{
-                        backgroundColor: isActive ? 'var(--bg-card)' : 'var(--hover-bg)',
-                        borderColor: isActive ? 'var(--gold)' : 'var(--border-color)',
-                        boxShadow: isActive ? 'var(--card-shadow)' : 'none',
-                      }}
-                    >
-                      <Icon className="w-4 h-4 mb-2" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }} />
-                      <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{card.label}</p>
-                      <p className="text-[11px] font-medium" style={{ color: isActive ? 'var(--gold)' : 'var(--text-secondary)' }}>{card.main}</p>
-                      <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{card.sub}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })()}
-        </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
+            {[
+              { key: 'network', label: 'Сеть', main: '62% плотность', sub: '4 сигнала в ткани', icon: Activity },
+              { key: 'density', label: 'Пульс', main: '+6 новых связей', sub: '+3 благодарности', icon: Zap },
+              { key: 'clusters', label: 'Кластеры', main: '3 группы', sub: '2 связующих участника', icon: Users },
+              { key: 'health', label: 'Состояние', main: '12 в движении', sub: '6 точки заботы', icon: Heart },
+              { key: 'list', label: 'Список', main: '4 действия', sub: 'по порядку сегодня', icon: ArrowDown },
+            ].map((card) => {
+              const Icon = card.icon;
+              const isActive = topology === card.key;
+              return (
+                <button
+                  key={card.key}
+                  onClick={() => handleTopologyChange(card.key)}
+                  className={`text-left p-4 rounded-xl transition-all duration-200 border ${isActive ? 'ring-1' : 'hover:translate-y-[-2px]'}`}
+                  style={{
+                    backgroundColor: isActive ? 'var(--bg-card)' : 'var(--hover-bg)',
+                    borderColor: isActive ? 'var(--gold)' : 'var(--border-color)',
+                    boxShadow: isActive ? 'var(--card-shadow)' : 'none',
+                  }}
+                >
+                  <Icon className="w-4 h-4 mb-2" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }} />
+                  <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{card.label}</p>
+                  <p className="text-[11px] font-medium" style={{ color: isActive ? 'var(--gold)' : 'var(--text-secondary)' }}>{card.main}</p>
+                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{card.sub}</p>
+                </button>
+              );
+            })}
+          </div>        </div>
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
