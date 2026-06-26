@@ -169,13 +169,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   useLayoutEffect(() => {
     const node = containerDivRef.current;
     if (!node) return;
-    // Даём браузеру время рассчитать flex-размеры перед первым измерением
-    requestAnimationFrame(() => {
-      const rect = node.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        setCanvasSize({ width: rect.width, height: rect.height });
-      }
-    });
+    const rect = node.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      setCanvasSize({ width: rect.width, height: rect.height });
+    }
   }, []);
 
 
@@ -253,7 +250,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
       <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : 'px-5 pb-4'}`}>
-        <main className="flex-1 min-w-0 space-y-6">
+        <main className="flex-1 min-w-0 flex flex-col gap-6 min-h-0">
 
           {/* Toolbar */}
           <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-between'}`}>
