@@ -318,7 +318,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             {/* Status filters — health tab */}
             {topology === 'health' && (
               <div className={`absolute z-30 flex items-center gap-2 transition-all duration-300 left-1/2 -translate-x-1/2 ${focusMode ? 'top-14' : 'top-3'}`}>
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex items-center gap-1 shrink-0">
                   {STATUS_FILTER_ORDER.map((key) => {
                     const sc = key ? STATUS_COLORS[key] : null;
                     const count = key ? statusCounts[key as keyof typeof statusCounts] : totalCount;
@@ -328,13 +328,13 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                       <button
                         key={key}
                         onClick={() => setStatusFilter(key || null)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition-all duration-200 border ${
+                        className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all duration-200 border whitespace-nowrap ${
                           isActive
                             ? 'bg-[var(--gold)]/15 text-[var(--gold)] border-[var(--gold)]/25'
                             : 'bg-[var(--hover-bg)] text-[var(--text-muted)] border-[var(--border-color)] hover:text-[var(--text-secondary)]'
                         }`}
                       >
-                        {sc && <div className="w-1.5 h-1.5 rounded-full" style={{ background: sc.border }} />}
+                        {sc && <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sc.border }} />}
                         <span>{label}</span>
                         <span className={isActive ? 'text-[var(--gold)]/70' : 'text-[var(--text-muted)]'}>{count}</span>
                       </button>
