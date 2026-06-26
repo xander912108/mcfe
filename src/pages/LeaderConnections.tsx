@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router';
 import {
   Users, AlertTriangle, Zap,
   Heart, X, Maximize2, Minimize2, Activity,
-  ArrowDown, RefreshCw,
+  ArrowDown,
 } from 'lucide-react';
 import {
   communityCenter, leaderNodes, leaderEdges, leaderSignals,
@@ -89,16 +89,15 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     if (!node) return;
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const w = entry.contentRect.width;
-        const h = entry.contentRect.height;
-        // Canvas height >= width for all tabs except list
-        const finalH = topology !== 'list' ? Math.max(h, w) : h;
-        setCanvasSize({ width: w, height: finalH });
+        setCanvasSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
       }
     });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [topology]);
+  }, []);
 
   const allNodes = useMemo(() => leaderNodes.filter((n) => n.id !== 'me'), []);
 
@@ -170,13 +169,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     const node = containerDivRef.current;
     if (!node) return;
     const rect = node.getBoundingClientRect();
-    if (rect.width > 0) {
-      const w = rect.width;
-      const h = rect.height;
-      const finalH = topology !== 'list' ? Math.max(h, w) : h;
-      setCanvasSize({ width: w, height: finalH });
+    if (rect.width > 0 && rect.height > 0) {
+      setCanvasSize({ width: rect.width, height: rect.height });
     }
-  }, [topology]);
+  }, []);
 
 
 
@@ -201,8 +197,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
   /* ── render ────────────────────────────────────────────── */
   return (
-    <div>
-    <div className={`${focusMode ? 'h-screen flex flex-col bg-[var(--bg-main)]' : 'flex flex-col gap-4 md:gap-6'}`}>
+    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
+    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
 
       {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
@@ -239,40 +235,55 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* ═══ NAVIGATION CARDS ═══ */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
-            {[
-              { key: 'network', label: 'Сеть', main: '62% плотность', sub: '4 сигнала в ткани', icon: Activity },
-              { key: 'density', label: 'Пульс', main: '+6 новых связей', sub: '+3 благодарности', icon: Zap },
-              { key: 'clusters', label: 'Кластеры', main: '3 группы', sub: '2 связующих участника', icon: Users },
-              { key: 'health', label: 'Состояние', main: '12 в движении', sub: '6 точки заботы', icon: Heart },
-              { key: 'list', label: 'Список', main: '4 действия', sub: 'по порядку сегодня', icon: ArrowDown },
-            ].map((card) => {
-              const Icon = card.icon;
-              const isActive = topology === card.key;
-              return (
-                <button
-                  key={card.key}
-                  onClick={() => handleTopologyChange(card.key)}
-                  className={`text-left p-4 rounded-xl transition-all duration-200 border ${isActive ? 'ring-1' : 'hover:translate-y-[-2px]'}`}
-                  style={{
-                    backgroundColor: isActive ? 'var(--bg-card)' : 'var(--hover-bg)',
-                    borderColor: isActive ? 'var(--gold)' : 'var(--border-color)',
-                    boxShadow: isActive ? 'var(--card-shadow)' : 'none',
-                  }}
-                >
-                  <Icon className="w-4 h-4 mb-2" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }} />
-                  <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{card.label}</p>
-                  <p className="text-[11px] font-medium" style={{ color: isActive ? 'var(--gold)' : 'var(--text-secondary)' }}>{card.main}</p>
-                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{card.sub}</p>
-                </button>
-              );
-            })}
-          </div>        </div>
+          {(() => {
+            const clusterMap = findClusters(filteredNodes, filteredEdges);
+            const clusterCount = new Set(clusterMap.values()).size;
+            const bridgeCount = findBridges(filteredEdges, clusterMap).size;
+            const changed = pulseMetricsByPeriod[pulsePeriod]?.changed || [];
+            const newLinks = changed.filter(c => c.label.includes('связ')).length || 6;
+            const thanks = changed.filter(c => c.label.includes('благодар')).length || 3;
+            const activeCount = allNodes.filter(n => n.status === 'active').length;
+            const careCount = allNodes.filter(n => ['stuck', 'burnout_risk', 'inactive'].includes(n.status)).length;
+            const density = (pulseMetricsByPeriod[pulsePeriod] || pulseMetricsByPeriod[7]).density;
+            const cards = [
+              { key: 'network', label: 'Сеть', main: `${density}% плотность`, sub: `${leaderSignals.length} сигнала в ткани`, icon: Activity },
+              { key: 'density', label: 'Пульс', main: `+${newLinks} новых связей`, sub: `+${thanks} благодарности`, icon: Zap },
+              { key: 'clusters', label: 'Кластеры', main: `${clusterCount} группы`, sub: `${bridgeCount} связующих участника`, icon: Users },
+              { key: 'health', label: 'Состояние', main: `${activeCount} в движении`, sub: `${careCount} точки заботы`, icon: Heart },
+              { key: 'list', label: 'Список', main: `${leaderSignals.length} действия`, sub: 'по порядку сегодня', icon: ArrowDown },
+            ];
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
+                {cards.map((card) => {
+                  const Icon = card.icon;
+                  const isActive = topology === card.key;
+                  return (
+                    <button
+                      key={card.key}
+                      onClick={() => handleTopologyChange(card.key)}
+                      className={`text-left p-4 rounded-xl transition-all duration-200 border ${isActive ? 'ring-1' : 'hover:translate-y-[-2px]'}`}
+                      style={{
+                        backgroundColor: isActive ? 'var(--bg-card)' : 'var(--hover-bg)',
+                        borderColor: isActive ? 'var(--gold)' : 'var(--border-color)',
+                        boxShadow: isActive ? 'var(--card-shadow)' : 'none',
+                      }}
+                    >
+                      <Icon className="w-4 h-4 mb-2" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }} />
+                      <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>{card.label}</p>
+                      <p className="text-[11px] font-medium" style={{ color: isActive ? 'var(--gold)' : 'var(--text-secondary)' }}>{card.main}</p>
+                      <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{card.sub}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })()}
+        </div>
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 ${focusMode ? 'h-full p-4' : ''}`}>
-        <main className="flex-1 min-w-0 space-y-6">
+      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : ''}`}>
+        <main className="flex-1 min-w-0 flex flex-col gap-6 min-h-0">
 
           {/* Toolbar — icons top-right over canvas */}
           <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-end'}`}>
@@ -319,11 +330,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`relative isolate ${focusMode ? 'h-full p-4' : 'rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`flex-1 relative isolate min-h-0 ${focusMode ? 'h-full p-0' : 'rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
-              className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'rounded-2xl'}`}
-              style={{ background: 'var(--bg-card)', minHeight: '100%' }}
+              className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
+              style={{ background: 'var(--bg-card)' }}
             >
             {filteredNodes.length === 0 && topology !== 'list' && (
               <EmptyStateCanvas mode="leader" hasFilters={activeFilterCount > 0} onClearFilters={activeFilterCount > 0 ? () => setFilters({}) : undefined} />
@@ -445,38 +456,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               </div>
             )}
 
-            <button
-              onClick={() => setFocusMode(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all border"
-              style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
-              title="Выйти из фокуса (ESC)"
-            >
-              <Minimize2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          {focusMode && (
-            <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-              <div className="relative w-9 h-9">
-                <FilterPanel
-                  mode="leader"
-                  onFilterChange={setFilters}
-                  activeCount={activeFilterCount}
-                  buttonPositionClassName="top-0 right-0"
-                  panelPositionClassName="top-10 right-0"
-                  topology={topology}
-                />
-              </div>
-              <button
-                onClick={() => setFocusMode(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg transition-all border"
-                style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', borderColor: 'var(--border-color)' }}
-                title="Выйти из фокуса (ESC)"
-              >
-                <Minimize2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-          <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
+            {/* Zoom controls */}
+            <div className="absolute bottom-4 right-4 z-20 flex flex-col gap-1">
               <ZoomButton label="Увеличить" onClick={cam.zoomIn}>+</ZoomButton>
               <ZoomButton label="Уменьшить" onClick={cam.zoomOut}>{'\u2212'}</ZoomButton>
               <ZoomButton label="Сбросить вид" onClick={cam.reset}>{'\u2316'}</ZoomButton>
@@ -490,7 +471,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       {/* ═══ SLIDE-OVER PANELS ═══ */}
       {/* Selected cluster */}
       {selectedCluster && topology === 'clusters' && (
-        <div>
+        <>
           <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedCluster(null)} />
           <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             {(() => {
@@ -538,7 +519,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               );
             })()}
           </div>
-        </div>
+        </>
       )}
 
       {/* Selected node */}
@@ -552,7 +533,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         const centrality = computeCentrality(selectedNode.id, filteredEdges);
         const cRole = cid === -1 ? ('isolated' as const) : isBridge ? ('bridge' as const) : centrality > 0.5 ? ('core' as const) : ('periphery' as const);
         return (
-          <div>
+          <>
             <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
             <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
               <NodeCard
@@ -575,7 +556,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 })()}
               />
             </div>
-          </div>
+          </>
         );
       })()}
     </div>
