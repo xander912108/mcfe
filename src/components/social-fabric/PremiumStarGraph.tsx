@@ -196,7 +196,7 @@ export function PremiumStarGraph({
     });
 
     sortedNodes.forEach((node, i) => {
-      const r = innerR + adaptiveSpacing * Math.sqrt(i);
+      const r = Math.min(maxCanvasR - finalNodeR - 12, innerR + adaptiveSpacing * Math.sqrt(i));
       const angle = i * goldenAngle - Math.PI / 2;
 
       const existing = nodesRef.current.get(node.id);

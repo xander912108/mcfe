@@ -174,7 +174,7 @@ export function CirclesTopology({
         });
       });
     });
-  }, [centerNode, nodes, edges, cx, cy, ringRadii]);
+  }, [centerNode, nodes, edges, cx, cy, ringRadii, maxR]);
 
   // Render
   useEffect(() => {
