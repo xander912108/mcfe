@@ -197,8 +197,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
   /* ── render ────────────────────────────────────────────── */
   return (
-    <div className={`${darkMode ? 'dark' : ''} ${focusMode ? '' : 'flex flex-col lg:flex-row gap-4 md:gap-6 w-full'}`} style={{ height: focusMode ? '100vh' : '100%' }}>
-    <div className={`${focusMode ? 'h-screen' : 'h-full flex-1 min-w-0'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+    <div className={`${darkMode ? 'dark ' : ''}${focusMode ? 'fixed inset-0 z-50 w-screen h-screen overflow-hidden' : 'flex flex-col lg:flex-row gap-4 md:gap-6 w-full'}`} style={{ height: focusMode ? '100vh' : '100%' }}>
+    <div className={`${focusMode ? 'h-screen w-screen' : 'h-full flex-1 min-w-0'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
 
       {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
@@ -282,11 +282,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : ''}`}>
-        <main className="flex-1 min-w-0 flex flex-col gap-6 min-h-0">
+      <div className={`flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-3 gap-2' : 'gap-4 md:gap-6'}`}>
+        <main className={`flex-1 min-w-0 flex flex-col min-h-0 ${focusMode ? 'gap-2' : 'gap-6'}`}>
 
           {/* Toolbar — icons top-right over canvas */}
-          <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-end'}`}>
+          <div className={`flex items-center shrink-0 ${focusMode ? 'justify-end' : 'justify-end'}`}>
             <div className="flex items-center gap-2">
               {!focusMode && (
                 <button
