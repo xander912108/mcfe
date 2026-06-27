@@ -305,7 +305,7 @@ export function PulseTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam]);
+  }, [nodes, edges, width, height, cam, darkMode]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
