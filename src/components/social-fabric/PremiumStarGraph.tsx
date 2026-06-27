@@ -39,6 +39,7 @@ interface PremiumStarGraphProps {
   bridgeContexts?: BridgeContext[];
   darkMode?: boolean;
   camera?: ReturnType<typeof useCamera>;
+  labelZoomThreshold?: number;
 }
 
 interface RenderNode extends GraphNode {
@@ -137,6 +138,7 @@ export function PremiumStarGraph({
   centerLabel,
   darkMode = true,
   camera: externalCamera,
+  labelZoomThreshold = 0.95,
 }: PremiumStarGraphProps) {
   const COLORS = useMemo(() => getColors(darkMode), [darkMode]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -189,11 +191,17 @@ export function PremiumStarGraph({
       ? Math.max(minSpacing, Math.min(desiredSpacing, fitSpacing))
       : desiredSpacing;
 
-    // Sort by weight descending: strong ties first (closer to center)
+    const nodeWeight = (nodeId: string) => edges
+      .filter((e) => e.source === nodeId || e.target === nodeId)
+      .reduce((maxWeight, edge) => Math.max(maxWeight, edge.weight), 0);
+
+    // Sort by strongest visible connection: strong ties first (inner golden-spiral turns).
+    // For the leader view the center is the community, so we use each participant's
+    // strongest incident edge rather than only center-to-node edges.
     const sortedNodes = [...connectedNodes].sort((a, b) => {
-      const edgeA = edges.find((e) => (e.source === centerNode.id && e.target === a.id) || (e.target === centerNode.id && e.source === a.id));
-      const edgeB = edges.find((e) => (e.source === centerNode.id && e.target === b.id) || (e.target === centerNode.id && e.source === b.id));
-      return (edgeB?.weight ?? 0) - (edgeA?.weight ?? 0);
+      const weightDelta = nodeWeight(b.id) - nodeWeight(a.id);
+      if (weightDelta !== 0) return weightDelta;
+      return a.id.localeCompare(b.id);
     });
 
     sortedNodes.forEach((node, i) => {
@@ -729,7 +737,7 @@ export function PremiumStarGraph({
         }
 
         // Labels — show role only (name shown in sidebar card on click)
-        const showLabels = isCenter || cameraRef.current.zoom >= 0.95;
+        const showLabels = isCenter || cameraRef.current.zoom >= labelZoomThreshold;
 
         if (showLabels) {
           // NAME — all nodes except center ("Я")
@@ -767,7 +775,7 @@ export function PremiumStarGraph({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [centerNode, edges, width, height, mode, highlightNodeId, cameraRef, centerLabel, connectedNodes, dimOpacity, highlightNodeIds, COLORS, darkMode]);
+  }, [centerNode, edges, width, height, mode, highlightNodeId, cameraRef, centerLabel, connectedNodes, dimOpacity, highlightNodeIds, COLORS, darkMode, labelZoomThreshold]);
 
   // Draw signal glow+core (stroke drawn separately AFTER circle border)
   // Convert screen coords to world coords (with camera)

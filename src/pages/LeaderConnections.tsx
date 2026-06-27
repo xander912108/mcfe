@@ -59,12 +59,25 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, boolean>>({});
-    const [pulsePeriod, setPulsePeriod] = useState(7);
+  const [pulsePeriod, setPulsePeriod] = useState(7);
   const [searchQuery] = useState('');
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
+  const defaultCanvasZoom = useMemo(() => {
+    if (topology === 'clusters') return 0.82 / 1.2 / 1.2;
+    if (topology === 'health') return 0.82 / 1.2;
+    return 0.82;
+  }, [topology]);
+  const labelZoomThreshold = defaultCanvasZoom * 1.2 - 0.001;
+
   // Camera for zoom controls
-  const cam = useCamera(canvasSize.width, canvasSize.height, 0.82);
+  const cam = useCamera(canvasSize.width, canvasSize.height, defaultCanvasZoom);
+
+  const resetCamera = cam.reset;
+
+  useEffect(() => {
+    resetCamera();
+  }, [topology, resetCamera]);
 
   // Smooth tab transition: fade + slide
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -423,6 +436,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     onPeriodChange={setPulsePeriod}
                     camera={cam}
                     highlightNodeIds={highlightNodeIds}
+                    labelZoomThreshold={labelZoomThreshold}
                   />
                 ) : displayTopology === 'clusters' ? (
                   <ClustersTopology nodes={allNodes}
@@ -436,6 +450,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     darkMode={darkMode}
                     camera={cam}
                     highlightNodeIds={highlightNodeIds}
+                    labelZoomThreshold={labelZoomThreshold}
                   />
                 ) : displayTopology === 'health' ? (
                   <HealthTopology nodes={allNodes}
@@ -450,6 +465,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     darkMode={darkMode}
                     camera={cam}
                     highlightNodeIds={highlightNodeIds}
+                    labelZoomThreshold={labelZoomThreshold}
                   />
                 ) : (
                   <PremiumStarGraph centerNode={communityCenter}
@@ -467,6 +483,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     darkMode={darkMode}
                     camera={cam}
                     highlightNodeIds={highlightNodeIds}
+                    labelZoomThreshold={labelZoomThreshold}
                   />
                 )}
                 {hoveredNode && !selectedNode && hoveredScreenPos && (

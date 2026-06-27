@@ -17,6 +17,7 @@ interface HealthTopologyProps {
   camera?: ReturnType<typeof useCamera>;
   highlightNodeIds?: Set<string> | null;
   dimOpacity?: number;
+  labelZoomThreshold?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -71,7 +72,7 @@ function statusColor(s: string) {
 
 export function HealthTopology({
   nodes, edges, onNodeHover, onNodeClick, activeStatusFilter, width, height,
-  darkMode = true, camera: externalCamera, highlightNodeIds, dimOpacity = 0.18,
+  darkMode = true, camera: externalCamera, highlightNodeIds, dimOpacity = 0.18, labelZoomThreshold = 0.55,
 }: HealthTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height, 0.55);
@@ -297,7 +298,7 @@ export function HealthTopology({
         const nameText = node.name;
 
         // Name and role labels hidden at zoom <= initialZoom (0.55)
-        if (cam.cameraRef.current.zoom > 0.55) {
+        if (cam.cameraRef.current.zoom >= labelZoomThreshold) {
           drawPremiumCanvasLabel(ctx, nameText, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
 
           // Role (if any)
@@ -327,7 +328,7 @@ export function HealthTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode, highlightNodeIds, dimOpacity]);
+  }, [nodes, edges, width, height, cam, darkMode, highlightNodeIds, dimOpacity, labelZoomThreshold]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

@@ -20,6 +20,7 @@ interface ClustersTopologyProps {
   camera?: ReturnType<typeof useCamera>;
   highlightNodeIds?: Set<string> | null;
   dimOpacity?: number;
+  labelZoomThreshold?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -128,7 +129,7 @@ function findBridges(edges: GraphEdge[], clusterMap: Map<string, number>): Set<s
 
 export function ClustersTopology({
   nodes, edges, onNodeHover, onNodeClick, onClusterClick, width, height,
-  darkMode = true, camera: externalCamera, highlightNodeIds, dimOpacity = 0.18,
+  darkMode = true, camera: externalCamera, highlightNodeIds, dimOpacity = 0.18, labelZoomThreshold = 0.55,
 }: ClustersTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height, 0.55);
@@ -349,7 +350,10 @@ export function ClustersTopology({
         const name = cid === -1 ? 'Нужна первая связь' : getClusterName(clusterNodes);
         const count = members.length;
 
-        ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+        const isProductLaunchCluster = name === 'Запуск продукта';
+        ctx.font = isProductLaunchCluster
+          ? 'bold 16px Inter, system-ui, sans-serif'
+          : 'bold 11px Inter, system-ui, sans-serif';
         ctx.fillStyle = color.label;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
@@ -509,12 +513,12 @@ export function ClustersTopology({
         // Name pill
         const nameText = node.name;
         // Name label hidden at zoom <= initialZoom (0.55)
-        if (cam.cameraRef.current.zoom > 0.55) {
+        if (cam.cameraRef.current.zoom >= labelZoomThreshold) {
           drawPremiumCanvasLabel(ctx, nameText, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
         }
 
         // Names and position labels hidden at zoom <= initialZoom (0.55)
-        if (cam.cameraRef.current.zoom > 0.55) {
+        if (cam.cameraRef.current.zoom >= labelZoomThreshold) {
           // Position label: only for bridges, periphery, and top-core nodes
           let posLabel = '';
           if (node.isBridge && !isIsolated) posLabel = 'мост';
@@ -547,7 +551,7 @@ export function ClustersTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode, hoveredCluster, highlightNodeIds, dimOpacity]);
+  }, [nodes, edges, width, height, cam, darkMode, hoveredCluster, highlightNodeIds, dimOpacity, labelZoomThreshold]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
