@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { Suspense, lazy, useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Map, Users, BookOpen, Calendar, Link2, Heart,
@@ -10,14 +10,14 @@ import {
   Award, UserPlus, Workflow, Repeat,
   Lock, Wallet, CreditCard, Crown as CrownIcon, Plus, MoreHorizontal, Zap
 } from 'lucide-react';
-import LeaderConsoleMain from './LeaderConsoleMain';
-import LeaderConsoleEntry from './LeaderConsoleEntry';
-import LeaderConsoleRequests from './LeaderConsoleRequests';
-import LeaderConsoleConnections from './LeaderConsoleConnections';
-import LeaderConsoleContribution from './LeaderConsoleContribution';
-import LeaderConsoleMonetization from './LeaderConsoleMonetization';
-import LeaderConsoleSettings from './LeaderConsoleSettings';
-import MyConnections from './pages/MyConnections';
+const LeaderConsoleMain = lazy(() => import('./LeaderConsoleMain'));
+const LeaderConsoleEntry = lazy(() => import('./LeaderConsoleEntry'));
+const LeaderConsoleRequests = lazy(() => import('./LeaderConsoleRequests'));
+const LeaderConsoleConnections = lazy(() => import('./LeaderConsoleConnections'));
+const LeaderConsoleContribution = lazy(() => import('./LeaderConsoleContribution'));
+const LeaderConsoleMonetization = lazy(() => import('./LeaderConsoleMonetization'));
+const LeaderConsoleSettings = lazy(() => import('./LeaderConsoleSettings'));
+const MyConnections = lazy(() => import('./pages/MyConnections'));
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
@@ -265,6 +265,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false }
         {/* ===== MAIN LAYOUT ===== */}
         <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
+            <Suspense fallback={<div className="flex-1 rounded-2xl p-6 text-sm" style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>Загружаем пространство…</div>}>
 
             {/* LEFT SIDEBAR — TWO LAYERS */}
             <aside className="hidden lg:flex flex-col w-[240px] shrink-0 sticky top-[88px] h-[calc(100vh-104px)]">
@@ -855,8 +856,9 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false }
             </>
             )}
             </div>
+            </Suspense>
+            </div>
           </div>
-        </div>
 
         {/* MOBILE BOTTOM NAV */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)]" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-color)', backdropFilter: 'blur(12px)' }}>

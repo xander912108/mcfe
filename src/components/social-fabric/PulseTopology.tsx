@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
+import { drawPremiumCanvasLabel, drawPremiumCanvasMetaLabel } from './canvasLabels';
 
 interface PulseTopologyProps {
   nodes: GraphNode[];
@@ -15,6 +16,8 @@ interface PulseTopologyProps {
   period?: number;
   onPeriodChange?: (period: number) => void;
   camera?: ReturnType<typeof useCamera>;
+  highlightNodeIds?: Set<string> | null;
+  dimOpacity?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -56,6 +59,7 @@ function tempColor(t: number): string {
 export function PulseTopology({
   nodes, edges, onNodeHover, onNodeClick, width, height,
   darkMode = true, period = 7, onPeriodChange, camera: externalCamera,
+  highlightNodeIds, dimOpacity = 0.18,
 }: PulseTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height);
@@ -63,6 +67,7 @@ export function PulseTopology({
   const simRef = useRef<Map<string, SimNode>>(new Map());
   const animRef = useRef<number>(0);
   const hoveredRef = useRef<string | null>(null);
+  const clickStartRef = useRef({ x: 0, y: 0 });
   // Initialize
   useEffect(() => {
     const cx = width / 2;
@@ -202,9 +207,10 @@ export function PulseTopology({
       simRef.current.forEach((node) => {
         const isHovered = hoveredRef.current === node.id;
         const isDimmed = hoveredRef.current && hoveredRef.current !== node.id;
+        const isFilterDimmed = highlightNodeIds && !highlightNodeIds.has(node.id);
 
         ctx.save();
-        ctx.globalAlpha = isDimmed ? 0.35 : 1;
+        ctx.globalAlpha = isDimmed ? 0.35 : isFilterDimmed ? dimOpacity : 1;
 
         // Avatar — circular gradient placeholder (photo-ready)
         drawNodeAvatar(ctx, node.x, node.y, node.radius * 0.92, node.id, node.name, node.avatar);
@@ -266,22 +272,12 @@ export function PulseTopology({
 
         // Name label — only visible when zoomed in (> 1.0) or on hover
         if (isHovered || cam.cameraRef.current.zoom > 1.0) {
-          // Name background pill
           const nameText = node.name;
-          const nameWidth = ctx.measureText(nameText).width;
-          ctx.fillStyle = 'rgba(8, 12, 26, 0.88)';
-          ctx.beginPath();
-          ctx.roundRect(node.x - nameWidth / 2 - 7, node.y + node.radius + 6, nameWidth + 14, 20, 5);
-          ctx.fill();
-
-          ctx.fillStyle = isHovered ? '#e2e8f0' : `rgba(203, 213, 225, ${0.7 + node.temperature * 0.3})`;
-          ctx.fillText(nameText, node.x, node.y + node.radius + 16);
+          drawPremiumCanvasLabel(ctx, nameText, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
 
           // Role (if hot enough)
           if (node.role && node.temperature > 0.3) {
-            ctx.font = '10px Inter, system-ui, sans-serif';
-            ctx.fillStyle = `rgba(154, 152, 149, ${0.5 + node.temperature * 0.3})`;
-            ctx.fillText(node.role, node.x, node.y + node.radius + 32);
+            drawPremiumCanvasMetaLabel(ctx, node.role, node.x, node.y + node.radius + 32, '#9A9895', { font: '8px Inter, system-ui, sans-serif' });
           }
         }
 
@@ -334,6 +330,7 @@ export function PulseTopology({
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    clickStartRef.current = { x: e.clientX, y: e.clientY };
     const rect = canvas.getBoundingClientRect();
     const world = cam.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
     const found = Array.from(simRef.current.values()).find((n) => {
@@ -355,7 +352,7 @@ export function PulseTopology({
   }, [cam]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (cam.wasDrag(e.clientX, e.clientY)) return;
+    if (Math.hypot(e.clientX - clickStartRef.current.x, e.clientY - clickStartRef.current.y) > 5) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -399,21 +396,23 @@ export function PulseTopology({
 
       {/* Time period scale overlay */}
       {onPeriodChange && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 rounded-xl p-1 border" style={{ background: darkMode ? "rgba(28,28,31,0.92)" : "rgba(255,255,255,0.92)", borderColor: "var(--border-color)", backdropFilter: "blur(12px)" }}>
-          {[7, 30, 90].map((d) => (
-            <button
-              key={d}
-              onClick={() => onPeriodChange(d)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
-                period === d
-                  ? "text-[var(--gold)] border border-[var(--gold)]/30"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-              }`}
-              style={period === d ? { background: "rgba(201,169,110,0.12)" } : {}}
-            >
-              {d} дней
-            </button>
-          ))}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 shrink-0 transition-all duration-300">
+          {[7, 30, 90].map((d) => {
+            const isActive = period === d;
+            return (
+              <button
+                key={d}
+                onClick={() => onPeriodChange(d)}
+                className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all duration-200 border whitespace-nowrap ${
+                  isActive
+                    ? "bg-[var(--gold)]/15 text-[var(--gold)] border-[var(--gold)]/25"
+                    : "bg-[var(--hover-bg)] text-[var(--text-muted)] border-[var(--border-color)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                {d} дней
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
