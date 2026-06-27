@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
+import { drawPremiumCanvasLabel, drawPremiumCanvasMetaLabel } from './canvasLabels';
 
 interface HealthTopologyProps {
   nodes: GraphNode[];
@@ -14,6 +15,8 @@ interface HealthTopologyProps {
   focusMode?: boolean;
   darkMode?: boolean;
   camera?: ReturnType<typeof useCamera>;
+  highlightNodeIds?: Set<string> | null;
+  dimOpacity?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -68,7 +71,7 @@ function statusColor(s: string) {
 
 export function HealthTopology({
   nodes, edges, onNodeHover, onNodeClick, activeStatusFilter, width, height,
-  darkMode = true, camera: externalCamera,
+  darkMode = true, camera: externalCamera, highlightNodeIds, dimOpacity = 0.18,
 }: HealthTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height, 0.55);
@@ -76,6 +79,7 @@ export function HealthTopology({
   const simRef = useRef<Map<string, SimNode>>(new Map());
   const animRef = useRef<number>(0);
   const hoveredRef = useRef<string | null>(null);
+  const clickStartRef = useRef({ x: 0, y: 0 });
   const filterRef = useRef<string | null>(activeStatusFilter ?? null);
 
   // Keep filterRef in sync without re-init
@@ -187,8 +191,10 @@ export function HealthTopology({
 
       // Smooth spotlight lerp
       simRef.current.forEach((node) => {
-        const isSpotlightMatch = !af || node.status === af;
-        const targetAlpha = isSpotlightMatch ? 1 : 0.18;
+        const statusMatch = !af || node.status === af;
+        const filterMatch = !highlightNodeIds || highlightNodeIds.has(node.id);
+        const isSpotlightMatch = statusMatch && filterMatch;
+        const targetAlpha = isSpotlightMatch ? 1 : dimOpacity;
         node.spotlightAlpha += (targetAlpha - node.spotlightAlpha) * 0.08;
       });
 
@@ -292,23 +298,11 @@ export function HealthTopology({
 
         // Name and role labels hidden at zoom <= initialZoom (0.55)
         if (cam.cameraRef.current.zoom > 0.55) {
-          const nameWidth = ctx.measureText(nameText).width;
-          ctx.fillStyle = 'rgba(8, 12, 26, 0.88)';
-          ctx.beginPath();
-          ctx.roundRect(node.x - nameWidth / 2 - 7, node.y + node.radius + 6, nameWidth + 14, 20, 5);
-          ctx.fill();
-
-          ctx.font = '11px Inter, system-ui, sans-serif';
-          ctx.fillStyle = isHovered ? '#e2e8f0' : '#9A9895';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(nameText, node.x, node.y + node.radius + 16);
+          drawPremiumCanvasLabel(ctx, nameText, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
 
           // Role (if any)
           if (node.role) {
-            ctx.font = '9px Inter, system-ui, sans-serif';
-            ctx.fillStyle = 'rgba(154, 152, 149, 0.5)';
-            ctx.fillText(node.role, node.x, node.y + node.radius + 32);
+            drawPremiumCanvasMetaLabel(ctx, node.role, node.x, node.y + node.radius + 32, '#9A9895', { font: '8px Inter, system-ui, sans-serif' });
           }
         }
 
@@ -333,7 +327,7 @@ export function HealthTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode]);
+  }, [nodes, edges, width, height, cam, darkMode, highlightNodeIds, dimOpacity]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -363,6 +357,7 @@ export function HealthTopology({
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    clickStartRef.current = { x: e.clientX, y: e.clientY };
     const rect = canvas.getBoundingClientRect();
     const world = cam.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
     const found = Array.from(simRef.current.values()).find((n) => {
@@ -385,7 +380,7 @@ export function HealthTopology({
   }, [cam]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (cam.wasDrag(e.clientX, e.clientY)) return;
+    if (Math.hypot(e.clientX - clickStartRef.current.x, e.clientY - clickStartRef.current.y) > 5) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
