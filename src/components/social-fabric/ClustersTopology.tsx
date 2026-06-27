@@ -136,6 +136,7 @@ export function ClustersTopology({
   const simRef = useRef<Map<string, SimNode>>(new Map());
   const animRef = useRef<number>(0);
   const hoveredRef = useRef<string | null>(null);
+  const clickStartRef = useRef({ x: 0, y: 0 });
   const clusterMapRef = useRef<Map<string, number>>(new Map());
   const bridgeRef = useRef<Set<string>>(new Set());
   const coreNodesRef = useRef<Set<string>>(new Set());
@@ -589,6 +590,7 @@ export function ClustersTopology({
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    clickStartRef.current = { x: e.clientX, y: e.clientY };
     const rect = canvas.getBoundingClientRect();
     const world = cam.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
     const found = Array.from(simRef.current.values()).find((n) => {
@@ -610,7 +612,7 @@ export function ClustersTopology({
   }, [cam]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (cam.wasDrag(e.clientX, e.clientY)) return;
+    if (Math.hypot(e.clientX - clickStartRef.current.x, e.clientY - clickStartRef.current.y) > 5) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();

@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
+import { drawPremiumCanvasLabel, drawPremiumCanvasMetaLabel } from './canvasLabels';
 import { useCamera } from '@/hooks/useCamera';
 import type { GraphNode, GraphEdge, BridgeContext } from '@/data/graphData';
 
@@ -727,48 +728,19 @@ export function PremiumStarGraph({
         if (showLabels) {
           // NAME — all nodes except center ("Я")
           if (!isCenter) {
-            const nameFont = '10px Inter, system-ui, sans-serif';
-            ctx.font = nameFont;
-            const nameWidth = ctx.measureText(node.name).width;
-            const namePadding = 4;
-            const nameY = node.y + node.radius + 14;
-
-            // Pill background
-            ctx.beginPath();
-            ctx.roundRect(node.x - nameWidth / 2 - namePadding, nameY - 8, nameWidth + namePadding * 2, 14, 3);
-            ctx.fillStyle = isHovered ? 'rgba(10, 14, 30, 0.92)' : 'rgba(8, 12, 26, 0.85)';
-            ctx.fill();
-
-            // Name text
-            ctx.fillStyle = isHovered ? '#ffffff' : '#9A9895';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(node.name, node.x, nameY);
+            drawPremiumCanvasLabel(ctx, node.name, node.x, node.y + node.radius + 14, {
+              hovered: isHovered,
+              darkMode,
+              font: '9px Inter, system-ui, sans-serif',
+            });
           }
 
           // ROLE LABEL
           if (node.role && !isCenter) {
-            const roleFont = '8px Inter, system-ui, sans-serif';
-            ctx.font = roleFont;
-            const roleWidth = ctx.measureText(node.role).width;
-            const rolePadding = 3;
-            const roleY = node.y + node.radius + 32;
-
-            // Pill background
-            ctx.beginPath();
-            ctx.roundRect(node.x - roleWidth / 2 - rolePadding, roleY - 6, roleWidth + rolePadding * 2, 12, 3);
             const roleColor = COLORS.roleColors[node.role] || COLORS.roleColors.default;
-            ctx.fillStyle = roleColor + '20';
-            ctx.fill();
-            ctx.strokeStyle = roleColor + '35';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-
-            // Role text
-            ctx.fillStyle = roleColor + 'cc';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(node.role, node.x, roleY);
+            drawPremiumCanvasMetaLabel(ctx, node.role, node.x, node.y + node.radius + 32, roleColor, {
+              font: '8px Inter, system-ui, sans-serif',
+            });
           }
 
           // Center node label intentionally hidden — shown as initials in circle only
