@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
+import { drawPremiumCanvasLabel } from './canvasLabels';
 
 interface CirclesTopologyProps {
   centerNode: GraphNode;
@@ -369,17 +370,8 @@ export function CirclesTopology({
         // Labels (when zoomed in or hovered)
         const showLabel = !isCenter && (isHovered || cam.cameraRef.current.zoom > 0.85);
         if (showLabel) {
-          ctx.font = '9px Inter, system-ui, sans-serif';
-          const nw = ctx.measureText(node.name).width;
           const ny = node.y + node.radius + 14;
-          ctx.fillStyle = darkMode ? 'rgba(14,13,11,0.9)' : 'rgba(243,239,232,0.92)';
-          ctx.beginPath();
-          ctx.roundRect(node.x - nw / 2 - 4, ny - 7, nw + 8, 14, 3);
-          ctx.fill();
-          ctx.fillStyle = darkMode ? '#ccc' : '#555';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(node.name, node.x, ny);
+          drawPremiumCanvasLabel(ctx, node.name, node.x, ny, { hovered: isHovered, darkMode });
 
           // Ring label on hover
           if (isHovered) {

@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
+import { drawPremiumCanvasLabel, drawPremiumCanvasMetaLabel } from './canvasLabels';
 
 interface HealthTopologyProps {
   nodes: GraphNode[];
@@ -292,23 +293,11 @@ export function HealthTopology({
 
         // Name and role labels hidden at zoom <= initialZoom (0.55)
         if (cam.cameraRef.current.zoom > 0.55) {
-          const nameWidth = ctx.measureText(nameText).width;
-          ctx.fillStyle = 'rgba(8, 12, 26, 0.88)';
-          ctx.beginPath();
-          ctx.roundRect(node.x - nameWidth / 2 - 7, node.y + node.radius + 6, nameWidth + 14, 20, 5);
-          ctx.fill();
-
-          ctx.font = '11px Inter, system-ui, sans-serif';
-          ctx.fillStyle = isHovered ? '#e2e8f0' : '#9A9895';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(nameText, node.x, node.y + node.radius + 16);
+          drawPremiumCanvasLabel(ctx, nameText, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
 
           // Role (if any)
           if (node.role) {
-            ctx.font = '9px Inter, system-ui, sans-serif';
-            ctx.fillStyle = 'rgba(154, 152, 149, 0.5)';
-            ctx.fillText(node.role, node.x, node.y + node.radius + 32);
+            drawPremiumCanvasMetaLabel(ctx, node.role, node.x, node.y + node.radius + 32, '#9A9895', { font: '8px Inter, system-ui, sans-serif' });
           }
         }
 
