@@ -18,6 +18,7 @@ interface PulseTopologyProps {
   camera?: ReturnType<typeof useCamera>;
   highlightNodeIds?: Set<string> | null;
   dimOpacity?: number;
+  labelZoomThreshold?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -59,7 +60,7 @@ function tempColor(t: number): string {
 export function PulseTopology({
   nodes, edges, onNodeHover, onNodeClick, width, height,
   darkMode = true, period = 7, onPeriodChange, camera: externalCamera,
-  highlightNodeIds, dimOpacity = 0.18,
+  highlightNodeIds, dimOpacity = 0.18, labelZoomThreshold = 1.0,
 }: PulseTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height);
@@ -271,7 +272,7 @@ export function PulseTopology({
         ctx.textBaseline = 'middle';
 
         // Name label — only visible when zoomed in (> 1.0) or on hover
-        if (isHovered || cam.cameraRef.current.zoom > 1.0) {
+        if (isHovered || cam.cameraRef.current.zoom >= labelZoomThreshold) {
           const nameText = node.name;
           drawPremiumCanvasLabel(ctx, nameText, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
 
@@ -301,7 +302,7 @@ export function PulseTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode, highlightNodeIds, dimOpacity]);
+  }, [nodes, edges, width, height, cam, darkMode, highlightNodeIds, dimOpacity, labelZoomThreshold]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
