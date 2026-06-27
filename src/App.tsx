@@ -22,6 +22,7 @@ const MyPath = lazy(() => import('./pages/MyPath'));
 const LearningPage = lazy(() => import('./pages/LearningPage'));
 const MeetingsPage = lazy(() => import('./pages/MeetingsPage'));
 const CommunityFeed = lazy(() => import('./pages/CommunityFeed'));
+const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
@@ -32,7 +33,7 @@ const navItems = [
   { icon: BookOpen, label: 'Обучение', active: false, path: '/learning' },
   { icon: Calendar, label: 'Встречи', active: false, path: '/meetings' },
   { icon: Link2, label: 'Мои связи', active: false, path: '/connections' },
-  { icon: Lightbulb, label: 'Инсайты', active: false, path: null },
+  { icon: Lightbulb, label: 'Инсайты', active: false, path: '/insights' },
   { icon: Heart, label: 'Вклад', active: false, path: null },
 ];
 
@@ -117,10 +118,10 @@ const faqItems = [
 ];
 
 /* ===== COMPONENT ===== */
-function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, myPathPage = false, learningPage = false, meetingsPage = false, communityFeedPage = false }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings'; connectionsPage?: boolean; myPathPage?: boolean; learningPage?: boolean; meetingsPage?: boolean; communityFeedPage?: boolean }) {
+function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, myPathPage = false, learningPage = false, meetingsPage = false, communityFeedPage = false, insightsPage = false }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings'; connectionsPage?: boolean; myPathPage?: boolean; learningPage?: boolean; meetingsPage?: boolean; communityFeedPage?: boolean; insightsPage?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const leaderConsoleMode = !connectionsPage && !myPathPage && !learningPage && !meetingsPage && !communityFeedPage && (leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry');
+  const leaderConsoleMode = !connectionsPage && !myPathPage && !learningPage && !meetingsPage && !communityFeedPage && !insightsPage && (leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry');
   const activeConsoleTab = leaderMode ? leaderTab : 'main';
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') !== 'light');
   useEffect(() => { localStorage.setItem('theme', darkMode ? 'dark' : 'light'); }, [darkMode]);
@@ -404,7 +405,12 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
                 <CommunityFeed />
               )}
 
-              {!leaderConsoleMode && !connectionsPage && !myPathPage && !learningPage && !meetingsPage && !communityFeedPage && (
+              {/* ===== INSIGHTS PAGE ===== */}
+              {insightsPage && (
+                <InsightsPage />
+              )}
+
+              {!leaderConsoleMode && !connectionsPage && !myPathPage && !learningPage && !meetingsPage && !communityFeedPage && !insightsPage && (
               <>
               <main className="flex-1 min-w-0">
                 <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
