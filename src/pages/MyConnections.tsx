@@ -320,7 +320,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
               className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'h-full rounded-2xl'}`}
               style={{ background: 'var(--bg-card)' }}
             >
-            {filteredNodes.length === 0 && topology !== 'list' && (
+            {participantNodes.length === 0 && topology !== 'list' && (
               <EmptyStateCanvas mode="participant" hasFilters={activeFilterCount > 0} onClearFilters={activeFilterCount > 0 ? () => setActiveFilters({}) : undefined} />
             )}
 
@@ -391,11 +391,11 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
               >
                 {displayTopology === 'circles' ? (
                   <div className="w-full h-full relative">
-                    <RingMetricsPanel edges={filteredEdges} />
+                    <RingMetricsPanel edges={participantEdges} />
                     <CirclesTopology key="circles-graph"
                       centerNode={currentUser}
-                      nodes={filteredNodes}
-                      edges={filteredEdges}
+                      nodes={participantNodes}
+                      edges={participantEdges}
                       onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                       onNodeClick={handleNodeClick}
                       onRingClick={(ri) => setSelectedRing(ri)}
@@ -410,7 +410,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                     />
                     {hoveredNode && !selectedNode && hoveredScreenPos && (
                       <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
-                        <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+                        <NodeTooltip node={hoveredNode} edges={participantEdges} currentUserId="me" />
                       </div>
                     )}
                   </div>
@@ -421,8 +421,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                   >
                     <PremiumStarGraph key="star-graph"
                       centerNode={currentUser}
-                      connectedNodes={filteredNodes}
-                      edges={filteredEdges}
+                      connectedNodes={participantNodes}
+                      edges={participantEdges}
                       onNodeHover={(node) => { handleNodeHover(node); if (!node) setHoveredScreenPos(null); }}
                       onNodeClick={handleNodeClick}
                       onBridgeHover={setHoveredBridge}
@@ -439,7 +439,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                     />
                     {hoveredNode && !selectedNode && hoveredScreenPos && (
                       <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
-                        <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+                        <NodeTooltip node={hoveredNode} edges={participantEdges} currentUserId="me" />
                       </div>
                     )}
                     {hoveredBridge && !selectedNode && (
@@ -523,8 +523,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
             <RingCard
               ringIndex={selectedRing}
               ringLabel={['Опоры', 'Близкие', 'Коллеги', 'Знакомые', 'Потенциальные'][selectedRing]}
-              nodes={filteredNodes}
-              edges={filteredEdges}
+              nodes={participantNodes}
+              edges={participantEdges}
               onClose={() => setSelectedRing(null)}
               onNodeClick={(node) => { setSelectedRing(null); setSelectedNode(node); }}
             />
@@ -540,7 +540,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
             style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             <NodeCard
               node={selectedNode}
-              edges={filteredEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id)}
+              edges={participantEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id)}
               currentUserId="me"
               onClose={() => setSelectedNode(null)}
               mode="participant"

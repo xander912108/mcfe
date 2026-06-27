@@ -18,6 +18,8 @@ interface ClustersTopologyProps {
   focusMode?: boolean;
   darkMode?: boolean;
   camera?: ReturnType<typeof useCamera>;
+  highlightNodeIds?: Set<string> | null;
+  dimOpacity?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -126,7 +128,7 @@ function findBridges(edges: GraphEdge[], clusterMap: Map<string, number>): Set<s
 
 export function ClustersTopology({
   nodes, edges, onNodeHover, onNodeClick, onClusterClick, width, height,
-  darkMode = true, camera: externalCamera,
+  darkMode = true, camera: externalCamera, highlightNodeIds, dimOpacity = 0.18,
 }: ClustersTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height, 0.55);
@@ -408,9 +410,10 @@ export function ClustersTopology({
       simRef.current.forEach((node) => {
         const isHovered = hoveredRef.current === node.id;
         const isDimmed = hoveredRef.current && hoveredRef.current !== node.id;
+        const isFilterDimmed = highlightNodeIds && !highlightNodeIds.has(node.id);
 
         ctx.save();
-        ctx.globalAlpha = isDimmed ? 0.35 : 1;
+        ctx.globalAlpha = isDimmed ? 0.35 : isFilterDimmed ? dimOpacity : 1;
 
         const isIsolated = node.clusterId === -1;
         const color = isIsolated ? ISOLATED_COLOR : CLUSTER_COLORS[node.clusterId % CLUSTER_COLORS.length];
@@ -543,7 +546,7 @@ export function ClustersTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode, hoveredCluster]);
+  }, [nodes, edges, width, height, cam, darkMode, hoveredCluster, highlightNodeIds, dimOpacity]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

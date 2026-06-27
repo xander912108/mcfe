@@ -16,6 +16,8 @@ interface PulseTopologyProps {
   period?: number;
   onPeriodChange?: (period: number) => void;
   camera?: ReturnType<typeof useCamera>;
+  highlightNodeIds?: Set<string> | null;
+  dimOpacity?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -57,6 +59,7 @@ function tempColor(t: number): string {
 export function PulseTopology({
   nodes, edges, onNodeHover, onNodeClick, width, height,
   darkMode = true, period = 7, onPeriodChange, camera: externalCamera,
+  highlightNodeIds, dimOpacity = 0.18,
 }: PulseTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height);
@@ -203,9 +206,10 @@ export function PulseTopology({
       simRef.current.forEach((node) => {
         const isHovered = hoveredRef.current === node.id;
         const isDimmed = hoveredRef.current && hoveredRef.current !== node.id;
+        const isFilterDimmed = highlightNodeIds && !highlightNodeIds.has(node.id);
 
         ctx.save();
-        ctx.globalAlpha = isDimmed ? 0.35 : 1;
+        ctx.globalAlpha = isDimmed ? 0.35 : isFilterDimmed ? dimOpacity : 1;
 
         // Avatar — circular gradient placeholder (photo-ready)
         drawNodeAvatar(ctx, node.x, node.y, node.radius * 0.92, node.id, node.name, node.avatar);
@@ -296,7 +300,7 @@ export function PulseTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode]);
+  }, [nodes, edges, width, height, cam, darkMode, highlightNodeIds, dimOpacity]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

@@ -15,6 +15,8 @@ interface HealthTopologyProps {
   focusMode?: boolean;
   darkMode?: boolean;
   camera?: ReturnType<typeof useCamera>;
+  highlightNodeIds?: Set<string> | null;
+  dimOpacity?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -69,7 +71,7 @@ function statusColor(s: string) {
 
 export function HealthTopology({
   nodes, edges, onNodeHover, onNodeClick, activeStatusFilter, width, height,
-  darkMode = true, camera: externalCamera,
+  darkMode = true, camera: externalCamera, highlightNodeIds, dimOpacity = 0.18,
 }: HealthTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height, 0.55);
@@ -188,8 +190,10 @@ export function HealthTopology({
 
       // Smooth spotlight lerp
       simRef.current.forEach((node) => {
-        const isSpotlightMatch = !af || node.status === af;
-        const targetAlpha = isSpotlightMatch ? 1 : 0.18;
+        const statusMatch = !af || node.status === af;
+        const filterMatch = !highlightNodeIds || highlightNodeIds.has(node.id);
+        const isSpotlightMatch = statusMatch && filterMatch;
+        const targetAlpha = isSpotlightMatch ? 1 : dimOpacity;
         node.spotlightAlpha += (targetAlpha - node.spotlightAlpha) * 0.08;
       });
 
@@ -322,7 +326,7 @@ export function HealthTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode]);
+  }, [nodes, edges, width, height, cam, darkMode, highlightNodeIds, dimOpacity]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

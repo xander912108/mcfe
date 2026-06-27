@@ -14,7 +14,7 @@ export function drawPremiumCanvasLabel(
 ) {
   const {
     hovered = false,
-    darkMode = true,
+    darkMode: _darkMode = true,
     font = '9px Inter, system-ui, sans-serif',
     textColor,
     mutedTextColor,
@@ -30,10 +30,11 @@ export function drawPremiumCanvasLabel(
 
   ctx.beginPath();
   ctx.roundRect(x - width / 2 - paddingX, y - height / 2, width + paddingX * 2, height, radius);
-  ctx.fillStyle = background ?? (darkMode ? (hovered ? 'rgba(10, 14, 30, 0.92)' : 'rgba(8, 12, 26, 0.85)') : 'rgba(243,239,232,0.92)');
+  void _darkMode;
+  ctx.fillStyle = background ?? (hovered ? 'rgba(255,255,255,0.96)' : 'rgba(243,239,232,0.92)');
   ctx.fill();
 
-  ctx.fillStyle = textColor ?? (hovered ? '#ffffff' : (mutedTextColor ?? (darkMode ? '#9A9895' : '#555')));
+  ctx.fillStyle = textColor ?? (hovered ? '#4f4638' : (mutedTextColor ?? '#555'));
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, x, y);
