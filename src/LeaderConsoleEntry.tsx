@@ -8,6 +8,10 @@ import {
 } from 'lucide-react';
 import { useToast } from './ToastContext';
 
+const GradientDivider = () => (
+  <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+);
+
 /* ===== PREMIUM COLORS ===== */
 const TERRACOTTA = '#C9706A';
 const TERRACOTTA_LIGHT = 'rgba(201,112,106,0.08)';
@@ -272,13 +276,53 @@ const newcomerFilters = [
 ] as const;
 type NewcomerFilterKey = typeof newcomerFilters[number]['key'];
 
+type NewcomerData = {
+  name: string;
+  day: string;
+  statusLabel: string;
+  statusColor: string;
+  goal?: string;
+  answer?: string;
+  applicationQuestion?: string;
+  timeline?: string[];
+  nextStep?: string;
+  hidden?: boolean;
+  hasGoal?: boolean;
+  hasFirstStep?: boolean;
+  hasConnection?: boolean;
+  hasSupport?: boolean;
+  firstResponseReceived?: boolean;
+  hasFirstQuestion?: boolean;
+  needsSupport?: boolean;
+  supportStatusLabel?: string;
+  supportStatusColor?: string;
+  hasDraft?: boolean;
+  showGoalInline?: boolean;
+  panelIntro?: string;
+  firstQuestion?: string;
+  draftTitle?: string;
+  draftText?: string;
+  panelProgress?: Array<{ label: string; ok: boolean }>;
+  panelNextStep?: string;
+  actions?: string[];
+  panelTimeline?: string[];
+  firstStepName?: string;
+  goalMessageSent?: boolean;
+  firstStepRecommended?: string | boolean;
+  firstStepOptionsSent?: boolean;
+  supportOfferSentTo?: string;
+  prevHelperDeclined?: string | boolean;
+  hasDraftFirstResponse?: boolean;
+  [key: string]: unknown;
+};
+
 function getNewcomerFilterCount(key: NewcomerFilterKey): number {
-  const visible = newcomers.filter((nc: any) => !nc.hidden);
+  const visible = newcomers.filter((nc) => !nc.hidden);
   if (key === 'all') return visible.length;
   if (key === 'ждёт первой связи') {
     return visible.filter(nc =>
       nc.statusLabel === 'ждёт первой связи'
-      || (nc as any).hasFirstQuestion === true
+      || nc.hasFirstQuestion === true
       || nc.statusLabel === 'приглашён на встречу, но не пришёл'
       || nc.statusLabel === 'опора предложена, но ещё нет живого контакта'
     ).length;
@@ -300,12 +344,12 @@ function getNewcomerFilterCount(key: NewcomerFilterKey): number {
       || nc.statusLabel === 'нужен первый шаг · черновик отклика'
     ).length;
   }
-  if (key === 'нужна опора') return visible.filter(nc => (nc as any).needsSupport === true).length;
+  if (key === 'нужна опора') return visible.filter(nc => nc.needsSupport === true).length;
   return visible.filter(nc => nc.statusLabel === key).length;
 }
 
 /* ===== DATA: NEWCOMERS ===== */
-const newcomers = [
+const newcomers: NewcomerData[] = [
   {
     name: 'Мария Козлова',
     day: '2-й день',
@@ -729,7 +773,7 @@ export default function LeaderConsoleEntry() {
   const [showMeetingInviteModal, setShowMeetingInviteModal] = useState(false);
   const [showFirstReplyModal, setShowFirstReplyModal] = useState(false);
   const [showPathPanel, setShowPathPanel] = useState(false);
-  const [newcomerSidePanel, setNewcomerSidePanel] = useState<typeof newcomers[0] | null>(null);
+  const [newcomerSidePanel, setNewcomerSidePanel] = useState<NewcomerData | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showLimitsModal, setShowLimitsModal] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterKey>('waiting');
@@ -786,7 +830,7 @@ export default function LeaderConsoleEntry() {
     { key: 'settings', label: 'Настройки входа', subtitle: `${settingsRisks.length} настройка мешает входу`, icon: Settings },
   ];
 
-  const filteredNewcomers = newcomers.filter((nc: any) => {
+  const filteredNewcomers = newcomers.filter((nc) => {
     if (nc.hidden) return false;
     if (newcomerFilter === 'all') return true;
     if (newcomerFilter === 'ждёт первой связи') {
@@ -978,10 +1022,6 @@ export default function LeaderConsoleEntry() {
         <p className="text-[11px] mt-0.5" style={{ color: TERRACOTTA }}>Заголовок слишком длинный. Лучше сделать его короче, чтобы в письме отображалось полностью.</p>
       )}
     </div>
-  );
-
-  const GradientDivider = () => (
-    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
   );
 
   /* ===== BODY SCROLL LOCK ===== */
@@ -1340,7 +1380,7 @@ export default function LeaderConsoleEntry() {
 
             {/* Newcomer preview cards */}
             <div>
-              {visibleNewcomers.map((nc: any, i) => {
+              {visibleNewcomers.map((nc, i) => {
                 const badgeColors: Record<string, { bg: string; text: string; border: string }> = {
                   terracotta: { bg: TERRACOTTA_LIGHT, text: TERRACOTTA, border: TERRACOTTA_BORDER },
                   sage: { bg: SAGE_LIGHT, text: SAGE, border: SAGE_BORDER },
@@ -1356,7 +1396,7 @@ export default function LeaderConsoleEntry() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>{nc.name}</h3>
                         <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ backgroundColor: bc.bg, color: bc.text, border: `1px solid ${bc.border}` }}>{displayLabel}</span>
-                        {(nc as any).hasDraft && (
+                        {nc.hasDraft && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={{ backgroundColor: 'rgba(212,175,55,0.08)', color: 'var(--gold)', border: '1px solid rgba(212,175,55,0.2)' }}>черновик ответа</span>
                         )}
                       </div>
@@ -1483,7 +1523,7 @@ export default function LeaderConsoleEntry() {
                   </div>
 
                   {/* Goal highlight — for newcomers without goal */}
-                  {(newcomerSidePanel as any).showGoalInline && !newcomerSidePanel.hasGoal && (
+                  {newcomerSidePanel.showGoalInline && !newcomerSidePanel.hasGoal && (
                     <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: TERRACOTTA_LIGHT, border: `1px solid ${TERRACOTTA_BORDER}` }}>
                       <p className="text-sm font-semibold" style={{ color: TERRACOTTA }}>Цель пока не указана</p>
                     </div>
@@ -1494,7 +1534,7 @@ export default function LeaderConsoleEntry() {
                     <span className="text-[10px] px-2 py-1 rounded-full font-medium" style={{ backgroundColor: newcomerSidePanel.statusColor === 'terracotta' ? TERRACOTTA_LIGHT : SAGE_LIGHT, color: newcomerSidePanel.statusColor === 'terracotta' ? TERRACOTTA : SAGE, border: `1px solid ${newcomerSidePanel.statusColor === 'terracotta' ? TERRACOTTA_BORDER : SAGE_BORDER}` }}>
                       {newcomerSidePanel.statusLabel}
                     </span>
-                    {(newcomerSidePanel as any).hasDraft && (
+                    {newcomerSidePanel.hasDraft && (
                       <span className="text-[10px] px-2 py-1 rounded-full font-medium" style={{ backgroundColor: 'rgba(212,175,55,0.1)', color: 'var(--gold)', border: '1px solid rgba(212,175,55,0.2)' }}>
                         черновик ответа
                       </span>
@@ -1505,29 +1545,29 @@ export default function LeaderConsoleEntry() {
                   <div className="mb-5">
                     <h3 className="text-lg font-bold heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Первые 7 дней</h3>
                     <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                      {(newcomerSidePanel as any).panelIntro || `Здесь видно, как ${newcomerSidePanel.name.split(' ')[0]} входит в сообщество: есть ли цель, первый шаг, первая связь и опора.`}
+                      {newcomerSidePanel.panelIntro || `Здесь видно, как ${newcomerSidePanel.name.split(' ')[0]} входит в сообщество: есть ли цель, первый шаг, первая связь и опора.`}
                     </p>
                   </div>
 
                   {/* First question — GOLD (attention, not problem) */}
-                  {(newcomerSidePanel as any).firstQuestion && (
+                  {newcomerSidePanel.firstQuestion && (
                     <div className="mt-4">
                       <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Первый вопрос новичка</p>
                       <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
                         <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}><strong>{newcomerSidePanel.name.split(' ')[0]} спросил:</strong></p>
-                        <p className="text-sm italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«{(newcomerSidePanel as any).firstQuestion}»</p>
+                        <p className="text-sm italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«{newcomerSidePanel.firstQuestion}»</p>
                         <p className="text-[11px] mt-2 font-medium" style={{ color: 'var(--gold)' }}>Статус: вопрос пока без ответа</p>
                       </div>
                     </div>
                   )}
 
                   {/* Draft answer — compact preview */}
-                  {(newcomerSidePanel as any).hasDraft && (
+                  {newcomerSidePanel.hasDraft && (
                     <div className="mt-4">
                       <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Черновик ответа</p>
                       <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.15)' }}>
-                        <p className="text-[11px] mb-1" style={{ color: 'var(--gold)' }}><strong>{(newcomerSidePanel as any).draftTitle}</strong></p>
-                        <p className={`text-xs leading-relaxed ${showDraftFull ? '' : 'line-clamp-3'}`} style={{ color: 'var(--text-secondary)' }}>{(newcomerSidePanel as any).draftText}</p>
+                        <p className="text-[11px] mb-1" style={{ color: 'var(--gold)' }}><strong>{newcomerSidePanel.draftTitle}</strong></p>
+                        <p className={`text-xs leading-relaxed ${showDraftFull ? '' : 'line-clamp-3'}`} style={{ color: 'var(--text-secondary)' }}>{newcomerSidePanel.draftText}</p>
                         {!showDraftFull && (
                           <button onClick={() => setShowDraftFull(true)} className="text-[11px] mt-2 font-medium transition-colors hover:opacity-80" style={{ color: 'var(--gold)' }}>Показать весь черновик</button>
                         )}
@@ -1542,12 +1582,12 @@ export default function LeaderConsoleEntry() {
                   <div className="mt-4">
                     <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Прогресс входа</p>
                     <div className="space-y-2">
-                      {((newcomerSidePanel as any).panelProgress || [
+                      {(newcomerSidePanel.panelProgress || [
                         { label: 'Цель указана', ok: newcomerSidePanel.hasGoal },
                         { label: 'Первый шаг: стартовый гайд', ok: newcomerSidePanel.hasFirstStep },
                         { label: 'Первая связь пока не появилась', ok: newcomerSidePanel.hasConnection },
                         { label: 'Опора не назначена', ok: newcomerSidePanel.hasSupport },
-                      ]).map((item: any, idx: number) => (
+                      ]).map((item, idx) => (
                         <div key={idx} className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.ok ? SAGE : TERRACOTTA }} />
                           <p className="text-xs" style={{ color: item.ok ? 'var(--text-secondary)' : TERRACOTTA }}>{item.label}</p>
@@ -1557,22 +1597,22 @@ export default function LeaderConsoleEntry() {
                   </div>
 
                   {/* Next step — amber for draft, sage for others */}
-                  {(newcomerSidePanel.nextStep || (newcomerSidePanel as any).panelNextStep) && (
+                  {(newcomerSidePanel.nextStep || newcomerSidePanel.panelNextStep) && (
                     <div className="mt-4 rounded-lg p-3" style={{
-                      backgroundColor: (newcomerSidePanel as any).hasDraft ? 'rgba(212,175,55,0.08)' : SAGE_LIGHT,
-                      border: `1px solid ${(newcomerSidePanel as any).hasDraft ? 'rgba(212,175,55,0.2)' : SAGE_BORDER}`
+                      backgroundColor: newcomerSidePanel.hasDraft ? 'rgba(212,175,55,0.08)' : SAGE_LIGHT,
+                      border: `1px solid ${newcomerSidePanel.hasDraft ? 'rgba(212,175,55,0.2)' : SAGE_BORDER}`
                     }}>
-                      <p className="text-[10px] font-semibold tracking-widest mb-1" style={{ color: (newcomerSidePanel as any).hasDraft ? 'var(--gold)' : SAGE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что дальше</p>
-                      <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{(newcomerSidePanel as any).panelNextStep || newcomerSidePanel.nextStep}</p>
+                      <p className="text-[10px] font-semibold tracking-widest mb-1" style={{ color: newcomerSidePanel.hasDraft ? 'var(--gold)' : SAGE, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что дальше</p>
+                      <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{newcomerSidePanel.panelNextStep || newcomerSidePanel.nextStep}</p>
                     </div>
                   )}
 
                   {/* Action buttons */}
-                  {(newcomerSidePanel as any).actions && (
+                  {newcomerSidePanel.actions && (
                     <div className="mt-4">
                       <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Действия</p>
                       <div className="flex flex-wrap gap-2">
-                        {(newcomerSidePanel as any).actions.map((action: string) => {
+                        {newcomerSidePanel.actions.map((action: string) => {
                           const isSecondary = ['Открыть путь', 'Посмотреть профиль', 'Открыть во Вступлении', 'Удалить черновик', 'Посмотреть другие варианты'].includes(action);
                           return (
                             <button
@@ -1634,7 +1674,7 @@ export default function LeaderConsoleEntry() {
                   </div>
 
                   {/* Collapse: Timeline */}
-                  {((newcomerSidePanel as any).panelTimeline || newcomerSidePanel.timeline) && (
+                  {(newcomerSidePanel.panelTimeline || newcomerSidePanel.timeline) && (
                     <div className="mt-4">
                       <button onClick={() => setShowTimelineCollapse(!showTimelineCollapse)} className="flex items-center gap-2 w-full text-left py-1 group">
                         <p className="text-[10px] font-semibold tracking-widest" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произошло</p>
@@ -1642,7 +1682,7 @@ export default function LeaderConsoleEntry() {
                       </button>
                       <div className={`collapse-content ${showTimelineCollapse ? 'open' : ''}`}>
                         <div className="pt-3 space-y-1.5">
-                          {((newcomerSidePanel as any).panelTimeline || newcomerSidePanel.timeline).map((step: string, idx: number, arr: string[]) => (
+                          {(newcomerSidePanel.panelTimeline ?? newcomerSidePanel.timeline ?? []).map((step, idx, arr) => (
                             <div key={idx} className="flex items-center gap-2">
                               <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: idx === arr.length - 1 ? 'var(--gold)' : SAGE }} />
                               <p className="text-xs" style={{ color: idx === arr.length - 1 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{step}</p>
@@ -1674,15 +1714,15 @@ export default function LeaderConsoleEntry() {
                 {/* Actions — sticky footer */}
                 <div className="sticky bottom-0 px-6 py-4" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-color)' }}>
                   <div className="flex flex-wrap gap-2">
-                    {(newcomerSidePanel as any).hasDraft ? (
+                    {newcomerSidePanel.hasDraft ? (
                       <>
                         <button onClick={() => setShowEditDraftModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Продолжить редактирование</button>
                         <button onClick={() => setShowSendDraftConfirmModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: SAGE, color: '#fff' }}>Отправить ответ</button>
                         <button className="px-4 py-2 rounded-lg text-sm transition-all duration-200 hover:opacity-80" style={{ color: TERRACOTTA }}>Удалить черновик</button>
                       </>
-                    ) : (newcomerSidePanel as any).hasFirstQuestion ? (
+                    ) : newcomerSidePanel.hasFirstQuestion ? (
                       <button onClick={() => setShowFirstQuestionReplyModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Ответить на первый вопрос</button>
-                    ) : (newcomerSidePanel as any).showGoalInline && !newcomerSidePanel.hasGoal ? (
+                    ) : newcomerSidePanel.showGoalInline && !newcomerSidePanel.hasGoal ? (
                       <>
                         <button onClick={() => setShowGoalHelpModal(true)} className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-90" style={{ backgroundColor: 'var(--gold)', color: '#fff' }}>Помочь с целью</button>
                         {!newcomerSidePanel.firstResponseReceived && (
@@ -1705,7 +1745,6 @@ export default function LeaderConsoleEntry() {
               </div>
             </>
           )}
-
 
           {activeSection === 'progress' && (<>
           <div className="rounded-2xl overflow-hidden section-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
@@ -4368,7 +4407,6 @@ export default function LeaderConsoleEntry() {
           </div>
         </div>
       )}
-
 
       {/* ===== PAYMENT & ACCESS MODAL ===== */}
       {showPaymentAccessModal && (

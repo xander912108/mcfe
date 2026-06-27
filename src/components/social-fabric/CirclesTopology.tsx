@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
@@ -92,7 +92,7 @@ export function CirclesTopology({
   const cy = height / 2;
   const maxR = Math.min(width, height) * 0.42;
   // Fixed ring radii — always 5 visible rings
-  const ringRadii = [maxR * 0.18, maxR * 0.36, maxR * 0.55, maxR * 0.75, maxR * 0.94];
+  const ringRadii = useMemo(() => [maxR * 0.18, maxR * 0.36, maxR * 0.55, maxR * 0.75, maxR * 0.94], [maxR]);
 
   // Distribute nodes into rings based on their max edge weight to center
   useEffect(() => {
