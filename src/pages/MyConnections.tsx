@@ -278,7 +278,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : 'px-5 pb-4'}`}>
+      <div className={`flex-1 flex gap-4 min-h-0 ${focusMode ? 'h-full overflow-hidden p-4' : 'overflow-y-auto px-5 pb-4'}`}>
         {/* Left: Canvas area */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Toolbar: tabs + filter + focus + search */}
@@ -314,7 +314,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`flex-1 relative isolate min-h-0 ${focusMode ? 'h-full p-0' : 'rounded-2xl p-px'}`} style={focusMode ? {} : { background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`relative isolate min-h-0 ${focusMode ? 'flex-1 h-full p-0' : 'w-full aspect-square flex-none rounded-2xl p-px'}`} style={focusMode ? {} : { background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
               className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'h-full rounded-2xl'}`}
@@ -423,9 +423,10 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                       centerNode={currentUser}
                       connectedNodes={filteredNodes}
                       edges={filteredEdges}
-                      onNodeHover={handleNodeHover}
+                      onNodeHover={(node) => { handleNodeHover(node); if (!node) setHoveredScreenPos(null); }}
                       onNodeClick={handleNodeClick}
                       onBridgeHover={setHoveredBridge}
+                      onHoverScreenPos={setHoveredScreenPos}
                       highlightNodeId={hoveredNode?.id || null}
                       highlightNodeIds={hasActiveFilters ? (highlightNodeIds ?? undefined) : undefined}
                       mode="participant"
@@ -436,8 +437,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                       darkMode={darkMode}
                       camera={cam}
                     />
-                    {hoveredNode && !selectedNode && (
-                      <div className="absolute z-50 pointer-events-none" style={{ left: (hoveredNode.x || 0) + 50, top: (hoveredNode.y || 0) - 30 }}>
+                    {hoveredNode && !selectedNode && hoveredScreenPos && (
+                      <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
                         <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
                       </div>
                     )}

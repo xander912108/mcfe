@@ -25,6 +25,7 @@ interface PremiumStarGraphProps {
   onNodeHover: (node: GraphNode | null) => void;
   onNodeClick: (node: GraphNode) => void;
   onBridgeHover?: (bridge: BridgeContext | null) => void;
+  onHoverScreenPos?: (pos: { x: number; y: number } | null) => void;
   highlightNodeId?: string | null;
   highlightNodeIds?: Set<string> | null;
   dimOpacity?: number;
@@ -124,6 +125,7 @@ export function PremiumStarGraph({
   onNodeHover,
   onNodeClick,
   onBridgeHover,
+  onHoverScreenPos,
   highlightNodeId,
   highlightNodeIds,
   dimOpacity = 0.2,
@@ -193,7 +195,7 @@ export function PremiumStarGraph({
     });
 
     sortedNodes.forEach((node, i) => {
-      const r = innerR + adaptiveSpacing * Math.sqrt(i);
+      const r = Math.min(maxCanvasR - finalNodeR - 12, innerR + adaptiveSpacing * Math.sqrt(i));
       const angle = i * goldenAngle - Math.PI / 2;
 
       const existing = nodesRef.current.get(node.id);
@@ -890,6 +892,14 @@ export function PremiumStarGraph({
         hoveredRef.current = nearest;
         const node = nearest ? nodesRef.current.get(nearest) ?? null : null;
         onNodeHover(node);
+        if (node && onHoverScreenPos) {
+          const cam = cameraRef.current;
+          const sx = (node.x - width / 2) * cam.zoom + width / 2 + cam.x;
+          const sy = (node.y - height / 2) * cam.zoom + height / 2 + cam.y;
+          onHoverScreenPos({ x: sx, y: sy });
+        } else {
+          onHoverScreenPos?.(null);
+        }
         canvas.style.cursor = nearest ? 'pointer' : hoveredBridge ? 'help' : 'grab';
       }
   };
