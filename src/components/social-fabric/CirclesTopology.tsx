@@ -93,7 +93,7 @@ export function CirclesTopology({
   const cx = width / 2;
   const cy = height / 2;
   const maxR = Math.min(width, height) * 0.42;
-  // Base ring radii; final rendered radii expand per ring contents.
+  // Fixed ring radii — always 5 visible rings
   const ringRadii = useMemo(() => [maxR * 0.18, maxR * 0.36, maxR * 0.55, maxR * 0.75, maxR * 0.94], [maxR]);
 
   // Distribute nodes into rings based on their max edge weight to center

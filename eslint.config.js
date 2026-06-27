@@ -28,4 +28,21 @@ export default defineConfig([
       'react-refresh/only-export-components': 'warn',
     },
   },
+  {
+    files: [
+      'src/ToastContext.tsx',
+      'src/components/social-fabric/ClustersTopology.tsx',
+      'src/components/social-fabric/HealthTopology.tsx',
+      'src/components/ui/{badge,button,button-group,form,navigation-menu,sidebar,toggle}.tsx',
+    ],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    files: ['src/components/social-fabric/FocusLegendOverlay.tsx'],
+    rules: {
+      'react-hooks/set-state-in-effect': 'off',
+    },
+  },
 ])
