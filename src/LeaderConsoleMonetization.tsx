@@ -16,6 +16,10 @@ const SAGE_LIGHT = 'rgba(107,158,124,0.08)';
 const SAGE_BORDER = 'rgba(107,158,124,0.15)';
 const GOLD_GLOW = 'rgba(201,169,110,0.08)';
 
+const GradientDivider = () => (
+  <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+);
+
 /* ===== SECTION TYPE ===== */
 type SectionKey = 'attention' | 'formats' | 'payments' | 'insights' | 'settings';
 
@@ -261,10 +265,6 @@ export default function LeaderConsoleMonetization() {
     showRules: true, allowManual: true, closeAccess: true, saveReason: true,
   });
 
-  const GradientDivider = () => (
-    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
-  );
-
   /* Section nav cards */
   const sectionCards = [
     { key: 'attention' as SectionKey, label: 'Ваше внимание', subtitle: '3 ситуации требуют проверки', icon: AlertTriangle },
@@ -348,7 +348,6 @@ export default function LeaderConsoleMonetization() {
             );
           })}
         </div>
-
 
         {/* ===== ATTENTION SECTION ===== */}
         {activeSection === 'attention' && (
@@ -537,7 +536,6 @@ export default function LeaderConsoleMonetization() {
           </div>
         )}
 
-
         {/* ===== PAYMENTS SECTION ===== */}
         {activeSection === 'payments' && (
           <div className="rounded-2xl overflow-hidden section-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
@@ -725,7 +723,6 @@ export default function LeaderConsoleMonetization() {
             </div>
           </div>
         )}
-
 
         {/* ===== SETTINGS SECTION ===== */}
         {activeSection === 'settings' && (

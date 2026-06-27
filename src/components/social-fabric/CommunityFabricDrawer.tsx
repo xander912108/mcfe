@@ -37,13 +37,13 @@ export interface CommunityFabricDrawerProps {
   signalIcons: Record<string, React.ReactNode>;
 }
 
-const METRIC_LABELS: Record<string, { label: string; desc: string; key: string }> = {
+const METRIC_LABELS = {
   density: { label: 'Плотность', desc: 'Связанность участников', key: 'density' },
   leaderDependency: { label: 'Зависимость от лидера', desc: 'Связи через лидера', key: 'leaderDependency' },
   isolation: { label: 'Изоляция', desc: 'Без устойчивых связей', key: 'isolation' },
   decaying: { label: 'Угасание', desc: 'Связи на исходе', key: 'decaying' },
   overload: { label: 'Перегрузка', desc: 'Много запросов помощи', key: 'overload' },
-};
+} satisfies Record<keyof Omit<PulseMetric, 'trend' | 'changed'>, { label: string; desc: string; key: string }>;
 
 const PERIODS = [
   { value: 7, label: '7 дн' },
@@ -84,11 +84,13 @@ export const CommunityFabricDrawer: React.FC<CommunityFabricDrawerProps> = ({
   const metrics = pulseMetricsByPeriod[pulsePeriod] || pulseMetricsByPeriod[7];
 
   const metricEntries = useMemo(() => {
-    return Object.entries(METRIC_LABELS).map(([k, v]) => {
-      const val = (metrics as any)[k] as number;
-      const trend = (metrics.trend as any)[k === 'overload' ? 'overloaded' : k] as number;
-      const dir = metricDirections[k] || 'neutral';
-      return { ...v, value: val, trend, dir, rawKey: k };
+    return Object.entries(METRIC_LABELS).map(([key, label]) => {
+      const metricKey = key as keyof typeof METRIC_LABELS;
+      const trendKey = metricKey === 'overload' ? 'overloaded' : metricKey;
+      const value = metrics[metricKey];
+      const trend = metrics.trend[trendKey];
+      const dir = metricDirections[metricKey] || 'neutral';
+      return { ...label, value, trend, dir, rawKey: metricKey };
     });
   }, [metrics, metricDirections]);
 
