@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import { useCamera } from '@/hooks/useCamera';
 import type { GraphNode, GraphEdge, BridgeContext } from '@/data/graphData';
@@ -113,7 +113,7 @@ export function PremiumStarGraph({
   darkMode = true,
   camera: externalCamera,
 }: PremiumStarGraphProps) {
-  const COLORS = getColors(darkMode);
+  const COLORS = useMemo(() => getColors(darkMode), [darkMode]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodesRef = useRef<Map<string, RenderNode>>(new Map());
   const animRef = useRef<number>(0);
@@ -764,7 +764,7 @@ export function PremiumStarGraph({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [centerNode, edges, width, height, mode, highlightNodeId]);
+  }, [centerNode, edges, width, height, mode, highlightNodeId, cameraRef, centerLabel, connectedNodes, dimOpacity, highlightNodeIds, COLORS]);
 
   // Draw signal glow+core (stroke drawn separately AFTER circle border)
   const drawPremiumSignal = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string) => {
@@ -798,7 +798,7 @@ export function PremiumStarGraph({
       x: (sx - cx - cam.x) / cam.zoom + cx,
       y: (sy - cy - cam.y) / cam.zoom + cy,
     };
-  }, [width, height]);
+  }, [cameraRef, width, height]);
 
   // Mouse handlers with camera support
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
@@ -822,7 +822,7 @@ export function PremiumStarGraph({
     cam.x = sx - cx - (worldBefore.x - cx) * newZoom;
     cam.y = sy - cy - (worldBefore.y - cy) * newZoom;
     cam.zoom = newZoom;
-  }, [screenToWorld, width, height]);
+  }, [cameraRef, screenToWorld, width, height]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     isPanningRef.current = true;
@@ -830,7 +830,7 @@ export function PremiumStarGraph({
     cameraStartRef.current = { ...cameraRef.current };
     const canvas = canvasRef.current;
     if (canvas) canvas.style.cursor = 'grabbing';
-  }, []);
+  }, [cameraRef]);
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -894,7 +894,7 @@ export function PremiumStarGraph({
         canvas.style.cursor = nearest ? 'pointer' : hoveredBridge ? 'help' : 'grab';
       }
     },
-    [onNodeHover, onBridgeHover, screenToWorld, edges, bridgeContexts]
+    [onNodeHover, onBridgeHover, screenToWorld, edges, bridgeContexts, cameraRef]
   );
 
   const handleMouseUp = useCallback(() => {
