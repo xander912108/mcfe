@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router';
 import { Sparkles, ArrowRight, UserPlus, Maximize2, Minimize2, Lightbulb, Users, Zap, MessageCircle } from 'lucide-react';
 import { useCamera } from '@/hooks/useCamera';
@@ -197,6 +198,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [focusMode]);
+
+  const slideOverRoot = typeof document === 'undefined' ? null : document.body;
 
   // Tab descriptions
   const tabDescriptions: Record<string, { title: string; text: string }> = {
@@ -511,10 +514,10 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       </div>
 
       {/* ═══ Slide-over panels ═══ */}
-      {selectedRing !== null && (
+      {slideOverRoot && selectedRing !== null && createPortal(
         <>
-          <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedRing(null)} />
-          <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto"
+          <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedRing(null)} />
+          <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto"
             style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             <RingCard
               ringIndex={selectedRing}
@@ -525,13 +528,14 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
               onNodeClick={(node) => { setSelectedRing(null); setSelectedNode(node); }}
             />
           </div>
-        </>
+        </>,
+        slideOverRoot
       )}
 
-      {selectedNode && (
+      {slideOverRoot && selectedNode && createPortal(
         <>
-          <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
-          <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto"
+          <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
+          <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto"
             style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             <NodeCard
               node={selectedNode}
@@ -543,7 +547,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
               bridgeContexts={bridgeContexts}
             />
           </div>
-        </>
+        </>,
+        slideOverRoot
       )}
     </div>
     </div>
