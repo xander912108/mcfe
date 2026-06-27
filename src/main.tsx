@@ -14,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/community/about" element={<CommunityLanding />} />
         <Route path="/connections" element={<App connectionsPage />} />
         <Route path="/learning" element={<App learningPage />} />
+        <Route path="/meetings" element={<App meetingsPage />} />
         <Route path="/my-path" element={<App myPathPage />} />
         <Route path="/leader" element={<App leaderMode />} />
         <Route path="/leader/entry" element={<App leaderMode leaderTab="entry" />} />
