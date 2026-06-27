@@ -19,6 +19,10 @@ const AMBER = '#D4A03A';
 const GOLD_GLOW = 'rgba(201,169,110,0.08)';
 const GOLD_BORDER = 'rgba(201,169,110,0.2)';
 
+const GradientDivider = () => (
+  <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+);
+
 /* ===== SECTION TYPE ===== */
 type SectionKey = 'map' | 'plan' | 'rhythm' | 'delegate' | 'risk';
 
@@ -203,10 +207,6 @@ export default function LeaderConsoleMain() {
     el.style.height = el.scrollHeight + 'px';
   }, [messageBody]);
 
-  const GradientDivider = () => (
-    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
-  );
-
   /* Section nav cards */
   const sectionCards = [
     { key: 'map' as SectionKey, label: 'Карта дня', subtitle: '74/100 · Среда стабильна', icon: Activity },
@@ -291,7 +291,6 @@ export default function LeaderConsoleMain() {
             );
           })}
         </div>
-
 
         {/* ===== КАРТА ДНЯ ===== */}
         {activeSection === 'map' && (
@@ -514,7 +513,6 @@ export default function LeaderConsoleMain() {
         </div>
 
       </aside>
-
 
       {/* ===== MODAL: ПУЛЬС СООБЩЕСТВА ===== */}
       {showPulseModal && (
