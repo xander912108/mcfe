@@ -18,12 +18,13 @@ const LeaderConsoleContribution = lazy(() => import('./LeaderConsoleContribution
 const LeaderConsoleMonetization = lazy(() => import('./LeaderConsoleMonetization'));
 const LeaderConsoleSettings = lazy(() => import('./LeaderConsoleSettings'));
 const MyConnections = lazy(() => import('./pages/MyConnections'));
+const MyPath = lazy(() => import('./pages/MyPath'));
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
 /* ===== DATA ===== */
 const navItems = [
-  { icon: Map, label: 'Мой путь', active: false, path: null },
+  { icon: Map, label: 'Мой путь', active: false, path: '/my-path' },
   { icon: Users, label: 'Сообщество', active: false, path: null },
   { icon: BookOpen, label: 'Обучение', active: false, path: null },
   { icon: Calendar, label: 'Встречи', active: false, path: null },
@@ -113,10 +114,10 @@ const faqItems = [
 ];
 
 /* ===== COMPONENT ===== */
-function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings'; connectionsPage?: boolean }) {
+function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, myPathPage = false }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings'; connectionsPage?: boolean; myPathPage?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const leaderConsoleMode = !connectionsPage && (leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry');
+  const leaderConsoleMode = !connectionsPage && !myPathPage && (leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry');
   const activeConsoleTab = leaderMode ? leaderTab : 'main';
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') !== 'light');
   useEffect(() => { localStorage.setItem('theme', darkMode ? 'dark' : 'light'); }, [darkMode]);
@@ -274,7 +275,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false }
                 <div className="flex flex-col h-full">
                   <nav className="space-y-1 flex-1">
                     {navItems.map((item, i) => {
-                      const isActive = item.path === '/connections' && location.pathname === '/connections';
+                      const isActive = Boolean(item.path && item.path === location.pathname);
                       return (
                         <div
                           key={i}
@@ -380,8 +381,13 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false }
                 </main>
               )}
 
+              {/* ===== MY PATH ===== */}
+              {myPathPage && (
+                <MyPath />
+              )}
+
               {/* ===== COMMUNITY PAGE ===== */}
-              {!leaderConsoleMode && !connectionsPage && (
+              {!leaderConsoleMode && !connectionsPage && !myPathPage && (
               <>
               <main className="flex-1 min-w-0">
                 <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
