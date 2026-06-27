@@ -8,6 +8,10 @@ import {
 } from 'lucide-react';
 import { useToast } from './ToastContext';
 
+const GradientDivider = () => (
+  <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+);
+
 /* ===== PREMIUM COLORS ===== */
 const TERRACOTTA = '#C9706A';
 const TERRACOTTA_LIGHT = 'rgba(201,112,106,0.08)';
@@ -980,10 +984,6 @@ export default function LeaderConsoleEntry() {
     </div>
   );
 
-  const GradientDivider = () => (
-    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
-  );
-
   /* ===== BODY SCROLL LOCK ===== */
   useEffect(() => {
     if (newcomerSidePanel || archivePanelOpen || sidePanelApp || showAppMessageModal || showRestoreConfirm || showDiscardConfirm || showFirst7DaysModal || showF7RestoreConfirm || showF7DiscardConfirm || showPickMaterialModal || pickMatDiscardConfirm || showMetricsModal || showNextStepModal || showNextStepRestoreConfirm || showNextStepDiscardConfirm || showPaymentAccessModal || showPaRestoreConfirm || showPaDiscardConfirm || showPickFirstStepModal) {
@@ -1705,7 +1705,6 @@ export default function LeaderConsoleEntry() {
               </div>
             </>
           )}
-
 
           {activeSection === 'progress' && (<>
           <div className="rounded-2xl overflow-hidden section-fade-in" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
@@ -4368,7 +4367,6 @@ export default function LeaderConsoleEntry() {
           </div>
         </div>
       )}
-
 
       {/* ===== PAYMENT & ACCESS MODAL ===== */}
       {showPaymentAccessModal && (
