@@ -19,6 +19,7 @@ const LeaderConsoleMonetization = lazy(() => import('./LeaderConsoleMonetization
 const LeaderConsoleSettings = lazy(() => import('./LeaderConsoleSettings'));
 const MyConnections = lazy(() => import('./pages/MyConnections'));
 const MyPath = lazy(() => import('./pages/MyPath'));
+const LearningPage = lazy(() => import('./pages/LearningPage'));
 const CommunityFeed = lazy(() => import('./pages/CommunityFeed'));
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
@@ -27,7 +28,7 @@ import { images, avatars, previews, teams } from './assets/images';
 const navItems = [
   { icon: Map, label: 'Мой путь', active: false, path: '/my-path' },
   { icon: Users, label: 'Сообщество', active: false, path: '/community' },
-  { icon: BookOpen, label: 'Обучение', active: false, path: null },
+  { icon: BookOpen, label: 'Обучение', active: false, path: '/learning' },
   { icon: Calendar, label: 'Встречи', active: false, path: null },
   { icon: Link2, label: 'Мои связи', active: false, path: '/connections' },
   { icon: Lightbulb, label: 'Инсайты', active: false, path: null },
@@ -115,10 +116,10 @@ const faqItems = [
 ];
 
 /* ===== COMPONENT ===== */
-function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, myPathPage = false, communityFeedPage = false }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings'; connectionsPage?: boolean; myPathPage?: boolean; communityFeedPage?: boolean }) {
+function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, myPathPage = false, learningPage = false, communityFeedPage = false }: { leaderMode?: boolean; leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings'; connectionsPage?: boolean; myPathPage?: boolean; learningPage?: boolean; communityFeedPage?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const leaderConsoleMode = !connectionsPage && !myPathPage && !communityFeedPage && (leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry');
+  const leaderConsoleMode = !connectionsPage && !myPathPage && !learningPage && !communityFeedPage && (leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry');
   const activeConsoleTab = leaderMode ? leaderTab : 'main';
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') !== 'light');
   useEffect(() => { localStorage.setItem('theme', darkMode ? 'dark' : 'light'); }, [darkMode]);
@@ -387,12 +388,17 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
                 <MyPath />
               )}
 
+              {/* ===== LEARNING PAGE ===== */}
+              {learningPage && (
+                <LearningPage />
+              )}
+
               {/* ===== COMMUNITY PAGE ===== */}
               {communityFeedPage && (
                 <CommunityFeed />
               )}
 
-              {!leaderConsoleMode && !connectionsPage && !myPathPage && !communityFeedPage && (
+              {!leaderConsoleMode && !connectionsPage && !myPathPage && !learningPage && !communityFeedPage && (
               <>
               <main className="flex-1 min-w-0">
                 <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
@@ -874,10 +880,10 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
         {/* MOBILE BOTTOM NAV */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)]" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-color)', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center justify-around py-2 px-4">
-            {[{ icon: Map, label: 'Путь' }, { icon: Users, label: 'Сообщество' }, { icon: BookOpen, label: 'Обучение' }, { icon: Link2, label: 'Связи' }, { icon: MoreHorizontal, label: 'Ещё' }].map((item, i) => (
-              <button key={i} className="flex flex-col items-center gap-1 py-1 px-2">
-                <item.icon className="w-5 h-5" style={{ color: i === 1 ? 'var(--gold)' : 'var(--text-muted)' }} />
-                <span className="text-[10px]" style={{ color: i === 1 ? 'var(--gold)' : 'var(--text-muted)' }}>{item.label}</span>
+            {[{ icon: Map, label: 'Путь', path: '/my-path' }, { icon: Users, label: 'Сообщество', path: '/community' }, { icon: BookOpen, label: 'Обучение', path: '/learning' }, { icon: Link2, label: 'Связи', path: '/connections' }, { icon: MoreHorizontal, label: 'Ещё', path: null }].map((item, i) => (
+              <button key={i} onClick={() => item.path ? navigate(item.path) : undefined} className="flex flex-col items-center gap-1 py-1 px-2">
+                <item.icon className="w-5 h-5" style={{ color: item.path === location.pathname ? 'var(--gold)' : 'var(--text-muted)' }} />
+                <span className="text-[10px]" style={{ color: item.path === location.pathname ? 'var(--gold)' : 'var(--text-muted)' }}>{item.label}</span>
               </button>
             ))}
           </div>
