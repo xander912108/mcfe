@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
 import type { GraphEdge } from '@/data/graphData';
 
 interface RingMetricsPanelProps {
@@ -72,55 +72,75 @@ function getBalanceAdvice(m: RingMetrics): string {
 }
 
 const METRIC_CONFIG = [
-  { key: 'opora', label: 'Опоры', color: '#fbbf24' },
-  { key: 'blizkie', label: 'Близкие', color: '#818cf8' },
-  { key: 'kollegi', label: 'Коллеги', color: '#2dd4bf' },
-  { key: 'znakomye', label: 'Знакомые', color: '#94a3b8' },
-  { key: 'potencial', label: 'Потенц.', color: '#64748b' },
+  { key: 'opora', shortLabel: 'Опоры', color: '#C9A96E' },
+  { key: 'blizkie', shortLabel: 'Близкие', color: '#B89CC0' },
+  { key: 'kollegi', shortLabel: 'Коллеги', color: '#6B9E7C' },
+  { key: 'znakomye', shortLabel: 'Знакомые', color: '#9A9895' },
+  { key: 'potencial', shortLabel: 'Потенц.', color: '#787673' },
 ] as const;
 
 export function RingMetricsPanel({ edges }: RingMetricsPanelProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const m = computeMetrics(edges);
   const advice = getBalanceAdvice(m);
 
   return (
-    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none transition-all duration-300">
-      <div className="pointer-events-auto flex max-w-[min(680px,calc(100vw-48px))] items-center gap-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)]/70 p-1 shadow-[var(--card-shadow)] backdrop-blur-2xl">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-medium whitespace-nowrap transition-all duration-200 ${
-            collapsed
-              ? 'border-[var(--border-color)] bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-              : 'border-[var(--gold)]/25 bg-[var(--gold)]/15 text-[var(--gold)]'
-          }`}
+    <div className="absolute top-3 left-1/2 z-30 w-[min(760px,calc(100%-32px))] -translate-x-1/2 pointer-events-none transition-all duration-300">
+      <div className="mx-auto flex w-fit max-w-full flex-col items-center gap-1.5">
+        <div
+          className="pointer-events-auto flex max-w-full items-center gap-1.5 overflow-hidden rounded-2xl border px-1.5 py-1 shadow-[0_18px_45px_rgba(56,48,34,0.10)] backdrop-blur-2xl"
+          style={{
+            background: 'linear-gradient(180deg, rgba(255,252,246,0.86), rgba(241,236,226,0.72))',
+            borderColor: 'rgba(201,169,110,0.18)',
+          }}
         >
-          <span>Баланс связей</span>
-          {collapsed ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
-        </button>
+          <button
+            onClick={() => setExpanded((value) => !value)}
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[10px] font-medium whitespace-nowrap transition-all duration-200 hover:translate-y-[-1px]"
+            style={{
+              background: expanded ? 'rgba(201,169,110,0.16)' : 'rgba(255,255,255,0.58)',
+              borderColor: expanded ? 'rgba(201,169,110,0.26)' : 'rgba(201,169,110,0.14)',
+              color: expanded ? '#A37D33' : '#B99A5B',
+              boxShadow: expanded ? '0 8px 18px rgba(201,169,110,0.12)' : 'none',
+            }}
+            title={expanded ? 'Скрыть пояснение' : 'Показать пояснение'}
+          >
+            <span>Баланс связей</span>
+            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </button>
 
-        <div className="flex items-center gap-1 overflow-hidden">
-          {METRIC_CONFIG.map((cfg) => (
-            <span
-              key={cfg.key}
-              className={`rounded-md border px-2 py-1 text-[10px] font-medium whitespace-nowrap transition-all duration-200 ${collapsed ? 'hidden sm:inline-flex' : 'inline-flex'} items-center gap-1`}
-              style={{
-                color: cfg.color,
-                background: `${cfg.color}14`,
-                borderColor: `${cfg.color}30`,
-              }}
-            >
-              <strong className="font-semibold">{m[cfg.key as keyof RingMetrics]}</strong>
-              <span className="text-[var(--text-muted)]">{cfg.label}</span>
-            </span>
-          ))}
+          <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {METRIC_CONFIG.map((cfg) => (
+              <span
+                key={cfg.key}
+                className="inline-flex shrink-0 items-center gap-1 rounded-xl border px-2.5 py-1.5 text-[10px] font-medium whitespace-nowrap"
+                style={{
+                  color: cfg.color,
+                  background: `${cfg.color}14`,
+                  borderColor: `${cfg.color}36`,
+                }}
+              >
+                <strong className="text-[11px] font-semibold">{m[cfg.key as keyof RingMetrics]}</strong>
+                <span className="text-[#77716A]">{cfg.shortLabel}</span>
+              </span>
+            ))}
+          </div>
         </div>
 
-        {!collapsed && (
-          <p className="ml-1 hidden max-w-[260px] truncate px-2 text-[10px] leading-relaxed text-[var(--text-secondary)] xl:block">
-            {advice}
-          </p>
+        {expanded && (
+          <div
+            className="pointer-events-auto flex w-fit max-w-[min(620px,100%)] items-start gap-2 rounded-2xl border px-3.5 py-2 shadow-[0_16px_38px_rgba(56,48,34,0.08)] backdrop-blur-2xl animate-in fade-in-0 slide-in-from-top-1 duration-200"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255,252,246,0.84), rgba(241,236,226,0.70))',
+              borderColor: 'rgba(201,169,110,0.16)',
+            }}
+          >
+            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#C9A96E]" />
+            <p className="text-[11px] leading-relaxed text-[#6F6960]">
+              {advice}
+            </p>
+          </div>
         )}
       </div>
     </div>
