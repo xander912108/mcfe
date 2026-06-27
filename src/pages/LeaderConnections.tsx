@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { CommunityFabricDrawer } from '../components/social-fabric/CommunityFabricDrawer';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router';
 import {
   Users, AlertTriangle, Zap,
@@ -21,6 +22,7 @@ import { FilterPanel } from '@/components/social-fabric/FilterPanel';
 import { FocusLegendOverlay } from '@/components/social-fabric/FocusLegendOverlay';
 import { EmptyStateCanvas } from '@/components/social-fabric/EmptyStateCanvas';
 import { NodeCard } from '@/components/social-fabric/NodeCard';
+import { NodeTooltip } from '@/components/social-fabric/NodeTooltip';
 import { LeaderConnectionList } from '@/components/social-fabric/LeaderConnectionList';
 import { SkeletonList, SkeletonCanvas } from '@/components/social-fabric/SkeletonLoader';
 import { ZoomButton } from '@/components/social-fabric/ZoomButton';
@@ -50,6 +52,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     setSearchParams({ tab: value }, { replace: true });
   }, [setSearchParams]);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
+  const [hoveredScreenPos, setHoveredScreenPos] = useState<{ x: number; y: number } | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<{
     id: number; name: string; members: GraphNode[];
   } | null>(null);
@@ -195,10 +199,12 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     return () => window.removeEventListener('keydown', handleKey);
   }, [focusMode]);
 
+  const slideOverRoot = typeof document === 'undefined' ? null : document.body;
+
   /* ── render ────────────────────────────────────────────── */
   return (
-    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
-    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+    <div className={`${darkMode ? 'dark ' : ''}${focusMode ? 'fixed inset-0 z-50 w-screen h-screen overflow-hidden' : 'flex flex-col lg:flex-row gap-4 md:gap-6 w-full'}`} style={{ height: focusMode ? '100vh' : 'auto' }}>
+    <div className={`${focusMode ? 'h-screen w-screen' : 'flex-1 min-w-0'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
 
       {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
@@ -210,7 +216,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 <span style={{ color: 'var(--gold)' }}>{'>'}</span>
                 <span style={{ color: 'var(--text-secondary)' }}>Связи</span>
               </div>
-              <h1 className="text-2xl md:text-[30px] font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+              <h1 className="text-2xl md:text-[30px] font-bold mb-2 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
                 {topology === 'network' ? 'Структура сообщества'
                   : topology === 'density' ? 'Пульс сообщества'
                   : topology === 'clusters' ? 'Естественные группы'
@@ -282,11 +288,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : ''}`}>
-        <main className="flex-1 min-w-0 flex flex-col gap-6 min-h-0">
+      <div className={`flex flex-col lg:flex-row flex-1 min-h-0 ${focusMode ? 'h-full overflow-hidden p-3 gap-2' : 'overflow-visible'}`}>
+        <main className={`flex-1 min-w-0 flex flex-col min-h-0 ${focusMode ? 'gap-2' : 'gap-0'}`}>
 
           {/* Toolbar — icons top-right over canvas */}
-          <div className={`flex items-center ${focusMode ? 'justify-end p-4' : 'justify-end'}`}>
+          <div className={`flex items-center shrink-0 justify-end ${focusMode ? '' : 'py-4 md:py-5'}`}>
             <div className="flex items-center gap-2">
               {!focusMode && (
                 <button
@@ -330,7 +336,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`flex-1 relative isolate min-h-0 ${focusMode ? 'h-full p-0' : 'rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`relative isolate min-h-0 ${focusMode ? 'flex-1 h-full p-0' : 'w-full aspect-square flex-none rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
               className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
@@ -402,7 +408,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 {displayTopology === 'density' ? (
                   <PulseTopology nodes={filteredNodes}
                     edges={filteredEdges}
-                    onNodeHover={() => {}}
+                    onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     width={canvasSize.width}
                     height={canvasSize.height}
@@ -415,7 +421,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 ) : displayTopology === 'clusters' ? (
                   <ClustersTopology nodes={filteredNodes}
                     edges={filteredEdges}
-                    onNodeHover={() => {}}
+                    onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     onClusterClick={handleClusterClick}
                     width={canvasSize.width}
@@ -427,7 +433,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 ) : displayTopology === 'health' ? (
                   <HealthTopology nodes={allNodes}
                     edges={filteredEdges}
-                    onNodeHover={() => {}}
+                    onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     onStatusFilter={setStatusFilter}
                     activeStatusFilter={statusFilter}
@@ -441,9 +447,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                   <PremiumStarGraph centerNode={communityCenter}
                     connectedNodes={filteredNodes}
                     edges={filteredEdges}
-                    onNodeHover={() => {}}
+                    onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     mode="leader"
+                    onHoverScreenPos={setHoveredScreenPos}
                     width={canvasSize.width}
                     height={canvasSize.height}
                     centerLabel="MC"
@@ -452,6 +459,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     darkMode={darkMode}
                     camera={cam}
                   />
+                )}
+                {hoveredNode && !selectedNode && hoveredScreenPos && (
+                  <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
+                    <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+                  </div>
                 )}
               </div>
             )}
@@ -470,10 +482,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
       {/* ═══ SLIDE-OVER PANELS ═══ */}
       {/* Selected cluster */}
-      {selectedCluster && topology === 'clusters' && (
+      {slideOverRoot && selectedCluster && topology === 'clusters' && createPortal(
         <>
-          <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedCluster(null)} />
-          <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
+          <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedCluster(null)} />
+          <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             {(() => {
               const cEdges = filteredEdges.filter((e) => selectedCluster.members.some((m) => m.id === e.source) && selectedCluster.members.some((m) => m.id === e.target));
               const coreCount = selectedCluster.members.filter((m) => {
@@ -519,11 +531,12 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               );
             })()}
           </div>
-        </>
+        </>,
+        slideOverRoot
       )}
 
       {/* Selected node */}
-      {selectedNode && (() => {
+      {slideOverRoot && selectedNode && (() => {
         const cMap = findClusters(filteredNodes, filteredEdges);
         const bridges = findBridges(filteredEdges, cMap);
         const cid = cMap.get(selectedNode.id) ?? -1;
@@ -532,10 +545,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         const isBridge = bridges.has(selectedNode.id);
         const centrality = computeCentrality(selectedNode.id, filteredEdges);
         const cRole = cid === -1 ? ('isolated' as const) : isBridge ? ('bridge' as const) : centrality > 0.5 ? ('core' as const) : ('periphery' as const);
-        return (
+        return createPortal(
           <>
-            <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
-            <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
+            <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
+            <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
               <NodeCard
                 node={selectedNode}
                 edges={filteredEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id)}
@@ -556,10 +569,13 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 })()}
               />
             </div>
-          </>
+          </>,
+          slideOverRoot
         );
       })()}
     </div>
+
+      {!focusMode && <aside className="hidden lg:block w-[240px] shrink-0" aria-hidden="true" />}
     
       <CommunityFabricDrawer
         isOpen={fabricDrawerOpen}

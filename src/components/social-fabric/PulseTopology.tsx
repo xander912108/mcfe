@@ -305,7 +305,7 @@ export function PulseTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam]);
+  }, [nodes, edges, width, height, cam, darkMode]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -399,21 +399,23 @@ export function PulseTopology({
 
       {/* Time period scale overlay */}
       {onPeriodChange && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 rounded-xl p-1 border" style={{ background: darkMode ? "rgba(28,28,31,0.92)" : "rgba(255,255,255,0.92)", borderColor: "var(--border-color)", backdropFilter: "blur(12px)" }}>
-          {[7, 30, 90].map((d) => (
-            <button
-              key={d}
-              onClick={() => onPeriodChange(d)}
-              className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
-                period === d
-                  ? "text-[var(--gold)] border border-[var(--gold)]/30"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-              }`}
-              style={period === d ? { background: "rgba(201,169,110,0.12)" } : {}}
-            >
-              {d} дней
-            </button>
-          ))}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 shrink-0 transition-all duration-300">
+          {[7, 30, 90].map((d) => {
+            const isActive = period === d;
+            return (
+              <button
+                key={d}
+                onClick={() => onPeriodChange(d)}
+                className={`px-2 py-1 rounded-md text-[10px] font-medium transition-all duration-200 border whitespace-nowrap ${
+                  isActive
+                    ? "bg-[var(--gold)]/15 text-[var(--gold)] border-[var(--gold)]/25"
+                    : "bg-[var(--hover-bg)] text-[var(--text-muted)] border-[var(--border-color)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                {d} дней
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

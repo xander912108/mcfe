@@ -353,7 +353,7 @@ export function FocusLegendOverlay({ topology = 'star', mode: _mode = 'participa
       if (!expanded) setTriggerVisible(false);
     }, 4000);
     return () => { if (hideTimerRef.current) clearTimeout(hideTimerRef.current); };
-  }, [focusMode]);
+  }, [focusMode, expanded]);
 
   useEffect(() => {
     if (focusMode && expanded) setTriggerVisible(true);

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import { useCamera } from '@/hooks/useCamera';
 import type { GraphNode, GraphEdge, BridgeContext } from '@/data/graphData';
@@ -25,6 +25,7 @@ interface PremiumStarGraphProps {
   onNodeHover: (node: GraphNode | null) => void;
   onNodeClick: (node: GraphNode) => void;
   onBridgeHover?: (bridge: BridgeContext | null) => void;
+  onHoverScreenPos?: (pos: { x: number; y: number } | null) => void;
   highlightNodeId?: string | null;
   highlightNodeIds?: Set<string> | null;
   dimOpacity?: number;
@@ -49,6 +50,28 @@ interface RenderNode extends GraphNode {
   pulsePhase: number;
   pulseOffset: number; // individual breathing offset in ms (0–5000)
 }
+
+const drawPremiumSignal = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string) => {
+  // Glow
+  ctx.beginPath();
+  ctx.arc(x, y, 9, 0, Math.PI * 2);
+  ctx.fillStyle = color + '30';
+  ctx.fill();
+  // Core fill
+  ctx.beginPath();
+  ctx.arc(x, y, 6.5, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+};
+
+// Draw dark stroke ON TOP of circle border for visibility
+const drawSignalStroke = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+  ctx.beginPath();
+  ctx.arc(x, y, 6.5, 0, Math.PI * 2);
+  ctx.strokeStyle = '#141416';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+};
 
 // PREMIUM COLOR PALETTE — Gold Theme with dark/light mode
 function getColors(dark: boolean) {
@@ -102,6 +125,7 @@ export function PremiumStarGraph({
   onNodeHover,
   onNodeClick,
   onBridgeHover,
+  onHoverScreenPos,
   highlightNodeId,
   highlightNodeIds,
   dimOpacity = 0.2,
@@ -110,11 +134,10 @@ export function PremiumStarGraph({
   width,
   height,
   centerLabel,
-  centerSubtitle: _centerSubtitle,
   darkMode = true,
   camera: externalCamera,
 }: PremiumStarGraphProps) {
-  const COLORS = getColors(darkMode);
+  const COLORS = useMemo(() => getColors(darkMode), [darkMode]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodesRef = useRef<Map<string, RenderNode>>(new Map());
   const animRef = useRef<number>(0);
@@ -172,7 +195,7 @@ export function PremiumStarGraph({
     });
 
     sortedNodes.forEach((node, i) => {
-      const r = innerR + adaptiveSpacing * Math.sqrt(i);
+      const r = Math.min(maxCanvasR - finalNodeR - 12, innerR + adaptiveSpacing * Math.sqrt(i));
       const angle = i * goldenAngle - Math.PI / 2;
 
       const existing = nodesRef.current.get(node.id);
@@ -765,33 +788,11 @@ export function PremiumStarGraph({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [centerNode, edges, width, height, mode, highlightNodeId]);
+  }, [centerNode, edges, width, height, mode, highlightNodeId, cameraRef, centerLabel, connectedNodes, dimOpacity, highlightNodeIds, COLORS]);
 
   // Draw signal glow+core (stroke drawn separately AFTER circle border)
-  const drawPremiumSignal = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string) => {
-    // Glow
-    ctx.beginPath();
-    ctx.arc(x, y, 9, 0, Math.PI * 2);
-    ctx.fillStyle = color + '30';
-    ctx.fill();
-    // Core fill
-    ctx.beginPath();
-    ctx.arc(x, y, 6.5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-  };
-
-  // Draw dark stroke ON TOP of circle border for visibility
-  const drawSignalStroke = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    ctx.beginPath();
-    ctx.arc(x, y, 6.5, 0, Math.PI * 2);
-    ctx.strokeStyle = '#141416';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-  };
-
   // Convert screen coords to world coords (with camera)
-  const screenToWorld = useCallback((sx: number, sy: number) => {
+  const screenToWorld = (sx: number, sy: number) => {
     const cam = cameraRef.current;
     const cx = width / 2;
     const cy = height / 2;
@@ -799,10 +800,10 @@ export function PremiumStarGraph({
       x: (sx - cx - cam.x) / cam.zoom + cx,
       y: (sy - cy - cam.y) / cam.zoom + cy,
     };
-  }, [width, height]);
+  };
 
   // Mouse handlers with camera support
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
+  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -823,18 +824,17 @@ export function PremiumStarGraph({
     cam.x = sx - cx - (worldBefore.x - cx) * newZoom;
     cam.y = sy - cy - (worldBefore.y - cy) * newZoom;
     cam.zoom = newZoom;
-  }, [screenToWorld, width, height]);
+  };
 
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     isPanningRef.current = true;
     panStartRef.current = { x: e.clientX, y: e.clientY };
     cameraStartRef.current = { ...cameraRef.current };
     const canvas = canvasRef.current;
     if (canvas) canvas.style.cursor = 'grabbing';
-  }, []);
+  };
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -892,11 +892,17 @@ export function PremiumStarGraph({
         hoveredRef.current = nearest;
         const node = nearest ? nodesRef.current.get(nearest) ?? null : null;
         onNodeHover(node);
+        if (node && onHoverScreenPos) {
+          const cam = cameraRef.current;
+          const sx = (node.x - width / 2) * cam.zoom + width / 2 + cam.x;
+          const sy = (node.y - height / 2) * cam.zoom + height / 2 + cam.y;
+          onHoverScreenPos({ x: sx, y: sy });
+        } else {
+          onHoverScreenPos?.(null);
+        }
         canvas.style.cursor = nearest ? 'pointer' : hoveredBridge ? 'help' : 'grab';
       }
-    },
-    [onNodeHover, onBridgeHover, screenToWorld, edges, bridgeContexts]
-  );
+  };
 
   const handleMouseUp = useCallback(() => {
     isPanningRef.current = false;
@@ -904,8 +910,7 @@ export function PremiumStarGraph({
     if (canvas) canvas.style.cursor = 'grab';
   }, []);
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
       // If camera moved significantly, treat as pan not click
       const dx = e.clientX - panStartRef.current.x;
       const dy = e.clientY - panStartRef.current.y;
@@ -927,9 +932,7 @@ export function PremiumStarGraph({
       if (found && found.id !== 'me') {
         onNodeClick(found);
       }
-    },
-    [onNodeClick, screenToWorld]
-  );
+  };
 
   return (
     <div className="relative" style={{ width, height }}>

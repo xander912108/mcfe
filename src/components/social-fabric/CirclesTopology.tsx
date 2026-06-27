@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
@@ -74,7 +74,7 @@ function getNodeRadius(contributionLevel: number): number {
 }
 
 export function CirclesTopology({
-  centerNode, nodes, edges, onNodeHover, onNodeClick, onRingClick: _onRingClick, onHoverScreenPos: _onHoverScreenPos,
+  centerNode, nodes, edges, onNodeHover, onNodeClick, onHoverScreenPos,
   highlightNodeId, highlightNodeIds, dimOpacity = 0.2, width, height,
   darkMode = true, camera: externalCamera,
 }: CirclesTopologyProps) {
@@ -92,7 +92,7 @@ export function CirclesTopology({
   const cy = height / 2;
   const maxR = Math.min(width, height) * 0.42;
   // Fixed ring radii — always 5 visible rings
-  const ringRadii = [maxR * 0.18, maxR * 0.36, maxR * 0.55, maxR * 0.75, maxR * 0.94];
+  const ringRadii = useMemo(() => [maxR * 0.18, maxR * 0.36, maxR * 0.55, maxR * 0.75, maxR * 0.94], [maxR]);
 
   // Distribute nodes into rings based on their max edge weight to center
   useEffect(() => {
@@ -125,11 +125,20 @@ export function CirclesTopology({
 
     // Place nodes in their rings
     ringPositions.forEach((nodeIds, ri) => {
-      const r = ringRadii[ri];
       nodeIds.forEach((nid, i) => {
         const node = nodes.find((n) => n.id === nid);
         if (!node) return;
-        const angle = (2 * Math.PI * i) / Math.max(nodeIds.length, 1) - Math.PI / 2;
+        const baseRadius = getNodeRadius(node.contributionLevel);
+        const safeGap = baseRadius * 2 + 16;
+        const baseR = ringRadii[ri];
+        const circumference = Math.max(1, 2 * Math.PI * baseR);
+        const lanes = Math.max(1, Math.ceil((nodeIds.length * safeGap) / circumference));
+        const lane = lanes === 1 ? 0 : i % lanes;
+        const laneOffset = (lane - (lanes - 1) / 2) * (safeGap * 0.72);
+        const innerLimit = ri > 0 ? ringRadii[ri - 1] + safeGap : ringRadii[0] * 0.42;
+        const outerLimit = ri < ringRadii.length - 1 ? ringRadii[ri + 1] - safeGap : maxR - baseRadius - 8;
+        const r = Math.min(Math.max(baseR + laneOffset, innerLimit), Math.max(innerLimit, outerLimit));
+        const angle = (2 * Math.PI * i) / Math.max(nodeIds.length, 1) - Math.PI / 2 + lane * 0.12;
         const existing = nodesRef.current.get(nid);
         nodesRef.current.set(nid, {
           ...node,
@@ -137,7 +146,7 @@ export function CirclesTopology({
           y: existing?.y ?? cy + r * 0.5 * Math.sin(angle),
           targetX: cx + r * Math.cos(angle),
           targetY: cy + r * Math.sin(angle),
-          radius: getNodeRadius(node.contributionLevel),
+          radius: baseRadius,
           opacity: existing?.opacity ?? 0,
           pulsePhase: Math.random() * Math.PI * 2,
           pulseOffset: Math.random() * 5000,
@@ -146,7 +155,7 @@ export function CirclesTopology({
         });
       });
     });
-  }, [centerNode, nodes, edges, cx, cy, ringRadii]);
+  }, [centerNode, nodes, edges, cx, cy, ringRadii, maxR]);
 
   // Render
   useEffect(() => {
@@ -391,14 +400,25 @@ export function CirclesTopology({
     });
     if (nearest !== hoveredRef.current) {
       hoveredRef.current = nearest;
-      onNodeHover(nearest ? nodesRef.current.get(nearest) ?? null : null);
+      const node = nearest ? nodesRef.current.get(nearest) ?? null : null;
+      onNodeHover(node);
+      if (node && onHoverScreenPos) {
+        const camState = cam.cameraRef.current;
+        onHoverScreenPos({
+          x: (node.x - width / 2) * camState.zoom + width / 2 + camState.x,
+          y: (node.y - height / 2) * camState.zoom + height / 2 + camState.y,
+        });
+      } else {
+        onHoverScreenPos?.(null);
+      }
       canvas.style.cursor = nearest ? 'pointer' : 'grab';
     }
-  }, [onNodeHover, cam, getWorldPos]);
+  }, [onNodeHover, onHoverScreenPos, cam, getWorldPos, width, height]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     cam.startPan(e.clientX, e.clientY);
-    canvasRef.current && (canvasRef.current.style.cursor = 'grabbing');
+    const canvas = canvasRef.current;
+    if (canvas) canvas.style.cursor = 'grabbing';
   }, [cam]);
 
   const handleMouseUp = useCallback(() => {

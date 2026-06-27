@@ -18,6 +18,10 @@ const SAGE = '#6B9E7C';
 const SAGE_LIGHT = 'rgba(107,158,124,0.08)';
 const GOLD_GLOW = 'rgba(201,169,110,0.08)';
 
+const GradientDivider = () => (
+  <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+);
+
 /* ===== SECTION TYPE ===== */
 type SectionKey = 'attention' | 'requests' | 'reviews' | 'insights' | 'settings';
 
@@ -406,10 +410,6 @@ export default function LeaderConsoleRequests() {
     }
     return () => { document.body.style.overflow = ''; };
   }, [showRequestPanel, showReviewPanel]);
-
-  const GradientDivider = () => (
-    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
-  );
 
   /* ---- Section cards data ---- */
   const sectionCards: { key: SectionKey; label: string; subtitle: string; icon: typeof AlertTriangle }[] = [

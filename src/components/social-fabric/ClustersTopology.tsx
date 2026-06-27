@@ -211,7 +211,7 @@ export function ClustersTopology({
     canvas.width = width * dpr;
     canvas.height = height * dpr;
 
-    const animate = (_ts: number) => {
+    const animate = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
@@ -554,7 +554,7 @@ export function ClustersTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam]);
+  }, [nodes, edges, width, height, cam, darkMode, hoveredCluster]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
