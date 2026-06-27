@@ -210,7 +210,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 <span style={{ color: 'var(--gold)' }}>{'>'}</span>
                 <span style={{ color: 'var(--text-secondary)' }}>Связи</span>
               </div>
-              <h1 className="text-2xl md:text-[30px] font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+              <h1 className="text-2xl md:text-[30px] font-bold mb-2 heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
                 {topology === 'network' ? 'Структура сообщества'
                   : topology === 'density' ? 'Пульс сообщества'
                   : topology === 'clusters' ? 'Естественные группы'
