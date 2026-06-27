@@ -211,7 +211,7 @@ export function ClustersTopology({
     canvas.width = width * dpr;
     canvas.height = height * dpr;
 
-    const animate = (_ts: number) => {
+    const animate = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
