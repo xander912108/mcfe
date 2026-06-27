@@ -19,6 +19,9 @@ import { SkeletonList, SkeletonCanvas } from '@/components/social-fabric/Skeleto
 import { ZoomButton } from '@/components/social-fabric/ZoomButton';
 import type { GraphNode, GraphEdge, BridgeContext } from '@/data/graphData';
 
+type FilterableGraphNode = GraphNode & { topics?: string[] };
+type FilterableGraphEdge = GraphEdge & { stepContext?: string };
+
 function getRingLabel(nodeId: string, edges: GraphEdge[]): string {
   const edge = edges.find((e) => (e.source === 'me' && e.target === nodeId) || (e.target === 'me' && e.source === nodeId));
   const weight = edge?.weight ?? 0;
@@ -58,21 +61,21 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedRing, setSelectedRing] = useState<number | null>(null);
 
-  const defaultFilters: Record<string, boolean> = {
+  const defaultFilters = useMemo<Record<string, boolean>>(() => ({
     helpedMe: true, iHelped: true, sameFlow: false, sameStep: false,
     gratitude: false, helpReady: false, mentors: false,
     topicDesign: false, topicMarketing: false, topicProduct: false,
     topicAnalytics: false, topicLaunch: false, online: false,
     ringOpora: false, ringBlizkie: false, ringKollegi: false,
     ringZnakomye: false, ringPotencial: false,
-  };
+  }), []);
   const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>(defaultFilters);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [displayTopology, setDisplayTopology] = useState(topology);
   const [slideDir, setSlideDir] = useState<'left' | 'right'>('right');
   const pendingTopologyRef = useRef<string | null>(null);
 
-  const tabOrder = ['star', 'circles', 'list'];
+  const tabOrder = useMemo(() => ['star', 'circles', 'list'], []);
 
   const handleTopologyChange = useCallback((value: string) => {
     if (value === topology || isTransitioning) return;
@@ -86,7 +89,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       setTopology(value);
       requestAnimationFrame(() => setIsTransitioning(false));
     }, 180);
-  }, [topology, isTransitioning, setTopology]);
+  }, [topology, isTransitioning, tabOrder, setTopology]);
 
   const [advisorTips, setAdvisorTips] = useState([
     {
@@ -115,7 +118,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   // Camera for zoom controls (shared across all canvas tabs)
   const cam = useCamera(canvasSize.width, canvasSize.height, 0.82);
 
-  const activeFilterKeys = Object.entries(activeFilters).filter(([, v]) => v).map(([k]) => k);
+  const activeFilterKeys = useMemo(() => Object.entries(activeFilters).filter(([, v]) => v).map(([k]) => k), [activeFilters]);
   const hasActiveFilters = activeFilterKeys.length > 0;
 
   const { filteredNodes, filteredEdges, highlightNodeIds } = useMemo(() => {
@@ -132,14 +135,14 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
           case 'helpedMe': return ne.some((e) => e.source === node.id && e.target === 'me');
           case 'iHelped': return ne.some((e) => e.source === 'me' && e.target === node.id);
           case 'sameFlow': return ne.some((e) => e.type === 'flow');
-          case 'sameStep': return ne.some((e) => (e as any).stepContext);
+          case 'sameStep': return ne.some((e) => Boolean((e as FilterableGraphEdge).stepContext));
           case 'gratitude': return ne.some((e) => e.type === 'gratitude');
           case 'mentors': return node.role === 'Куратор' || node.role === 'Хранитель знаний';
-          case 'topicDesign': return (node as any).topics?.includes('дизайн');
-          case 'topicMarketing': return (node as any).topics?.includes('маркетинг');
-          case 'topicProduct': return (node as any).topics?.includes('продукт');
-          case 'topicAnalytics': return (node as any).topics?.includes('аналитика');
-          case 'topicLaunch': return (node as any).topics?.includes('запуск');
+          case 'topicDesign': return (node as FilterableGraphNode).topics?.includes('дизайн') ?? false;
+          case 'topicMarketing': return (node as FilterableGraphNode).topics?.includes('маркетинг') ?? false;
+          case 'topicProduct': return (node as FilterableGraphNode).topics?.includes('продукт') ?? false;
+          case 'topicAnalytics': return (node as FilterableGraphNode).topics?.includes('аналитика') ?? false;
+          case 'topicLaunch': return (node as FilterableGraphNode).topics?.includes('запуск') ?? false;
           case 'online': return node.isOnline;
           case 'ringOpora': return ne.some((e) => (e.weight ?? 0) >= 7);
           case 'ringBlizkie': { const w = ne[0]?.weight ?? 0; return w >= 5 && w < 7; }
@@ -161,7 +164,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     );
     const hIds = hasActiveFilters ? new Set(nodes.map((n) => n.id)) : null;
     return { filteredNodes: nodes, filteredEdges: edges, highlightNodeIds: hIds };
-  }, [activeFilters, hasActiveFilters, activeFilterKeys]);
+  }, [hasActiveFilters, activeFilterKeys]);
 
   const activeFilterCount = activeFilterKeys.length;
 
