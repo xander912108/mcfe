@@ -152,6 +152,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     );
   }, [filteredNodes]);
 
+  const highlightNodeIds = useMemo(
+    () => activeFilterCount > 0 ? new Set(filteredNodes.map((n) => n.id)) : null,
+    [activeFilterCount, filteredNodes]
+  );
+
   // Search filtering
   const searchFilteredNodes = useMemo(() => {
     if (!searchQuery.trim()) return filteredNodes;
@@ -342,7 +347,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
               style={{ background: 'var(--bg-card)' }}
             >
-            {filteredNodes.length === 0 && topology !== 'list' && (
+            {allNodes.length === 0 && topology !== 'list' && (
               <EmptyStateCanvas mode="leader" hasFilters={activeFilterCount > 0} onClearFilters={activeFilterCount > 0 ? () => setFilters({}) : undefined} />
             )}
 
@@ -406,8 +411,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             ) : (
               <div className="w-full h-full">
                 {displayTopology === 'density' ? (
-                  <PulseTopology nodes={filteredNodes}
-                    edges={filteredEdges}
+                  <PulseTopology nodes={allNodes}
+                    edges={leaderEdges}
                     onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     width={canvasSize.width}
@@ -417,10 +422,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     period={pulsePeriod}
                     onPeriodChange={setPulsePeriod}
                     camera={cam}
+                    highlightNodeIds={highlightNodeIds}
                   />
                 ) : displayTopology === 'clusters' ? (
-                  <ClustersTopology nodes={filteredNodes}
-                    edges={filteredEdges}
+                  <ClustersTopology nodes={allNodes}
+                    edges={leaderEdges}
                     onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     onClusterClick={handleClusterClick}
@@ -429,10 +435,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     focusMode={focusMode}
                     darkMode={darkMode}
                     camera={cam}
+                    highlightNodeIds={highlightNodeIds}
                   />
                 ) : displayTopology === 'health' ? (
                   <HealthTopology nodes={allNodes}
-                    edges={filteredEdges}
+                    edges={leaderEdges}
                     onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     onStatusFilter={setStatusFilter}
@@ -442,11 +449,12 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     focusMode={focusMode}
                     darkMode={darkMode}
                     camera={cam}
+                    highlightNodeIds={highlightNodeIds}
                   />
                 ) : (
                   <PremiumStarGraph centerNode={communityCenter}
-                    connectedNodes={filteredNodes}
-                    edges={filteredEdges}
+                    connectedNodes={allNodes}
+                    edges={leaderEdges}
                     onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     mode="leader"
@@ -458,11 +466,12 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     focusMode={focusMode}
                     darkMode={darkMode}
                     camera={cam}
+                    highlightNodeIds={highlightNodeIds}
                   />
                 )}
                 {hoveredNode && !selectedNode && hoveredScreenPos && (
                   <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
-                    <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+                    <NodeTooltip node={hoveredNode} edges={leaderEdges} currentUserId="me" />
                   </div>
                 )}
               </div>
@@ -487,13 +496,13 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedCluster(null)} />
           <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             {(() => {
-              const cEdges = filteredEdges.filter((e) => selectedCluster.members.some((m) => m.id === e.source) && selectedCluster.members.some((m) => m.id === e.target));
+              const cEdges = leaderEdges.filter((e) => selectedCluster.members.some((m) => m.id === e.source) && selectedCluster.members.some((m) => m.id === e.target));
               const coreCount = selectedCluster.members.filter((m) => {
                 const me = cEdges.filter((e) => e.source === m.id || e.target === m.id);
                 const tw = me.reduce((s, e) => s + e.weight, 0);
                 return me.length >= 2 && tw / Math.max(me.length, 1) > 4;
               }).length;
-              const bridgeCount = filteredEdges.filter((e) => {
+              const bridgeCount = leaderEdges.filter((e) => {
                 const sIn = selectedCluster.members.some((m) => m.id === e.source);
                 const tIn = selectedCluster.members.some((m) => m.id === e.target);
                 return sIn !== tIn;
@@ -537,13 +546,13 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
       {/* Selected node */}
       {slideOverRoot && selectedNode && (() => {
-        const cMap = findClusters(filteredNodes, filteredEdges);
-        const bridges = findBridges(filteredEdges, cMap);
+        const cMap = findClusters(allNodes, leaderEdges);
+        const bridges = findBridges(leaderEdges, cMap);
         const cid = cMap.get(selectedNode.id) ?? -1;
-        const cNodes = filteredNodes.filter((n) => (cMap.get(n.id) ?? -1) === cid);
+        const cNodes = allNodes.filter((n) => (cMap.get(n.id) ?? -1) === cid);
         const cName = cid === -1 ? null : getClusterName(cNodes);
         const isBridge = bridges.has(selectedNode.id);
-        const centrality = computeCentrality(selectedNode.id, filteredEdges);
+        const centrality = computeCentrality(selectedNode.id, leaderEdges);
         const cRole = cid === -1 ? ('isolated' as const) : isBridge ? ('bridge' as const) : centrality > 0.5 ? ('core' as const) : ('periphery' as const);
         return createPortal(
           <>
@@ -551,7 +560,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
             <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
               <NodeCard
                 node={selectedNode}
-                edges={filteredEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id)}
+                edges={leaderEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id)}
                 currentUserId="me"
                 onClose={() => setSelectedNode(null)}
                 mode="leader"
@@ -561,7 +570,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 statusExplanation={(() => {
                   const s = selectedNode.status;
                   const name = selectedNode.name.split(' ')[0];
-                  const ne = filteredEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id);
+                  const ne = leaderEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id);
                   if (s === 'inactive') return `${name} пока не вошла в живые связи сообщества — нет устойчивых контактов. Стоит мягко подобрать наставника или включить в Welcome Loop.`;
                   if (s === 'stuck') return `${name} задержалась на шаге — у неё ${ne.length} связей, но движение приостановилось. Может помочь мягкий разбор или новый импульс.`;
                   if (s === 'burnout_risk') return `${name} активно помогает другим (${ne.length} связей помощи), но близка к перегрузке. Ей может понадобиться разгрузка.`;

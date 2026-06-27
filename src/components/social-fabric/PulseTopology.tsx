@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
+import { drawPremiumCanvasLabel, drawPremiumCanvasMetaLabel } from './canvasLabels';
 
 interface PulseTopologyProps {
   nodes: GraphNode[];
@@ -15,6 +16,8 @@ interface PulseTopologyProps {
   period?: number;
   onPeriodChange?: (period: number) => void;
   camera?: ReturnType<typeof useCamera>;
+  highlightNodeIds?: Set<string> | null;
+  dimOpacity?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -56,6 +59,7 @@ function tempColor(t: number): string {
 export function PulseTopology({
   nodes, edges, onNodeHover, onNodeClick, width, height,
   darkMode = true, period = 7, onPeriodChange, camera: externalCamera,
+  highlightNodeIds, dimOpacity = 0.18,
 }: PulseTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height);
@@ -202,9 +206,10 @@ export function PulseTopology({
       simRef.current.forEach((node) => {
         const isHovered = hoveredRef.current === node.id;
         const isDimmed = hoveredRef.current && hoveredRef.current !== node.id;
+        const isFilterDimmed = highlightNodeIds && !highlightNodeIds.has(node.id);
 
         ctx.save();
-        ctx.globalAlpha = isDimmed ? 0.35 : 1;
+        ctx.globalAlpha = isDimmed ? 0.35 : isFilterDimmed ? dimOpacity : 1;
 
         // Avatar — circular gradient placeholder (photo-ready)
         drawNodeAvatar(ctx, node.x, node.y, node.radius * 0.92, node.id, node.name, node.avatar);
@@ -266,22 +271,12 @@ export function PulseTopology({
 
         // Name label — only visible when zoomed in (> 1.0) or on hover
         if (isHovered || cam.cameraRef.current.zoom > 1.0) {
-          // Name background pill
           const nameText = node.name;
-          const nameWidth = ctx.measureText(nameText).width;
-          ctx.fillStyle = 'rgba(8, 12, 26, 0.88)';
-          ctx.beginPath();
-          ctx.roundRect(node.x - nameWidth / 2 - 7, node.y + node.radius + 6, nameWidth + 14, 20, 5);
-          ctx.fill();
-
-          ctx.fillStyle = isHovered ? '#e2e8f0' : `rgba(203, 213, 225, ${0.7 + node.temperature * 0.3})`;
-          ctx.fillText(nameText, node.x, node.y + node.radius + 16);
+          drawPremiumCanvasLabel(ctx, nameText, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
 
           // Role (if hot enough)
           if (node.role && node.temperature > 0.3) {
-            ctx.font = '10px Inter, system-ui, sans-serif';
-            ctx.fillStyle = `rgba(154, 152, 149, ${0.5 + node.temperature * 0.3})`;
-            ctx.fillText(node.role, node.x, node.y + node.radius + 32);
+            drawPremiumCanvasMetaLabel(ctx, node.role, node.x, node.y + node.radius + 32, '#9A9895', { font: '8px Inter, system-ui, sans-serif' });
           }
         }
 
@@ -305,7 +300,7 @@ export function PulseTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode]);
+  }, [nodes, edges, width, height, cam, darkMode, highlightNodeIds, dimOpacity]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

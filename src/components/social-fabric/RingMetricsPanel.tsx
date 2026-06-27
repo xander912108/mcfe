@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import type { GraphEdge } from '@/data/graphData';
 
@@ -80,112 +80,47 @@ const METRIC_CONFIG = [
 ] as const;
 
 export function RingMetricsPanel({ edges }: RingMetricsPanelProps) {
-  const [collapsed, setCollapsed] = useState(true);
-  const [position, setPosition] = useState({ x: 0, y: 16 }); // y=16px from top
-  const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0 });
-  const panelRef = useRef<HTMLDivElement>(null);
+  const [collapsed, setCollapsed] = useState(false);
 
   const m = computeMetrics(edges);
   const advice = getBalanceAdvice(m);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) return; // Don't drag on button
-    setIsDragging(true);
-    dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      origX: position.x,
-      origY: position.y,
-    };
-  }, [position]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-    setPosition({
-      x: dragRef.current.origX + dx,
-      y: Math.max(0, dragRef.current.origY + dy),
-    });
-  }, [isDragging]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
   return (
-    <div
-      className="absolute z-30 pointer-events-none"
-      style={{
-        left: 16,
-        top: 0,
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        cursor: isDragging ? 'grabbing' : 'grab',
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      <div
-        ref={panelRef}
-        className="rounded-xl pointer-events-auto select-none"
-        style={{
-          background: 'var(--bg-card)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.05)',
-          boxShadow: 'var(--card-shadow)',
-          padding: collapsed ? '5px 12px' : '10px 16px',
-          minWidth: collapsed ? 'auto' : '360px',
-          transition: isDragging ? 'none' : 'padding 0.25s ease, min-width 0.25s ease',
-        }}
-        onMouseDown={handleMouseDown}
-      >
-        {/* Header + toggle */}
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium whitespace-nowrap">
-            Баланс связей
-          </span>
-          <button
-            onClick={(e) => { e.stopPropagation(); setCollapsed(!collapsed); }}
-            className="p-0.5 rounded hover:bg-white/5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors pointer-events-auto"
-          >
-            {collapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
-          </button>
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none transition-all duration-300">
+      <div className="pointer-events-auto flex max-w-[min(680px,calc(100vw-48px))] items-center gap-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)]/70 p-1 shadow-[var(--card-shadow)] backdrop-blur-2xl">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-medium whitespace-nowrap transition-all duration-200 ${
+            collapsed
+              ? 'border-[var(--border-color)] bg-[var(--hover-bg)] text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+              : 'border-[var(--gold)]/25 bg-[var(--gold)]/15 text-[var(--gold)]'
+          }`}
+        >
+          <span>Баланс связей</span>
+          {collapsed ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+        </button>
+
+        <div className="flex items-center gap-1 overflow-hidden">
+          {METRIC_CONFIG.map((cfg) => (
+            <span
+              key={cfg.key}
+              className={`rounded-md border px-2 py-1 text-[10px] font-medium whitespace-nowrap transition-all duration-200 ${collapsed ? 'hidden sm:inline-flex' : 'inline-flex'} items-center gap-1`}
+              style={{
+                color: cfg.color,
+                background: `${cfg.color}14`,
+                borderColor: `${cfg.color}30`,
+              }}
+            >
+              <strong className="font-semibold">{m[cfg.key as keyof RingMetrics]}</strong>
+              <span className="text-[var(--text-muted)]">{cfg.label}</span>
+            </span>
+          ))}
         </div>
 
-        {/* Expanded: metrics row + advice */}
         {!collapsed && (
-          <>
-            <div className="mt-2 flex items-center gap-3 flex-wrap">
-              {METRIC_CONFIG.map((cfg) => (
-                <div key={cfg.key} className="flex items-center gap-1">
-                  <span className="text-sm font-bold" style={{ color: cfg.color }}>
-                    {m[cfg.key as keyof RingMetrics]}
-                  </span>
-                  <span className="text-[10px] text-[var(--text-muted)]">{cfg.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-              <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-                {advice}
-              </p>
-            </div>
-          </>
-        )}
-
-        {/* Collapsed: mini indicator */}
-        {collapsed && (
-          <div className="flex items-center gap-2 mt-0.5">
-            {METRIC_CONFIG.map((cfg) => (
-              <span key={cfg.key} className="text-[10px] font-medium" style={{ color: cfg.color }}>
-                {m[cfg.key as keyof RingMetrics]}
-              </span>
-            ))}
-          </div>
+          <p className="ml-1 hidden max-w-[260px] truncate px-2 text-[10px] leading-relaxed text-[var(--text-secondary)] xl:block">
+            {advice}
+          </p>
         )}
       </div>
     </div>
