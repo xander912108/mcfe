@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
+import { drawPremiumCanvasLabel, drawPremiumCanvasMetaLabel } from './canvasLabels';
 import { useCamera } from '@/hooks/useCamera';
 import type { GraphNode, GraphEdge, BridgeContext } from '@/data/graphData';
 
@@ -25,6 +26,7 @@ interface PremiumStarGraphProps {
   onNodeHover: (node: GraphNode | null) => void;
   onNodeClick: (node: GraphNode) => void;
   onBridgeHover?: (bridge: BridgeContext | null) => void;
+  onHoverScreenPos?: (pos: { x: number; y: number } | null) => void;
   highlightNodeId?: string | null;
   highlightNodeIds?: Set<string> | null;
   dimOpacity?: number;
@@ -124,6 +126,7 @@ export function PremiumStarGraph({
   onNodeHover,
   onNodeClick,
   onBridgeHover,
+  onHoverScreenPos,
   highlightNodeId,
   highlightNodeIds,
   dimOpacity = 0.2,
@@ -172,18 +175,19 @@ export function PremiumStarGraph({
     const nodeR = 26;
     const count = connectedNodes.length;
     const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5° — sunflower pattern
-    const maxCanvasR = Math.min(width, height) * 0.42;
+    const maxCanvasR = Math.min(width, height) * 0.46;
     // Adaptive innerR: scales with canvas but never exceeds 120
     const innerR = Math.min(120, maxCanvasR * 0.35);
-    const defaultSpacing = 42;
-    // Minimum spacing = node diameter + padding to prevent overlap
-    const minSpacing = nodeR * 2.5; // 65px for 26px radius
-    // Adaptive spacing: ensure last node fits within canvas, but never below minSpacing
-    const adaptiveSpacing = count > 1
-      ? Math.max(minSpacing, Math.min(defaultSpacing, (maxCanvasR - innerR) / Math.sqrt(count - 1)))
-      : defaultSpacing;
     // If canvas is too small, shrink nodes to fit
-    const finalNodeR = maxCanvasR < innerR + minSpacing ? Math.max(14, (maxCanvasR - innerR) / 3) : nodeR;
+    const finalNodeR = maxCanvasR < innerR + nodeR * 2.5 ? Math.max(14, (maxCanvasR - innerR) / 3) : nodeR;
+    const desiredSpacing = finalNodeR * 2 * 1.45;
+    const fitSpacing = count > 1
+      ? (maxCanvasR - innerR - finalNodeR - 12) / Math.sqrt(count - 1)
+      : desiredSpacing;
+    const minSpacing = finalNodeR * (count > 30 ? 2.05 : 2.25);
+    const adaptiveSpacing = count > 1
+      ? Math.max(minSpacing, Math.min(desiredSpacing, fitSpacing))
+      : desiredSpacing;
 
     // Sort by weight descending: strong ties first (closer to center)
     const sortedNodes = [...connectedNodes].sort((a, b) => {
@@ -193,7 +197,7 @@ export function PremiumStarGraph({
     });
 
     sortedNodes.forEach((node, i) => {
-      const r = innerR + adaptiveSpacing * Math.sqrt(i);
+      const r = Math.min(maxCanvasR - finalNodeR - 12, innerR + adaptiveSpacing * Math.sqrt(i));
       const angle = i * goldenAngle - Math.PI / 2;
 
       const existing = nodesRef.current.get(node.id);
@@ -724,48 +728,19 @@ export function PremiumStarGraph({
         if (showLabels) {
           // NAME — all nodes except center ("Я")
           if (!isCenter) {
-            const nameFont = '10px Inter, system-ui, sans-serif';
-            ctx.font = nameFont;
-            const nameWidth = ctx.measureText(node.name).width;
-            const namePadding = 4;
-            const nameY = node.y + node.radius + 14;
-
-            // Pill background
-            ctx.beginPath();
-            ctx.roundRect(node.x - nameWidth / 2 - namePadding, nameY - 8, nameWidth + namePadding * 2, 14, 3);
-            ctx.fillStyle = isHovered ? 'rgba(10, 14, 30, 0.92)' : 'rgba(8, 12, 26, 0.85)';
-            ctx.fill();
-
-            // Name text
-            ctx.fillStyle = isHovered ? '#ffffff' : '#9A9895';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(node.name, node.x, nameY);
+            drawPremiumCanvasLabel(ctx, node.name, node.x, node.y + node.radius + 14, {
+              hovered: isHovered,
+              darkMode,
+              font: '9px Inter, system-ui, sans-serif',
+            });
           }
 
           // ROLE LABEL
           if (node.role && !isCenter) {
-            const roleFont = '8px Inter, system-ui, sans-serif';
-            ctx.font = roleFont;
-            const roleWidth = ctx.measureText(node.role).width;
-            const rolePadding = 3;
-            const roleY = node.y + node.radius + 32;
-
-            // Pill background
-            ctx.beginPath();
-            ctx.roundRect(node.x - roleWidth / 2 - rolePadding, roleY - 6, roleWidth + rolePadding * 2, 12, 3);
             const roleColor = COLORS.roleColors[node.role] || COLORS.roleColors.default;
-            ctx.fillStyle = roleColor + '20';
-            ctx.fill();
-            ctx.strokeStyle = roleColor + '35';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-
-            // Role text
-            ctx.fillStyle = roleColor + 'cc';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(node.role, node.x, roleY);
+            drawPremiumCanvasMetaLabel(ctx, node.role, node.x, node.y + node.radius + 32, roleColor, {
+              font: '8px Inter, system-ui, sans-serif',
+            });
           }
 
           // Center node label intentionally hidden — shown as initials in circle only
@@ -890,6 +865,14 @@ export function PremiumStarGraph({
         hoveredRef.current = nearest;
         const node = nearest ? nodesRef.current.get(nearest) ?? null : null;
         onNodeHover(node);
+        if (node && onHoverScreenPos) {
+          const cam = cameraRef.current;
+          const sx = (node.x - width / 2) * cam.zoom + width / 2 + cam.x;
+          const sy = (node.y - height / 2) * cam.zoom + height / 2 + cam.y;
+          onHoverScreenPos({ x: sx, y: sy });
+        } else {
+          onHoverScreenPos?.(null);
+        }
         canvas.style.cursor = nearest ? 'pointer' : hoveredBridge ? 'help' : 'grab';
       }
   };

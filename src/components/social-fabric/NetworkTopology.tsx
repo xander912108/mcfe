@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
+import { drawPremiumCanvasLabel, drawPremiumCanvasMetaLabel } from './canvasLabels';
 
 interface NetworkTopologyProps {
   nodes: GraphNode[];
@@ -453,16 +454,11 @@ darkMode = true,
         // Name + role labels — zoom-dependent (center node name hidden)
         const showLabels = isCenter || cam.cameraRef.current.zoom > 1.1;
         if (showLabels && !isCenter) {
-          ctx.font = '12px Inter, system-ui, sans-serif';
-          ctx.fillStyle = isHovered ? '#ffffff' : '#9A9895';
-          ctx.textAlign = 'center';
-          ctx.fillText(node.name, node.x, node.y + node.radius + 16);
+          drawPremiumCanvasLabel(ctx, node.name, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
 
           if (node.role) {
-            ctx.font = '11px Inter, system-ui, sans-serif';
             const rc = COLORS.roleColors[node.role] || COLORS.roleColors.default;
-            ctx.fillStyle = rc + 'cc';
-            ctx.fillText(node.role, node.x, node.y + node.radius + 30);
+            drawPremiumCanvasMetaLabel(ctx, node.role, node.x, node.y + node.radius + 32, rc, { font: '8px Inter, system-ui, sans-serif' });
           }
         }
 
