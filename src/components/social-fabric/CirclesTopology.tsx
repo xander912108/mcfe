@@ -74,7 +74,7 @@ function getNodeRadius(contributionLevel: number): number {
 }
 
 export function CirclesTopology({
-  centerNode, nodes, edges, onNodeHover, onNodeClick, onRingClick: _onRingClick, onHoverScreenPos: _onHoverScreenPos,
+  centerNode, nodes, edges, onNodeHover, onNodeClick,
   highlightNodeId, highlightNodeIds, dimOpacity = 0.2, width, height,
   darkMode = true, camera: externalCamera,
 }: CirclesTopologyProps) {
@@ -398,7 +398,8 @@ export function CirclesTopology({
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     cam.startPan(e.clientX, e.clientY);
-    canvasRef.current && (canvasRef.current.style.cursor = 'grabbing');
+    const canvas = canvasRef.current;
+    if (canvas) canvas.style.cursor = 'grabbing';
   }, [cam]);
 
   const handleMouseUp = useCallback(() => {

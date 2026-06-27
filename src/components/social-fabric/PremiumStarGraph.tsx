@@ -110,7 +110,6 @@ export function PremiumStarGraph({
   width,
   height,
   centerLabel,
-  centerSubtitle: _centerSubtitle,
   darkMode = true,
   camera: externalCamera,
 }: PremiumStarGraphProps) {
