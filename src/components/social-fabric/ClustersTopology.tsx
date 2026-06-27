@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
+import { drawPremiumCanvasLabel, drawPremiumCanvasMetaLabel } from './canvasLabels';
 
 // Re-export helpers for use in other components
 export { findClusters, findBridges, computeCentrality, getClusterName };
@@ -17,6 +18,8 @@ interface ClustersTopologyProps {
   focusMode?: boolean;
   darkMode?: boolean;
   camera?: ReturnType<typeof useCamera>;
+  highlightNodeIds?: Set<string> | null;
+  dimOpacity?: number;
 }
 
 interface SimNode extends GraphNode {
@@ -125,7 +128,7 @@ function findBridges(edges: GraphEdge[], clusterMap: Map<string, number>): Set<s
 
 export function ClustersTopology({
   nodes, edges, onNodeHover, onNodeClick, onClusterClick, width, height,
-  darkMode = true, camera: externalCamera,
+  darkMode = true, camera: externalCamera, highlightNodeIds, dimOpacity = 0.18,
 }: ClustersTopologyProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalCam = useCamera(width, height, 0.55);
@@ -133,6 +136,7 @@ export function ClustersTopology({
   const simRef = useRef<Map<string, SimNode>>(new Map());
   const animRef = useRef<number>(0);
   const hoveredRef = useRef<string | null>(null);
+  const clickStartRef = useRef({ x: 0, y: 0 });
   const clusterMapRef = useRef<Map<string, number>>(new Map());
   const bridgeRef = useRef<Set<string>>(new Set());
   const coreNodesRef = useRef<Set<string>>(new Set());
@@ -407,9 +411,10 @@ export function ClustersTopology({
       simRef.current.forEach((node) => {
         const isHovered = hoveredRef.current === node.id;
         const isDimmed = hoveredRef.current && hoveredRef.current !== node.id;
+        const isFilterDimmed = highlightNodeIds && !highlightNodeIds.has(node.id);
 
         ctx.save();
-        ctx.globalAlpha = isDimmed ? 0.35 : 1;
+        ctx.globalAlpha = isDimmed ? 0.35 : isFilterDimmed ? dimOpacity : 1;
 
         const isIsolated = node.clusterId === -1;
         const color = isIsolated ? ISOLATED_COLOR : CLUSTER_COLORS[node.clusterId % CLUSTER_COLORS.length];
@@ -505,17 +510,7 @@ export function ClustersTopology({
         const nameText = node.name;
         // Name label hidden at zoom <= initialZoom (0.55)
         if (cam.cameraRef.current.zoom > 0.55) {
-          const nameWidth = ctx.measureText(nameText).width;
-          ctx.fillStyle = 'rgba(8, 12, 26, 0.88)';
-          ctx.beginPath();
-          ctx.roundRect(node.x - nameWidth / 2 - 7, node.y + node.radius + 6, nameWidth + 14, 20, 5);
-          ctx.fill();
-
-          ctx.font = '11px Inter, system-ui, sans-serif';
-          ctx.fillStyle = isHovered ? '#e2e8f0' : '#9A9895';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(nameText, node.x, node.y + node.radius + 16);
+          drawPremiumCanvasLabel(ctx, nameText, node.x, node.y + node.radius + 16, { hovered: isHovered, darkMode, font: '9px Inter, system-ui, sans-serif' });
         }
 
         // Names and position labels hidden at zoom <= initialZoom (0.55)
@@ -527,9 +522,7 @@ export function ClustersTopology({
           else if (node.centrality < 0.25 && !isIsolated && node.clusterId !== -1) posLabel = 'периферия';
 
           if (posLabel) {
-            ctx.font = '9px Inter, system-ui, sans-serif';
-            ctx.fillStyle = node.isBridge ? 'rgba(201, 169, 110, 0.55)' : 'rgba(154, 152, 149, 0.4)';
-            ctx.fillText(posLabel, node.x, node.y + node.radius + 32);
+            drawPremiumCanvasMetaLabel(ctx, posLabel, node.x, node.y + node.radius + 32, node.isBridge ? '#C9A96E' : '#9A9895', { font: '8px Inter, system-ui, sans-serif' });
           }
         }
 
@@ -597,6 +590,7 @@ export function ClustersTopology({
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    clickStartRef.current = { x: e.clientX, y: e.clientY };
     const rect = canvas.getBoundingClientRect();
     const world = cam.screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
     const found = Array.from(simRef.current.values()).find((n) => {
@@ -618,7 +612,7 @@ export function ClustersTopology({
   }, [cam]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (cam.wasDrag(e.clientX, e.clientY)) return;
+    if (Math.hypot(e.clientX - clickStartRef.current.x, e.clientY - clickStartRef.current.y) > 5) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();

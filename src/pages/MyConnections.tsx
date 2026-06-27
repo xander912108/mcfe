@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router';
 import { Sparkles, ArrowRight, UserPlus, Maximize2, Minimize2, Lightbulb, Users, Zap, MessageCircle } from 'lucide-react';
 import { useCamera } from '@/hooks/useCamera';
@@ -198,6 +199,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     return () => window.removeEventListener('keydown', handleKey);
   }, [focusMode]);
 
+  const slideOverRoot = typeof document === 'undefined' ? null : document.body;
+
   // Tab descriptions
   const tabDescriptions: Record<string, { title: string; text: string }> = {
     star: { title: 'Ваш личный круг', text: 'Кто уже рядом, кто помогал, кому вы можете быть полезны и с кем можно продолжить связь.' },
@@ -235,8 +238,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   }
 
   return (
-    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
-    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : 'auto', minHeight: focusMode ? '100vh' : '100%' }}>
+    <div className={`${focusMode ? 'h-screen' : 'min-h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
         <div className="shrink-0 px-5 pt-4 pb-3">
@@ -275,7 +278,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 overflow-hidden ${focusMode ? 'h-full p-4' : 'px-5 pb-4'}`}>
+      <div className={`flex-1 flex gap-4 min-h-0 ${focusMode ? 'h-full overflow-hidden p-4' : 'overflow-visible px-5 pb-4'}`}>
         {/* Left: Canvas area */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Toolbar: tabs + filter + focus + search */}
@@ -311,13 +314,13 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`flex-1 relative isolate min-h-0 ${focusMode ? 'h-full p-0' : 'rounded-2xl p-px'}`} style={focusMode ? {} : { background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`relative isolate min-h-0 ${focusMode ? 'flex-1 h-full p-0' : 'w-full aspect-square flex-none rounded-2xl p-px'}`} style={focusMode ? {} : { background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
               className={`relative overflow-hidden w-full ${focusMode ? 'h-full' : 'h-full rounded-2xl'}`}
               style={{ background: 'var(--bg-card)' }}
             >
-            {filteredNodes.length === 0 && topology !== 'list' && (
+            {participantNodes.length === 0 && topology !== 'list' && (
               <EmptyStateCanvas mode="participant" hasFilters={activeFilterCount > 0} onClearFilters={activeFilterCount > 0 ? () => setActiveFilters({}) : undefined} />
             )}
 
@@ -388,11 +391,11 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
               >
                 {displayTopology === 'circles' ? (
                   <div className="w-full h-full relative">
-                    <RingMetricsPanel edges={filteredEdges} />
+                    <RingMetricsPanel edges={participantEdges} />
                     <CirclesTopology key="circles-graph"
                       centerNode={currentUser}
-                      nodes={filteredNodes}
-                      edges={filteredEdges}
+                      nodes={participantNodes}
+                      edges={participantEdges}
                       onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                       onNodeClick={handleNodeClick}
                       onRingClick={(ri) => setSelectedRing(ri)}
@@ -407,7 +410,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                     />
                     {hoveredNode && !selectedNode && hoveredScreenPos && (
                       <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
-                        <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+                        <NodeTooltip node={hoveredNode} edges={participantEdges} currentUserId="me" />
                       </div>
                     )}
                   </div>
@@ -418,11 +421,12 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                   >
                     <PremiumStarGraph key="star-graph"
                       centerNode={currentUser}
-                      connectedNodes={filteredNodes}
-                      edges={filteredEdges}
-                      onNodeHover={handleNodeHover}
+                      connectedNodes={participantNodes}
+                      edges={participantEdges}
+                      onNodeHover={(node) => { handleNodeHover(node); if (!node) setHoveredScreenPos(null); }}
                       onNodeClick={handleNodeClick}
                       onBridgeHover={setHoveredBridge}
+                      onHoverScreenPos={setHoveredScreenPos}
                       highlightNodeId={hoveredNode?.id || null}
                       highlightNodeIds={hasActiveFilters ? (highlightNodeIds ?? undefined) : undefined}
                       mode="participant"
@@ -433,9 +437,9 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                       darkMode={darkMode}
                       camera={cam}
                     />
-                    {hoveredNode && !selectedNode && (
-                      <div className="absolute z-50 pointer-events-none" style={{ left: (hoveredNode.x || 0) + 50, top: (hoveredNode.y || 0) - 30 }}>
-                        <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+                    {hoveredNode && !selectedNode && hoveredScreenPos && (
+                      <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
+                        <NodeTooltip node={hoveredNode} edges={participantEdges} currentUserId="me" />
                       </div>
                     )}
                     {hoveredBridge && !selectedNode && (
@@ -511,31 +515,32 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       </div>
 
       {/* ═══ Slide-over panels ═══ */}
-      {selectedRing !== null && (
+      {slideOverRoot && selectedRing !== null && createPortal(
         <>
-          <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedRing(null)} />
-          <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto"
+          <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedRing(null)} />
+          <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto"
             style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             <RingCard
               ringIndex={selectedRing}
               ringLabel={['Опоры', 'Близкие', 'Коллеги', 'Знакомые', 'Потенциальные'][selectedRing]}
-              nodes={filteredNodes}
-              edges={filteredEdges}
+              nodes={participantNodes}
+              edges={participantEdges}
               onClose={() => setSelectedRing(null)}
               onNodeClick={(node) => { setSelectedRing(null); setSelectedNode(node); }}
             />
           </div>
-        </>
+        </>,
+        slideOverRoot
       )}
 
-      {selectedNode && (
+      {slideOverRoot && selectedNode && createPortal(
         <>
-          <div className="fixed inset-0 z-30" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
-          <div className="fixed inset-y-0 right-0 z-40 w-96 overflow-y-auto"
+          <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
+          <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto"
             style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
             <NodeCard
               node={selectedNode}
-              edges={filteredEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id)}
+              edges={participantEdges.filter((e) => e.source === selectedNode.id || e.target === selectedNode.id)}
               currentUserId="me"
               onClose={() => setSelectedNode(null)}
               mode="participant"
@@ -543,11 +548,11 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
               bridgeContexts={bridgeContexts}
             />
           </div>
-        </>
+        </>,
+        slideOverRoot
       )}
     </div>
     </div>
   );
 }
-
 
