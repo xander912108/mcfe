@@ -21,6 +21,27 @@ const SAGE_LIGHT = 'rgba(107,158,124,0.08)';
 const SAGE_BORDER = 'rgba(107,158,124,0.15)';
 const GOLD_GLOW = 'rgba(201,169,110,0.08)';
 const GOLD_BORDER = 'rgba(201,169,110,0.2)';
+
+const MessageCounter = ({ count }: { count: number }) => (
+  <div className="text-right">
+    <span className="text-[11px]" style={{ color: count > 900 ? TERRACOTTA : 'var(--text-muted)' }}>{count} / 1000</span>
+    {count > 500 && count <= 900 && (
+      <p className="text-[11px] mt-0.5">Сообщение получилось длиннее обычного. Лучше оставить самое важное и один понятный следующий шаг.</p>
+    )}
+    {count > 900 && (
+      <p className="text-[11px] mt-0.5" style={{ color: TERRACOTTA }}>Почти предел. Попробуйте сократить текст, чтобы его было легче прочитать.</p>
+    )}
+  </div>
+);
+
+const TitleCounter = ({ count }: { count: number }) => (
+  <div className="text-right">
+    <span className="text-[11px]" style={{ color: count > 100 ? TERRACOTTA : 'var(--text-muted)' }}>{count} / 120</span>
+    {count > 100 && (
+      <p className="text-[11px] mt-0.5" style={{ color: TERRACOTTA }}>Заголовок слишком длинный. Лучше сделать его короче, чтобы в письме отображалось полностью.</p>
+    )}
+  </div>
+);
 /* ===== DATA (placeholder for future metrics if needed) ===== */
 /* ===== DATA: ATTENTION CARDS ===== */
 const attentionCards = [
@@ -59,6 +80,7 @@ const applicationFilters = [
 ] as const;
 
 type FilterKey = typeof applicationFilters[number]['key'];
+type ArchivePeriod = '6m' | '1y' | 'all';
 
 interface ApplicationData {
   name: string;
@@ -810,7 +832,7 @@ export default function LeaderConsoleEntry() {
 
   /* ===== ARCHIVE SIDE PANEL STATE ===== */
   const [archivePanelOpen, setArchivePanelOpen] = useState(false);
-  const [archiveDetailApp, setArchiveDetailApp] = useState<any>(null);
+  const [archiveDetailApp, setArchiveDetailApp] = useState<(ApplicationData & { isArchive?: boolean }) | null>(null);
   const [archiveSearch, setArchiveSearch] = useState('');
   const [archivePeriod, setArchivePeriod] = useState<'6m' | '1y' | 'all'>('6m');
   const [archiveStatusFilter, setArchiveStatusFilter] = useState<string>('all');
@@ -1003,26 +1025,7 @@ export default function LeaderConsoleEntry() {
   const [showTimelineCollapse, setShowTimelineCollapse] = useState(false);
   const [showNoteCollapse, setShowNoteCollapse] = useState(false);
 
-  const MessageCounter = ({ count }: { count: number }) => (
-    <div className="text-right">
-      <span className="text-[11px]" style={{ color: count > 900 ? TERRACOTTA : 'var(--text-muted)' }}>{count} / 1000</span>
-      {count > 500 && count <= 900 && (
-        <p className="text-[11px] mt-0.5">Сообщение получилось длиннее обычного. Лучше оставить самое важное и один понятный следующий шаг.</p>
-      )}
-      {count > 900 && (
-        <p className="text-[11px] mt-0.5" style={{ color: TERRACOTTA }}>Почти предел. Попробуйте сократить текст, чтобы его было легче прочитать.</p>
-      )}
-    </div>
-  );
 
-  const TitleCounter = ({ count }: { count: number }) => (
-    <div className="text-right">
-      <span className="text-[11px]" style={{ color: count > 100 ? TERRACOTTA : 'var(--text-muted)' }}>{count} / 120</span>
-      {count > 100 && (
-        <p className="text-[11px] mt-0.5" style={{ color: TERRACOTTA }}>Заголовок слишком длинный. Лучше сделать его короче, чтобы в письме отображалось полностью.</p>
-      )}
-    </div>
-  );
 
   /* ===== BODY SCROLL LOCK ===== */
   useEffect(() => {
@@ -3463,48 +3466,48 @@ export default function LeaderConsoleEntry() {
               )}
 
               {/* Tried / Struggle — for applications waiting for response */}
-              {(sidePanelApp as any).tried && (
+              {sidePanelApp.tried && (
                 <div className="mt-3 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                   <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>Что уже пробовали:</p>
-                  <p className="text-xs italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«{(sidePanelApp as any).tried}»</p>
+                  <p className="text-xs italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«{sidePanelApp.tried}»</p>
                 </div>
               )}
-              {(sidePanelApp as any).struggle && (
+              {sidePanelApp.struggle && (
                 <div className="mt-2 rounded-lg p-3" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                   <p className="text-[11px] mb-1" style={{ color: 'var(--text-muted)' }}>С чем сейчас сложнее всего:</p>
-                  <p className="text-xs italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«{(sidePanelApp as any).struggle}»</p>
+                  <p className="text-xs italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>«{sidePanelApp.struggle}»</p>
                 </div>
               )}
 
               {/* Payment info — for approved applications */}
-              {(sidePanelApp as any).paymentAmount && (
+              {sidePanelApp.paymentAmount && (
                 <div className="mt-4">
                   <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Оплата</p>
                   <div className="rounded-lg p-3 space-y-1.5" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
                     <div className="flex justify-between">
                       <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Сумма:</span>
-                      <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{(sidePanelApp as any).paymentAmount}</span>
+                      <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{sidePanelApp.paymentAmount}</span>
                     </div>
-                    {(sidePanelApp as any).paymentProvider && (
+                    {sidePanelApp.paymentProvider && (
                       <div className="flex justify-between">
                         <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Провайдер:</span>
-                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(sidePanelApp as any).paymentProvider}</span>
+                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{sidePanelApp.paymentProvider}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
                       <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Статус:</span>
-                      <span className="text-xs font-medium" style={{ color: (sidePanelApp as any).paymentStatus === 'прошёл' ? SAGE : (sidePanelApp as any).paymentStatus === 'оплата не завершена' ? 'var(--gold)' : 'var(--text-secondary)' }}>{(sidePanelApp as any).paymentStatus}</span>
+                      <span className="text-xs font-medium" style={{ color: sidePanelApp.paymentStatus === 'прошёл' ? SAGE : sidePanelApp.paymentStatus === 'оплата не завершена' ? 'var(--gold)' : 'var(--text-secondary)' }}>{sidePanelApp.paymentStatus}</span>
                     </div>
-                    {(sidePanelApp as any).paymentTime && (
+                    {sidePanelApp.paymentTime && (
                       <div className="flex justify-between">
                         <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Время:</span>
-                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(sidePanelApp as any).paymentTime}</span>
+                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{sidePanelApp.paymentTime}</span>
                       </div>
                     )}
-                    {(sidePanelApp as any).paymentLinkSent && (
+                    {sidePanelApp.paymentLinkSent && (
                       <div className="flex justify-between">
                         <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>Ссылка отправлена:</span>
-                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(sidePanelApp as any).paymentLinkSent}</span>
+                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{sidePanelApp.paymentLinkSent}</span>
                       </div>
                     )}
                   </div>
@@ -3617,8 +3620,8 @@ export default function LeaderConsoleEntry() {
             <div className="sticky bottom-0 px-6 py-4" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-color)' }}>
               <div className="flex flex-wrap gap-2">
                 {/* Dynamic actions from data */}
-                {(sidePanelApp as any).actions ? (
-                  (sidePanelApp as any).actions.map((action: string) => {
+                {sidePanelApp.actions ? (
+                  sidePanelApp.actions.map((action: string) => {
                     const isPrimary = ['Одобрить', 'Напомнить об оплате', 'Открыть доступ вручную'].includes(action);
                     const isDanger = action === 'Открыть доступ вручную';
                     return (
@@ -3721,10 +3724,10 @@ export default function LeaderConsoleEntry() {
                     <div className="mt-4">
                       <p className="text-[10px] font-semibold tracking-widest mb-2" style={{ color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Что произошло</p>
                       <div className="space-y-1.5">
-                        {archiveDetailApp.timeline.map((step: string, idx: number) => (
+                        {archiveDetailApp.timeline.map((step, idx, arr) => (
                           <div key={idx} className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: idx === archiveDetailApp.timeline.length - 1 ? 'var(--gold)' : SAGE }} />
-                            <p className="text-xs" style={{ color: idx === archiveDetailApp.timeline.length - 1 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{step}</p>
+                            <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: idx === arr.length - 1 ? 'var(--gold)' : SAGE }} />
+                            <p className="text-xs" style={{ color: idx === arr.length - 1 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{step}</p>
                           </div>
                         ))}
                       </div>
@@ -3787,13 +3790,13 @@ export default function LeaderConsoleEntry() {
                   {/* Period filters */}
                   <div className="flex gap-2 flex-wrap">
                     {[
-                      { key: '6m', label: '6 мес' },
-                      { key: '1y', label: '12 мес' },
-                      { key: 'all', label: 'Всё время' },
+                      { key: '6m' as ArchivePeriod, label: '6 мес' },
+                      { key: '1y' as ArchivePeriod, label: '12 мес' },
+                      { key: 'all' as ArchivePeriod, label: 'Всё время' },
                     ].map((p) => (
                       <button
                         key={p.key}
-                        onClick={() => setArchivePeriod(p.key as any)}
+                        onClick={() => setArchivePeriod(p.key)}
                         className="text-xs px-3 py-1 rounded-full transition-all duration-200"
                         style={{
                           border: `1px solid ${archivePeriod === p.key ? 'var(--gold)' : 'var(--border-color)'}`,
