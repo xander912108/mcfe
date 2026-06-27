@@ -197,8 +197,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
   /* ── render ────────────────────────────────────────────── */
   return (
-    <div className={`${darkMode ? 'dark ' : ''}${focusMode ? 'fixed inset-0 z-50 w-screen h-screen overflow-hidden' : 'flex flex-col lg:flex-row gap-4 md:gap-6 w-full'}`} style={{ height: focusMode ? '100vh' : '100%' }}>
-    <div className={`${focusMode ? 'h-screen w-screen' : 'h-full flex-1 min-w-0'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+    <div className={`${darkMode ? 'dark ' : ''}${focusMode ? 'fixed inset-0 z-50 w-screen h-screen overflow-hidden' : 'flex flex-col lg:flex-row gap-4 md:gap-6 w-full'}`} style={{ height: focusMode ? '100vh' : 'auto' }}>
+    <div className={`${focusMode ? 'h-screen w-screen' : 'flex-1 min-w-0'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
 
       {/* ═══ HERO BLOCK ═══ */}
       {!focusMode && (
@@ -282,11 +282,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden ${focusMode ? 'h-full p-3 gap-2' : 'gap-4 md:gap-6'}`}>
-        <main className={`flex-1 min-w-0 flex flex-col min-h-0 ${focusMode ? 'gap-2' : 'gap-6'}`}>
+      <div className={`flex flex-col lg:flex-row flex-1 min-h-0 ${focusMode ? 'h-full overflow-hidden p-3 gap-2' : 'overflow-visible'}`}>
+        <main className={`flex-1 min-w-0 flex flex-col min-h-0 ${focusMode ? 'gap-2' : 'gap-0'}`}>
 
           {/* Toolbar — icons top-right over canvas */}
-          <div className={`flex items-center shrink-0 ${focusMode ? 'justify-end' : 'justify-end'}`}>
+          <div className={`flex items-center shrink-0 justify-end ${focusMode ? '' : 'py-4 md:py-5'}`}>
             <div className="flex items-center gap-2">
               {!focusMode && (
                 <button
@@ -330,7 +330,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
           </div>
 
           {/* Canvas container with gold gradient border */}
-          <div className={`flex-1 relative isolate min-h-0 ${focusMode ? 'h-full p-0' : 'rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
+          <div className={`relative isolate min-h-0 ${focusMode ? 'flex-1 h-full p-0' : 'w-full aspect-square flex-none rounded-2xl p-px'}`} style={{ background: 'linear-gradient(135deg, rgba(201,169,110,0.25), rgba(201,169,110,0.05) 40%, rgba(201,169,110,0.08) 60%, rgba(201,169,110,0.2))' }}>
             <div
               ref={containerDivRef}
               className={`relative overflow-hidden w-full h-full ${focusMode ? '' : 'rounded-2xl'}`}
