@@ -245,7 +245,7 @@ export function FilterPanel({ mode, onFilterChange, activeFilters: externalFilte
         <Filter className={`w-4 h-4 transition-colors ${isOpen ? 'text-[var(--gold)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'}`} />
         {activeCount > 0 && (
           <span
-            className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[9px] font-bold rounded-full shadow-sm"
+            className="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 text-[9px] font-bold rounded-full shadow-sm"
             style={{ background: 'rgba(201,169,110,0.2)', color: '#C9A96E', border: '1px solid rgba(201,169,110,0.3)' }}
           >
             {activeCount}

@@ -238,8 +238,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   }
 
   return (
-    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : '100%' }}>
-    <div className={`${focusMode ? 'h-screen' : 'h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
+    <div className={darkMode ? 'dark' : ''} style={{ height: focusMode ? '100vh' : 'auto', minHeight: focusMode ? '100vh' : '100%' }}>
+    <div className={`${focusMode ? 'h-screen' : 'min-h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
         <div className="shrink-0 px-5 pt-4 pb-3">
@@ -278,7 +278,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 ${focusMode ? 'h-full overflow-hidden p-4' : 'overflow-y-auto px-5 pb-4'}`}>
+      <div className={`flex-1 flex gap-4 min-h-0 ${focusMode ? 'h-full overflow-hidden p-4' : 'overflow-visible px-5 pb-4'}`}>
         {/* Left: Canvas area */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Toolbar: tabs + filter + focus + search */}
@@ -555,5 +555,4 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     </div>
   );
 }
-
 

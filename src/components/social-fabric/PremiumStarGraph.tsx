@@ -174,18 +174,19 @@ export function PremiumStarGraph({
     const nodeR = 26;
     const count = connectedNodes.length;
     const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5° — sunflower pattern
-    const maxCanvasR = Math.min(width, height) * 0.42;
+    const maxCanvasR = Math.min(width, height) * 0.46;
     // Adaptive innerR: scales with canvas but never exceeds 120
     const innerR = Math.min(120, maxCanvasR * 0.35);
-    const defaultSpacing = 42;
-    // Minimum spacing = node diameter + padding to prevent overlap
-    const minSpacing = nodeR * 2.5; // 65px for 26px radius
-    // Adaptive spacing: ensure last node fits within canvas, but never below minSpacing
-    const adaptiveSpacing = count > 1
-      ? Math.max(minSpacing, Math.min(defaultSpacing, (maxCanvasR - innerR) / Math.sqrt(count - 1)))
-      : defaultSpacing;
     // If canvas is too small, shrink nodes to fit
-    const finalNodeR = maxCanvasR < innerR + minSpacing ? Math.max(14, (maxCanvasR - innerR) / 3) : nodeR;
+    const finalNodeR = maxCanvasR < innerR + nodeR * 2.5 ? Math.max(14, (maxCanvasR - innerR) / 3) : nodeR;
+    const desiredSpacing = finalNodeR * 2 * 1.45;
+    const fitSpacing = count > 1
+      ? (maxCanvasR - innerR - finalNodeR - 12) / Math.sqrt(count - 1)
+      : desiredSpacing;
+    const minSpacing = finalNodeR * (count > 30 ? 2.05 : 2.25);
+    const adaptiveSpacing = count > 1
+      ? Math.max(minSpacing, Math.min(desiredSpacing, fitSpacing))
+      : desiredSpacing;
 
     // Sort by weight descending: strong ties first (closer to center)
     const sortedNodes = [...connectedNodes].sort((a, b) => {
