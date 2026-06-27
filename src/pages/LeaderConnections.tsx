@@ -22,6 +22,7 @@ import { FilterPanel } from '@/components/social-fabric/FilterPanel';
 import { FocusLegendOverlay } from '@/components/social-fabric/FocusLegendOverlay';
 import { EmptyStateCanvas } from '@/components/social-fabric/EmptyStateCanvas';
 import { NodeCard } from '@/components/social-fabric/NodeCard';
+import { NodeTooltip } from '@/components/social-fabric/NodeTooltip';
 import { LeaderConnectionList } from '@/components/social-fabric/LeaderConnectionList';
 import { SkeletonList, SkeletonCanvas } from '@/components/social-fabric/SkeletonLoader';
 import { ZoomButton } from '@/components/social-fabric/ZoomButton';
@@ -51,6 +52,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     setSearchParams({ tab: value }, { replace: true });
   }, [setSearchParams]);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
+  const [hoveredScreenPos, setHoveredScreenPos] = useState<{ x: number; y: number } | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<{
     id: number; name: string; members: GraphNode[];
   } | null>(null);
@@ -405,7 +408,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 {displayTopology === 'density' ? (
                   <PulseTopology nodes={filteredNodes}
                     edges={filteredEdges}
-                    onNodeHover={() => {}}
+                    onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     width={canvasSize.width}
                     height={canvasSize.height}
@@ -418,7 +421,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 ) : displayTopology === 'clusters' ? (
                   <ClustersTopology nodes={filteredNodes}
                     edges={filteredEdges}
-                    onNodeHover={() => {}}
+                    onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     onClusterClick={handleClusterClick}
                     width={canvasSize.width}
@@ -430,7 +433,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 ) : displayTopology === 'health' ? (
                   <HealthTopology nodes={allNodes}
                     edges={filteredEdges}
-                    onNodeHover={() => {}}
+                    onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     onStatusFilter={setStatusFilter}
                     activeStatusFilter={statusFilter}
@@ -444,9 +447,10 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                   <PremiumStarGraph centerNode={communityCenter}
                     connectedNodes={filteredNodes}
                     edges={filteredEdges}
-                    onNodeHover={() => {}}
+                    onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                     onNodeClick={handleNodeClick}
                     mode="leader"
+                    onHoverScreenPos={setHoveredScreenPos}
                     width={canvasSize.width}
                     height={canvasSize.height}
                     centerLabel="MC"
@@ -455,6 +459,11 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                     darkMode={darkMode}
                     camera={cam}
                   />
+                )}
+                {hoveredNode && !selectedNode && hoveredScreenPos && (
+                  <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
+                    <NodeTooltip node={hoveredNode} edges={filteredEdges} currentUserId="me" />
+                  </div>
                 )}
               </div>
             )}

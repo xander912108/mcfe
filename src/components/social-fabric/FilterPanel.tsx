@@ -229,11 +229,11 @@ export function FilterPanel({ mode, onFilterChange, activeFilters: externalFilte
   };
 
   return (
-    <div className="absolute inset-0 pointer-events-none" ref={panelRef}>
+    <div className="absolute inset-0 overflow-visible pointer-events-none" ref={panelRef}>
       {/* Compact button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`absolute z-30 w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-300 group pointer-events-auto border backdrop-blur bg-[var(--bg-card)]/80 border-[var(--border-color)] hover:border-[var(--border-color)] ${buttonPositionClassName ?? 'right-14 top-3'}`}
+        className={`absolute z-30 overflow-visible w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-300 group pointer-events-auto border backdrop-blur bg-[var(--bg-card)]/80 border-[var(--border-color)] hover:border-[var(--border-color)] ${buttonPositionClassName ?? 'right-14 top-3'}`}
         style={{
           background: isOpen ? 'rgba(201,169,110,0.12)' : 'var(--bg-card)',
           backdropFilter: 'blur(20px)',
@@ -245,7 +245,7 @@ export function FilterPanel({ mode, onFilterChange, activeFilters: externalFilte
         <Filter className={`w-4 h-4 transition-colors ${isOpen ? 'text-[var(--gold)]' : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'}`} />
         {activeCount > 0 && (
           <span
-            className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[9px] font-bold rounded-full"
+            className="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 text-[9px] font-bold rounded-full shadow-sm"
             style={{ background: 'rgba(201,169,110,0.2)', color: '#C9A96E', border: '1px solid rgba(201,169,110,0.3)' }}
           >
             {activeCount}

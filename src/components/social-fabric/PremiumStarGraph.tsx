@@ -25,6 +25,7 @@ interface PremiumStarGraphProps {
   onNodeHover: (node: GraphNode | null) => void;
   onNodeClick: (node: GraphNode) => void;
   onBridgeHover?: (bridge: BridgeContext | null) => void;
+  onHoverScreenPos?: (pos: { x: number; y: number } | null) => void;
   highlightNodeId?: string | null;
   highlightNodeIds?: Set<string> | null;
   dimOpacity?: number;
@@ -124,6 +125,7 @@ export function PremiumStarGraph({
   onNodeHover,
   onNodeClick,
   onBridgeHover,
+  onHoverScreenPos,
   highlightNodeId,
   highlightNodeIds,
   dimOpacity = 0.2,
@@ -172,18 +174,19 @@ export function PremiumStarGraph({
     const nodeR = 26;
     const count = connectedNodes.length;
     const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5° — sunflower pattern
-    const maxCanvasR = Math.min(width, height) * 0.42;
+    const maxCanvasR = Math.min(width, height) * 0.46;
     // Adaptive innerR: scales with canvas but never exceeds 120
     const innerR = Math.min(120, maxCanvasR * 0.35);
-    const defaultSpacing = 42;
-    // Minimum spacing = node diameter + padding to prevent overlap
-    const minSpacing = nodeR * 2.5; // 65px for 26px radius
-    // Adaptive spacing: ensure last node fits within canvas, but never below minSpacing
-    const adaptiveSpacing = count > 1
-      ? Math.max(minSpacing, Math.min(defaultSpacing, (maxCanvasR - innerR) / Math.sqrt(count - 1)))
-      : defaultSpacing;
     // If canvas is too small, shrink nodes to fit
-    const finalNodeR = maxCanvasR < innerR + minSpacing ? Math.max(14, (maxCanvasR - innerR) / 3) : nodeR;
+    const finalNodeR = maxCanvasR < innerR + nodeR * 2.5 ? Math.max(14, (maxCanvasR - innerR) / 3) : nodeR;
+    const desiredSpacing = finalNodeR * 2 * 1.45;
+    const fitSpacing = count > 1
+      ? (maxCanvasR - innerR - finalNodeR - 12) / Math.sqrt(count - 1)
+      : desiredSpacing;
+    const minSpacing = finalNodeR * (count > 30 ? 2.05 : 2.25);
+    const adaptiveSpacing = count > 1
+      ? Math.max(minSpacing, Math.min(desiredSpacing, fitSpacing))
+      : desiredSpacing;
 
     // Sort by weight descending: strong ties first (closer to center)
     const sortedNodes = [...connectedNodes].sort((a, b) => {
@@ -890,6 +893,14 @@ export function PremiumStarGraph({
         hoveredRef.current = nearest;
         const node = nearest ? nodesRef.current.get(nearest) ?? null : null;
         onNodeHover(node);
+        if (node && onHoverScreenPos) {
+          const cam = cameraRef.current;
+          const sx = (node.x - width / 2) * cam.zoom + width / 2 + cam.x;
+          const sy = (node.y - height / 2) * cam.zoom + height / 2 + cam.y;
+          onHoverScreenPos({ x: sx, y: sy });
+        } else {
+          onHoverScreenPos?.(null);
+        }
         canvas.style.cursor = nearest ? 'pointer' : hoveredBridge ? 'help' : 'grab';
       }
   };

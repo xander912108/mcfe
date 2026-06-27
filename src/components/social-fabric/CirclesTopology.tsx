@@ -74,7 +74,7 @@ function getNodeRadius(contributionLevel: number): number {
 }
 
 export function CirclesTopology({
-  centerNode, nodes, edges, onNodeHover, onNodeClick,
+  centerNode, nodes, edges, onNodeHover, onNodeClick, onHoverScreenPos,
   highlightNodeId, highlightNodeIds, dimOpacity = 0.2, width, height,
   darkMode = true, camera: externalCamera,
 }: CirclesTopologyProps) {
@@ -83,6 +83,7 @@ export function CirclesTopology({
   const animRef = useRef<number>(0);
   const hoveredRef = useRef<string | null>(null);
   const ringNodesRef = useRef<string[][]>([[], [], [], [], []]);
+  const adaptiveRingRadiiRef = useRef<number[]>([]);
 
   const COLORS = getColors(darkMode);
   const internalCam = useCamera(width, height, 0.82);
@@ -91,7 +92,7 @@ export function CirclesTopology({
   const cx = width / 2;
   const cy = height / 2;
   const maxR = Math.min(width, height) * 0.42;
-  // Fixed ring radii — always 5 visible rings
+  // Base ring radii; final rendered radii expand per ring contents.
   const ringRadii = useMemo(() => [maxR * 0.18, maxR * 0.36, maxR * 0.55, maxR * 0.75, maxR * 0.94], [maxR]);
 
   // Distribute nodes into rings based on their max edge weight to center
@@ -116,6 +117,32 @@ export function CirclesTopology({
     });
     ringNodesRef.current = ringPositions;
 
+    const adaptiveRingRadii = ringPositions.reduce<number[]>((acc, nodeIds, ri) => {
+      const maxNodeRadius = Math.max(
+        17,
+        ...nodeIds
+          .map((nid) => nodes.find((node) => node.id === nid))
+          .filter((node): node is GraphNode => Boolean(node))
+          .map((node) => getNodeRadius(node.contributionLevel))
+      );
+      const contentRadius = nodeIds.length * maxNodeRadius * 1.45 / Math.PI;
+      const baseRadius = Math.max(ringRadii[ri], contentRadius);
+      const previousRadius = acc[ri - 1] ?? 0;
+      const previousMaxNodeRadius = ri > 0
+        ? Math.max(
+            17,
+            ...ringPositions[ri - 1]
+              .map((nid) => nodes.find((node) => node.id === nid))
+              .filter((node): node is GraphNode => Boolean(node))
+              .map((node) => getNodeRadius(node.contributionLevel))
+          )
+        : 0;
+      const ringGap = (previousMaxNodeRadius + maxNodeRadius) * 1.45;
+      acc.push(Math.max(baseRadius, previousRadius + ringGap));
+      return acc;
+    }, []);
+    adaptiveRingRadiiRef.current = adaptiveRingRadii;
+
     // Place center node
     const centerRn: RenderNode = {
       ...centerNode, x: cx, y: cy, targetX: cx, targetY: cy,
@@ -125,10 +152,11 @@ export function CirclesTopology({
 
     // Place nodes in their rings
     ringPositions.forEach((nodeIds, ri) => {
-      const r = ringRadii[ri];
       nodeIds.forEach((nid, i) => {
         const node = nodes.find((n) => n.id === nid);
         if (!node) return;
+        const baseRadius = getNodeRadius(node.contributionLevel);
+        const r = adaptiveRingRadii[ri];
         const angle = (2 * Math.PI * i) / Math.max(nodeIds.length, 1) - Math.PI / 2;
         const existing = nodesRef.current.get(nid);
         nodesRef.current.set(nid, {
@@ -137,7 +165,7 @@ export function CirclesTopology({
           y: existing?.y ?? cy + r * 0.5 * Math.sin(angle),
           targetX: cx + r * Math.cos(angle),
           targetY: cy + r * Math.sin(angle),
-          radius: getNodeRadius(node.contributionLevel),
+          radius: baseRadius,
           opacity: existing?.opacity ?? 0,
           pulsePhase: Math.random() * Math.PI * 2,
           pulseOffset: Math.random() * 5000,
@@ -175,12 +203,15 @@ export function CirclesTopology({
       cam.applyTransform(ctx);
 
       // ─── ALL 5 RINGS (always visible) ───
-      ringRadii.forEach((r, i) => {
+      const adaptiveRingRadii = adaptiveRingRadiiRef.current.length === RING_CONFIG.length
+        ? adaptiveRingRadiiRef.current
+        : ringRadii;
+      adaptiveRingRadii.forEach((r, i) => {
         const cfg = RING_CONFIG[i];
         const nodeCount = ringNodesRef.current[i]?.length ?? 0;
 
         // 1. Fill band — brighter
-        const prevR = i > 0 ? ringRadii[i - 1] : ringRadii[0] * 0.35;
+        const prevR = i > 0 ? adaptiveRingRadii[i - 1] : adaptiveRingRadii[0] * 0.35;
         const bandGrad = ctx.createRadialGradient(cx, cy, prevR, cx, cy, r);
         bandGrad.addColorStop(0, cfg.color + cfg.fillAlpha);
         bandGrad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -188,7 +219,7 @@ export function CirclesTopology({
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         if (i > 0) ctx.arc(cx, cy, prevR, 0, Math.PI * 2, true);
-        else ctx.arc(cx, cy, ringRadii[0] * 0.35, 0, Math.PI * 2, true);
+        else ctx.arc(cx, cy, adaptiveRingRadii[0] * 0.35, 0, Math.PI * 2, true);
         ctx.fill();
 
         // 2. Ring circle line — thicker, brighter
@@ -241,8 +272,8 @@ export function CirclesTopology({
 
       // ─── RADIAL TICKS ───
       const tickCount = 24;
-      const innerTickR = ringRadii[0] * 0.35;
-      const outerTickR = ringRadii[4] + 8;
+      const innerTickR = adaptiveRingRadii[0] * 0.35;
+      const outerTickR = adaptiveRingRadii[4] + 8;
       for (let t = 0; t < tickCount; t++) {
         const angle = (2 * Math.PI * t) / tickCount - Math.PI / 2;
         const isMajor = t % 6 === 0;
@@ -391,10 +422,20 @@ export function CirclesTopology({
     });
     if (nearest !== hoveredRef.current) {
       hoveredRef.current = nearest;
-      onNodeHover(nearest ? nodesRef.current.get(nearest) ?? null : null);
+      const node = nearest ? nodesRef.current.get(nearest) ?? null : null;
+      onNodeHover(node);
+      if (node && onHoverScreenPos) {
+        const camState = cam.cameraRef.current;
+        onHoverScreenPos({
+          x: (node.x - width / 2) * camState.zoom + width / 2 + camState.x,
+          y: (node.y - height / 2) * camState.zoom + height / 2 + camState.y,
+        });
+      } else {
+        onHoverScreenPos?.(null);
+      }
       canvas.style.cursor = nearest ? 'pointer' : 'grab';
     }
-  }, [onNodeHover, cam, getWorldPos]);
+  }, [onNodeHover, onHoverScreenPos, cam, getWorldPos, width, height]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     cam.startPan(e.clientX, e.clientY);
