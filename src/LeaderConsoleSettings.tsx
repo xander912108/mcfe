@@ -18,6 +18,10 @@ const SAGE_LIGHT = 'rgba(107,158,124,0.08)';
 const SAGE_BORDER = 'rgba(107,158,124,0.15)';
 const GOLD_GLOW = 'rgba(201,169,110,0.08)';
 
+const GradientDivider = () => (
+  <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
+);
+
 /* ===== SECTION TYPE ===== */
 type SectionKey = 'attention' | 'community' | 'team' | 'rules' | 'security';
 
@@ -209,10 +213,6 @@ export default function LeaderConsoleSettings() {
     publishWork: true, publishCase: true, usePromo: true, publicReview: true, notifications: true, sharePayment: true,
   });
 
-  const GradientDivider = () => (
-    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />
-  );
-
   /* Section nav cards */
   const sectionCards = [
     { key: 'attention' as SectionKey, label: 'Ваше внимание', subtitle: '2 настройки требуют проверки', icon: AlertTriangle },
@@ -268,7 +268,6 @@ export default function LeaderConsoleSettings() {
             );
           })}
         </div>
-
 
         {/* ===== ATTENTION SECTION ===== */}
         {activeSection === 'attention' && (
@@ -481,7 +480,6 @@ export default function LeaderConsoleSettings() {
             </div>
           </div>
         )}
-
 
         {/* ===== TEAM SECTION ===== */}
         {activeSection === 'team' && (
@@ -779,7 +777,6 @@ export default function LeaderConsoleSettings() {
             </div>
           </div>
         )}
-
 
         {/* ===== SECURITY SECTION ===== */}
         {activeSection === 'security' && (

@@ -32,6 +32,16 @@ const ROLE_COLORS: Record<string, string> = {
   'default': '#6b7280',
 };
 
+const drawSignalBadge = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string) => {
+  ctx.beginPath();
+  ctx.arc(x, y, 6, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+};
+
 const EDGE_COLORS: Record<string, string> = {
   help: '#C9A96E',
   review: '#10b981',
@@ -317,16 +327,6 @@ export function StarGraph({
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
   }, [centerNode, edges, width, height, mode, highlightNodeId]);
-
-  const drawSignalBadge = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string) => {
-    ctx.beginPath();
-    ctx.arc(x, y, 6, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  };
 
   // Mouse handlers
   const handleMouseMove = useCallback(

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { drawNodeAvatar } from '@/hooks/useNodeAvatars';
 import type { GraphNode, GraphEdge } from '@/data/graphData';
@@ -61,7 +61,7 @@ export function NetworkTopology({
   nodes, edges, bridges = [], centerNode, onNodeHover, onNodeClick, highlightNodeId, width, height,
 darkMode = true,
 }: NetworkTopologyProps) {
-  const COLORS = getColors(darkMode);
+  const COLORS = useMemo(() => getColors(darkMode), [darkMode]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simRef = useRef<Map<string, SimNode>>(new Map());
   const animRef = useRef<number>(0);
@@ -478,7 +478,7 @@ darkMode = true,
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [centerNode, edges, bridges, width, height, highlightNodeId]);
+  }, [centerNode, edges, bridges, width, height, highlightNodeId, COLORS, cam, darkMode]);
 
   // Mouse handlers with camera
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
