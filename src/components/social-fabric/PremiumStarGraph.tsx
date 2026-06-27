@@ -543,27 +543,33 @@ export function PremiumStarGraph({
           }
         }
 
-        // OREOL — steady bright gold glow around high-value nodes
-        // Constant intensity, sits just outside the node circle.
+        // OREOL — visible indigo relevance glow around nodes with a clear reason for attention.
+        // It is drawn before the avatar, so it reads as a soft halo rather than a status badge.
         if (!isCenter) {
           const nodeEdges = edges.filter(
             (e) => (e.source === node.id && e.target === centerNode.id) ||
                    (e.target === node.id && e.source === centerNode.id)
           );
-          const hasStrongEdge = nodeEdges.some((e) => e.weight >= 7);
-          if (hasStrongEdge) {
-            const oreolR = node.radius + 11; // ~10–12 px beyond node edge
+          const hasAttentionReason = node.isHelpReady || nodeEdges.some((e) => e.weight >= 7 || e.type === 'flow' || e.type === 'mentorship');
+          if (hasAttentionReason) {
+            const pulse = (Math.sin(ts * 0.0012 + node.pulseOffset * 0.001) + 1) / 2;
+            const oreolR = node.radius + 15 + pulse * 3;
             const oreolGrad = ctx.createRadialGradient(
-              node.x, node.y, node.radius * 0.80,
+              node.x, node.y, node.radius * 0.72,
               node.x, node.y, oreolR
             );
-            oreolGrad.addColorStop(0, 'rgba(201, 169, 110, 0.65)');
-            oreolGrad.addColorStop(0.5, 'rgba(201, 169, 110, 0.30)');
-            oreolGrad.addColorStop(1, 'rgba(201, 169, 110, 0)');
+            oreolGrad.addColorStop(0, 'rgba(129, 140, 248, 0.52)');
+            oreolGrad.addColorStop(0.46, 'rgba(99, 102, 241, 0.30)');
+            oreolGrad.addColorStop(1, 'rgba(99, 102, 241, 0)');
             ctx.fillStyle = oreolGrad;
             ctx.beginPath();
             ctx.arc(node.x, node.y, oreolR, 0, Math.PI * 2);
             ctx.fill();
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius + 8 + pulse * 2, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(165, 180, 252, ${0.35 + pulse * 0.22})`;
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
           }
         }
 
@@ -723,7 +729,7 @@ export function PremiumStarGraph({
         }
 
         // Labels — show role only (name shown in sidebar card on click)
-        const showLabels = isCenter || cameraRef.current.zoom > 1.1;
+        const showLabels = isCenter || cameraRef.current.zoom >= 0.95;
 
         if (showLabels) {
           // NAME — all nodes except center ("Я")
