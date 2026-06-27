@@ -49,8 +49,6 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       document.body.style.overflow = '';
     };
   }, [focusMode]);
-  const [searchQuery] = useState('');
-
   const topology = searchParams.get('tab') || 'star';
   const setTopology = useCallback((value: string) => {
     setSearchParams({ tab: value }, { replace: true });
@@ -61,9 +59,12 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedRing, setSelectedRing] = useState<number | null>(null);
+  const [hoveredRing, setHoveredRing] = useState<number | null>(null);
+  const [hoveredRingScreenPos, setHoveredRingScreenPos] = useState<{ x: number; y: number } | null>(null);
+  const [listScenario, setListScenario] = useState('');
 
   const defaultFilters = useMemo<Record<string, boolean>>(() => ({
-    helpedMe: true, iHelped: true, sameFlow: false, sameStep: false,
+    helpedMe: false, iHelped: false, sameFlow: false, sameStep: false,
     gratitude: false, helpReady: false, mentors: false,
     topicDesign: false, topicMarketing: false, topicProduct: false,
     topicAnalytics: false, topicLaunch: false, online: false,
@@ -122,8 +123,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
   const activeFilterKeys = useMemo(() => Object.entries(activeFilters).filter(([, v]) => v).map(([k]) => k), [activeFilters]);
   const hasActiveFilters = activeFilterKeys.length > 0;
 
-  const { filteredNodes, filteredEdges, highlightNodeIds } = useMemo(() => {
-    let nodes = participantNodes;
+  const { filteredNodes, highlightNodeIds, matchingNodes } = useMemo(() => {
+    const nodes = participantNodes;
     const nodeMeEdges = (nodeId: string) =>
       participantEdges.filter((e) => (e.source === nodeId && e.target === 'me') || (e.target === nodeId && e.source === 'me'));
 
@@ -155,30 +156,42 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       });
     };
 
-    nodes = nodes.filter(matchesFilters);
-    const nodeIds = new Set(nodes.map((n) => n.id));
-    // Include edges between filtered nodes AND edges connecting to 'me' (center)
-    const edges = participantEdges.filter((e) =>
-      (nodeIds.has(e.source) && nodeIds.has(e.target)) ||
-      (e.source === 'me' && nodeIds.has(e.target)) ||
-      (e.target === 'me' && nodeIds.has(e.source))
-    );
-    const hIds = hasActiveFilters ? new Set(nodes.map((n) => n.id)) : null;
-    return { filteredNodes: nodes, filteredEdges: edges, highlightNodeIds: hIds };
-  }, [hasActiveFilters, activeFilterKeys]);
+    const matchingNodes = nodes.filter(matchesFilters);
+    const visibleNodes = displayTopology === 'list' ? matchingNodes : nodes;
+    const hIds = hasActiveFilters ? new Set(matchingNodes.map((n) => n.id)) : null;
+    return { filteredNodes: visibleNodes, highlightNodeIds: hIds, matchingNodes };
+  }, [hasActiveFilters, activeFilterKeys, displayTopology]);
 
   const activeFilterCount = activeFilterKeys.length;
 
-  // Search filtering
-  const searchFilteredNodes = useMemo(() => {
-    if (!searchQuery.trim()) return filteredNodes;
-    const q = searchQuery.toLowerCase();
-    return filteredNodes.filter((n) =>
-      n.name.toLowerCase().includes(q) ||
-      (n.role && n.role.toLowerCase().includes(q)) ||
-      (n.goals && n.goals.some((g) => g.toLowerCase().includes(q)))
-    );
-  }, [filteredNodes, searchQuery]);
+
+  const listScenarioMatches = useCallback((node: GraphNode, scenario: string) => {
+    if (!scenario) return true;
+    const ne = participantEdges.filter((e) => e.source === node.id || e.target === node.id);
+    switch (scenario) {
+      case 'gratitude': return ne.some((e) => e.type === 'gratitude');
+      case 'advice': return node.isHelpReady || node.role === 'Куратор' || node.role === 'Хранитель знаний';
+      case 'offerHelp': return ne.some((e) => e.source === 'me' && e.target === node.id) || node.goals?.length > 0;
+      case 'meet': return ne.length === 0 || ne.every((e) => (e.weight ?? 0) <= 2);
+      default: return true;
+    }
+  }, []);
+
+  const listNodes = useMemo(() => {
+    const base = hasActiveFilters ? matchingNodes : participantNodes;
+    return base.filter((node) => listScenarioMatches(node, listScenario));
+  }, [hasActiveFilters, matchingNodes, listScenario, listScenarioMatches]);
+
+  const listScenarioCounts = useMemo(() => {
+    const base = hasActiveFilters ? matchingNodes : participantNodes;
+    return {
+      all: base.length,
+      gratitude: base.filter((node) => listScenarioMatches(node, 'gratitude')).length,
+      advice: base.filter((node) => listScenarioMatches(node, 'advice')).length,
+      offerHelp: base.filter((node) => listScenarioMatches(node, 'offerHelp')).length,
+      meet: base.filter((node) => listScenarioMatches(node, 'meet')).length,
+    };
+  }, [hasActiveFilters, matchingNodes, listScenarioMatches]);
 
   const handleNodeHover = useCallback((node: GraphNode | null) => {
     setHoveredNode(node);
@@ -250,7 +263,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
             <span className="text-[var(--text-secondary)] font-medium">Мои связи</span>
           </div>
           {/* Title + description */}
-          <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-1 tracking-tight">{tabDescriptions[topology]?.title}</h1>
+          <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-1 tracking-tight heading-accent inline-block">{tabDescriptions[topology]?.title}</h1>
           <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-2xl">{tabDescriptions[topology]?.text}</p>
           {/* Micro-stats */}
           <div className="flex items-center gap-4 mt-2">
@@ -342,24 +355,24 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                 <div className="shrink-0 py-3 px-5" style={{ backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)' }}>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {[
-                      { key: '', label: 'Все', count: filteredNodes.length },
-                      { key: 'gratitude', label: 'Поблагодарить', count: filteredEdges.filter((e) => e.type === 'gratitude').length },
-                      { key: 'help', label: 'Попросить совет', count: filteredNodes.filter((n) => n.isHelpReady).length },
-                      { key: 'mentorship', label: 'Предложить помощь', count: filteredNodes.filter((n) => n.role === 'Куратор' || n.role === 'Помощник по практике').length },
-                      { key: 'new', label: 'Познакомиться', count: filteredNodes.filter((n) => filteredEdges.filter((e) => e.source === n.id || e.target === n.id).length === 0).length },
+                      { key: '', label: 'Все', count: listScenarioCounts.all },
+                      { key: 'gratitude', label: 'Поблагодарить', count: listScenarioCounts.gratitude },
+                      { key: 'advice', label: 'Попросить совет', count: listScenarioCounts.advice },
+                      { key: 'offerHelp', label: 'Предложить помощь', count: listScenarioCounts.offerHelp },
+                      { key: 'meet', label: 'Познакомиться', count: listScenarioCounts.meet },
                     ].map((f) => (
                       <button
                         key={f.key}
                         className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all border"
                         style={{
-                          borderColor: activeFilters[f.key] ? 'var(--gold)' : 'var(--border-color)',
-                          color: activeFilters[f.key] ? 'var(--gold)' : 'var(--text-muted)',
-                          backgroundColor: activeFilters[f.key] ? 'rgba(201,169,110,0.08)' : 'transparent',
+                          borderColor: listScenario === f.key ? 'var(--gold)' : 'var(--border-color)',
+                          color: listScenario === f.key ? 'var(--gold)' : 'var(--text-muted)',
+                          backgroundColor: listScenario === f.key ? 'rgba(201,169,110,0.08)' : 'transparent',
                         }}
-                        onClick={() => setActiveFilters((prev) => ({ ...prev, [f.key]: !prev[f.key] }))}
+                        onClick={() => setListScenario(f.key)}
                       >
                         {f.label}
-                        <span style={{ color: activeFilters[f.key] ? 'var(--gold)' : 'var(--text-muted)', opacity: 0.7 }}>{f.count}</span>
+                        <span style={{ color: listScenario === f.key ? 'var(--gold)' : 'var(--text-muted)', opacity: 0.7 }}>{f.count}</span>
                       </button>
                     ))}
                   </div>
@@ -369,8 +382,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                 </div>
                 <div className="flex-1 min-h-0 overflow-y-auto">
                 <ConnectionList
-                  nodes={searchFilteredNodes}
-                  edges={filteredEdges}
+                  nodes={listNodes}
+                  edges={participantEdges}
                   currentUserId="me"
                   onNodeClick={handleNodeClick}
                   onMessage={(node) => console.log('Message', node.name)}
@@ -399,6 +412,8 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                       onNodeHover={(node) => { setHoveredNode(node); if (!node) setHoveredScreenPos(null); }}
                       onNodeClick={handleNodeClick}
                       onRingClick={(ri) => setSelectedRing(ri)}
+                      onRingHover={setHoveredRing}
+                      onRingHoverScreenPos={setHoveredRingScreenPos}
                       onHoverScreenPos={setHoveredScreenPos}
                       highlightNodeId={hoveredNode?.id || null}
                       highlightNodeIds={hasActiveFilters ? (highlightNodeIds ?? undefined) : undefined}
@@ -408,6 +423,14 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
                       darkMode={darkMode}
                       camera={cam}
                     />
+                    {hoveredRing !== null && !selectedRing && !hoveredNode && hoveredRingScreenPos && (
+                      <div className="absolute z-50 pointer-events-none max-w-[240px]" style={{ left: hoveredRingScreenPos.x + 18, top: hoveredRingScreenPos.y - 20 }}>
+                        <div className="rounded-xl px-3.5 py-3 shadow-2xl border bg-[var(--bg-card)]/95 backdrop-blur-xl" style={{ borderColor: 'rgba(201,169,110,0.25)' }}>
+                          <div className="text-xs font-semibold text-[var(--text-primary)] mb-1">{['Опоры', 'Близкие', 'Коллеги', 'Знакомые', 'Потенциальные'][hoveredRing]}</div>
+                          <div className="text-[11px] leading-relaxed text-[var(--text-secondary)]">{['Устойчивые связи: можно попросить совет.', 'Тёплые связи — можно продолжить контакт.', 'Общий контекст — удобно обменяться опытом.', 'Связь пока слабая — её можно мягко оживить.', 'Связи ещё нет, но есть хороший повод познакомиться.'][hoveredRing]}</div>
+                        </div>
+                      </div>
+                    )}
                     {hoveredNode && !selectedNode && hoveredScreenPos && (
                       <div className="absolute z-50 pointer-events-none" style={{ left: hoveredScreenPos.x + 50, top: hoveredScreenPos.y - 30 }}>
                         <NodeTooltip node={hoveredNode} edges={participantEdges} currentUserId="me" />

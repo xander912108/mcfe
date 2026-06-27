@@ -11,6 +11,8 @@ interface CirclesTopologyProps {
   onNodeHover: (node: GraphNode | null) => void;
   onNodeClick: (node: GraphNode) => void;
   onRingClick?: (ringIndex: number) => void;
+  onRingHover?: (ringIndex: number | null) => void;
+  onRingHoverScreenPos?: (pos: { x: number; y: number } | null) => void;
   onHoverScreenPos?: (pos: { x: number; y: number } | null) => void;
   highlightNodeId?: string | null;
   highlightNodeIds?: Set<string> | null;
@@ -75,7 +77,7 @@ function getNodeRadius(contributionLevel: number): number {
 }
 
 export function CirclesTopology({
-  centerNode, nodes, edges, onNodeHover, onNodeClick, onHoverScreenPos,
+  centerNode, nodes, edges, onNodeHover, onNodeClick, onRingClick, onHoverScreenPos, onRingHover, onRingHoverScreenPos,
   highlightNodeId, highlightNodeIds, dimOpacity = 0.2, width, height,
   darkMode = true, camera: externalCamera,
 }: CirclesTopologyProps) {
@@ -83,6 +85,7 @@ export function CirclesTopology({
   const nodesRef = useRef<Map<string, RenderNode>>(new Map());
   const animRef = useRef<number>(0);
   const hoveredRef = useRef<string | null>(null);
+  const hoveredRingRef = useRef<number | null>(null);
   const ringNodesRef = useRef<string[][]>([[], [], [], [], []]);
   const adaptiveRingRadiiRef = useRef<number[]>([]);
 
@@ -255,7 +258,7 @@ export function CirclesTopology({
         ctx.strokeStyle = cfg.color + '30';
         ctx.lineWidth = 0.5;
         ctx.beginPath();
-        ctx.roundRect(labelX - labelW - 6, labelY - 9, labelW + 20, 18, 4);
+        ctx.roundRect(labelX - labelW - 6, labelY - 9, labelW + 14, 18, 4);
         ctx.fill();
         ctx.stroke();
         // Text
@@ -267,7 +270,8 @@ export function CirclesTopology({
         if (nodeCount > 0) {
           ctx.fillStyle = cfg.color;
           ctx.font = 'bold 9px Inter, system-ui, sans-serif';
-          ctx.fillText(String(nodeCount), labelX + 16, labelY);
+          ctx.textAlign = 'left';
+          ctx.fillText(String(nodeCount), labelX + 8, labelY);
         }
       });
 
@@ -412,6 +416,17 @@ export function CirclesTopology({
       const d = Math.hypot(node.x - world.x, node.y - world.y);
       if (d < node.radius + 8 && d < minDist) { minDist = d; nearest = node.id; }
     });
+    const adaptiveRadii = adaptiveRingRadiiRef.current.length === RING_CONFIG.length
+      ? adaptiveRingRadiiRef.current
+      : ringRadii;
+    let ringHover: number | null = null;
+    if (!nearest) {
+      const distFromCenter = Math.hypot(world.x - cx, world.y - cy);
+      adaptiveRadii.forEach((radius, index) => {
+        if (Math.abs(distFromCenter - radius) <= 14) ringHover = index;
+      });
+    }
+
     if (nearest !== hoveredRef.current) {
       hoveredRef.current = nearest;
       const node = nearest ? nodesRef.current.get(nearest) ?? null : null;
@@ -425,9 +440,23 @@ export function CirclesTopology({
       } else {
         onHoverScreenPos?.(null);
       }
-      canvas.style.cursor = nearest ? 'pointer' : 'grab';
     }
-  }, [onNodeHover, onHoverScreenPos, cam, getWorldPos, width, height]);
+    if (ringHover !== hoveredRingRef.current) {
+      hoveredRingRef.current = ringHover;
+      onRingHover?.(ringHover);
+      if (ringHover !== null) {
+        const camState = cam.cameraRef.current;
+        const radius = adaptiveRadii[ringHover];
+        onRingHoverScreenPos?.({
+          x: (cx - radius - width / 2) * camState.zoom + width / 2 + camState.x,
+          y: (cy - 4 - height / 2) * camState.zoom + height / 2 + camState.y,
+        });
+      } else {
+        onRingHoverScreenPos?.(null);
+      }
+    }
+    canvas.style.cursor = nearest || ringHover !== null ? 'pointer' : 'grab';
+  }, [onNodeHover, onHoverScreenPos, onRingHover, onRingHoverScreenPos, cam, getWorldPos, width, height, ringRadii, cx, cy]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     cam.startPan(e.clientX, e.clientY);
@@ -448,8 +477,12 @@ export function CirclesTopology({
     const found = Array.from(nodesRef.current.values()).find((n) =>
       Math.hypot(n.x - world.x, n.y - world.y) < n.radius + 8
     );
-    if (found && found.id !== centerNode.id) onNodeClick(found);
-  }, [onNodeClick, cam, getWorldPos, centerNode.id]);
+    if (found && found.id !== centerNode.id) { onNodeClick(found); return; }
+    const adaptiveRadii = adaptiveRingRadiiRef.current.length === RING_CONFIG.length ? adaptiveRingRadiiRef.current : ringRadii;
+    const distFromCenter = Math.hypot(world.x - cx, world.y - cy);
+    const ringIndex = adaptiveRadii.findIndex((radius) => Math.abs(distFromCenter - radius) <= 14);
+    if (ringIndex >= 0) onRingClick?.(ringIndex);
+  }, [onNodeClick, onRingClick, cam, getWorldPos, centerNode.id, ringRadii, cx, cy]);
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
     cam.handleWheel(e, canvasRef.current);

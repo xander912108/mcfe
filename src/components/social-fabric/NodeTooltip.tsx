@@ -18,7 +18,7 @@ export function NodeTooltip({ node, edges, currentUserId }: NodeTooltipProps) {
 
   return (
     <div className="absolute pointer-events-none z-50 animate-in fade-in duration-150">
-      <div className="bg-[var(--bg-card)]/95 backdrop-blur-xl text-white rounded-xl px-4 py-3.5 shadow-2xl shadow-amber-500/10 border border-[var(--border-color)] max-w-xs">
+      <div className="bg-[var(--bg-card)]/95 backdrop-blur-xl text-white rounded-xl px-4 py-3.5 shadow-2xl shadow-indigo-500/10 border max-w-xs" style={{ borderColor: 'rgba(201,169,110,0.24)', boxShadow: '0 18px 45px rgba(0,0,0,0.28), 0 0 0 1px rgba(201,169,110,0.08), 0 0 28px rgba(99,102,241,0.10)' }}>
         <div className="flex items-center gap-2.5 mb-2">
           <div
             className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border shrink-0 ${
@@ -68,7 +68,7 @@ export function NodeTooltip({ node, edges, currentUserId }: NodeTooltipProps) {
         </div>
 
         {/* Arrow */}
-        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[var(--bg-card)] rotate-45 border-r border-b border-[var(--border-color)]" />
+        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[var(--bg-card)] rotate-45 border-r border-b" style={{ borderColor: 'rgba(201,169,110,0.24)' }} />
       </div>
     </div>
   );
