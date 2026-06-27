@@ -10,7 +10,8 @@ createRoot(document.getElementById('root')!).render(
     <HashRouter>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/community" element={<CommunityLanding />} />
+        <Route path="/community" element={<App communityFeedPage />} />
+        <Route path="/community/about" element={<CommunityLanding />} />
         <Route path="/connections" element={<App connectionsPage />} />
         <Route path="/my-path" element={<App myPathPage />} />
         <Route path="/leader" element={<App leaderMode />} />
