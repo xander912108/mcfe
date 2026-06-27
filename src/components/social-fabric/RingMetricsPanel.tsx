@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronUp, ChevronDown, Sparkles } from 'lucide-react';
 import type { GraphEdge } from '@/data/graphData';
 
 interface RingMetricsPanelProps {
@@ -72,119 +72,74 @@ function getBalanceAdvice(m: RingMetrics): string {
 }
 
 const METRIC_CONFIG = [
-  { key: 'opora', label: 'Опоры', color: '#fbbf24' },
-  { key: 'blizkie', label: 'Близкие', color: '#818cf8' },
-  { key: 'kollegi', label: 'Коллеги', color: '#2dd4bf' },
-  { key: 'znakomye', label: 'Знакомые', color: '#94a3b8' },
-  { key: 'potencial', label: 'Потенц.', color: '#64748b' },
+  { key: 'opora', shortLabel: 'Опоры', color: '#C9A96E' },
+  { key: 'blizkie', shortLabel: 'Близкие', color: '#B89CC0' },
+  { key: 'kollegi', shortLabel: 'Коллеги', color: '#6B9E7C' },
+  { key: 'znakomye', shortLabel: 'Знакомые', color: '#9A9895' },
+  { key: 'potencial', shortLabel: 'Потенц.', color: '#787673' },
 ] as const;
 
 export function RingMetricsPanel({ edges }: RingMetricsPanelProps) {
-  const [collapsed, setCollapsed] = useState(true);
-  const [position, setPosition] = useState({ x: 0, y: 16 }); // y=16px from top
-  const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0 });
-  const panelRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
 
   const m = computeMetrics(edges);
   const advice = getBalanceAdvice(m);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) return; // Don't drag on button
-    setIsDragging(true);
-    dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      origX: position.x,
-      origY: position.y,
-    };
-  }, [position]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-    setPosition({
-      x: dragRef.current.origX + dx,
-      y: Math.max(0, dragRef.current.origY + dy),
-    });
-  }, [isDragging]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
   return (
-    <div
-      className="absolute z-30 pointer-events-none"
-      style={{
-        left: 16,
-        top: 0,
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        cursor: isDragging ? 'grabbing' : 'grab',
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      <div
-        ref={panelRef}
-        className="rounded-xl pointer-events-auto select-none"
-        style={{
-          background: 'var(--bg-card)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.05)',
-          boxShadow: 'var(--card-shadow)',
-          padding: collapsed ? '5px 12px' : '10px 16px',
-          minWidth: collapsed ? 'auto' : '360px',
-          transition: isDragging ? 'none' : 'padding 0.25s ease, min-width 0.25s ease',
-        }}
-        onMouseDown={handleMouseDown}
-      >
-        {/* Header + toggle */}
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium whitespace-nowrap">
-            Баланс связей
-          </span>
+    <div className="absolute top-3 left-1/2 z-30 w-[min(760px,calc(100%-32px))] -translate-x-1/2 pointer-events-none transition-all duration-300">
+      <div className="mx-auto flex w-fit max-w-full flex-col items-center gap-1.5">
+        <div
+          className="pointer-events-auto flex max-w-full items-center gap-1.5 overflow-hidden rounded-2xl border px-1.5 py-1 shadow-[0_18px_45px_rgba(56,48,34,0.10)] backdrop-blur-2xl"
+          style={{
+            background: 'linear-gradient(180deg, rgba(255,252,246,0.86), rgba(241,236,226,0.72))',
+            borderColor: 'rgba(201,169,110,0.18)',
+          }}
+        >
           <button
-            onClick={(e) => { e.stopPropagation(); setCollapsed(!collapsed); }}
-            className="p-0.5 rounded hover:bg-white/5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors pointer-events-auto"
+            onClick={() => setExpanded((value) => !value)}
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-[10px] font-medium whitespace-nowrap transition-all duration-200 hover:translate-y-[-1px]"
+            style={{
+              background: expanded ? 'rgba(201,169,110,0.16)' : 'rgba(255,255,255,0.58)',
+              borderColor: expanded ? 'rgba(201,169,110,0.26)' : 'rgba(201,169,110,0.14)',
+              color: expanded ? '#A37D33' : '#B99A5B',
+              boxShadow: expanded ? '0 8px 18px rgba(201,169,110,0.12)' : 'none',
+            }}
+            title={expanded ? 'Скрыть пояснение' : 'Показать пояснение'}
           >
-            {collapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+            <span>Баланс связей</span>
+            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
           </button>
-        </div>
 
-        {/* Expanded: metrics row + advice */}
-        {!collapsed && (
-          <>
-            <div className="mt-2 flex items-center gap-3 flex-wrap">
-              {METRIC_CONFIG.map((cfg) => (
-                <div key={cfg.key} className="flex items-center gap-1">
-                  <span className="text-sm font-bold" style={{ color: cfg.color }}>
-                    {m[cfg.key as keyof RingMetrics]}
-                  </span>
-                  <span className="text-[10px] text-[var(--text-muted)]">{cfg.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-              <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-                {advice}
-              </p>
-            </div>
-          </>
-        )}
-
-        {/* Collapsed: mini indicator */}
-        {collapsed && (
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {METRIC_CONFIG.map((cfg) => (
-              <span key={cfg.key} className="text-[10px] font-medium" style={{ color: cfg.color }}>
-                {m[cfg.key as keyof RingMetrics]}
+              <span
+                key={cfg.key}
+                className="inline-flex shrink-0 items-center gap-1 rounded-xl border px-2.5 py-1.5 text-[10px] font-medium whitespace-nowrap"
+                style={{
+                  color: cfg.color,
+                  background: `${cfg.color}14`,
+                  borderColor: `${cfg.color}36`,
+                }}
+              >
+                <strong className="text-[11px] font-semibold">{m[cfg.key as keyof RingMetrics]}</strong>
+                <span className="text-[#77716A]">{cfg.shortLabel}</span>
               </span>
             ))}
+          </div>
+        </div>
+
+        {expanded && (
+          <div
+            className="pointer-events-auto flex w-fit max-w-[min(620px,100%)] items-start gap-2 rounded-2xl border px-3.5 py-2 shadow-[0_16px_38px_rgba(56,48,34,0.08)] backdrop-blur-2xl animate-in fade-in-0 slide-in-from-top-1 duration-200"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255,252,246,0.84), rgba(241,236,226,0.70))',
+              borderColor: 'rgba(201,169,110,0.16)',
+            }}
+          >
+            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#C9A96E]" />
+            <p className="text-[11px] leading-relaxed text-[#6F6960]">
+              {advice}
+            </p>
           </div>
         )}
       </div>
