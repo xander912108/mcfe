@@ -547,7 +547,7 @@ export function ClustersTopology({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [nodes, edges, width, height, cam, darkMode, hoveredCluster]);
+  }, [nodes, edges, width, height, cam, darkMode, hoveredCluster, highlightNodeIds, dimOpacity]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

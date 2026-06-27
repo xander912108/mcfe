@@ -761,7 +761,7 @@ export function PremiumStarGraph({
 
     animRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animRef.current);
-  }, [centerNode, edges, width, height, mode, highlightNodeId, cameraRef, centerLabel, connectedNodes, dimOpacity, highlightNodeIds, COLORS]);
+  }, [centerNode, edges, width, height, mode, highlightNodeId, cameraRef, centerLabel, connectedNodes, dimOpacity, highlightNodeIds, COLORS, darkMode]);
 
   // Draw signal glow+core (stroke drawn separately AFTER circle border)
   // Convert screen coords to world coords (with camera)
