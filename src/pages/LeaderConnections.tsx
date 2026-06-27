@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { CommunityFabricDrawer } from '../components/social-fabric/CommunityFabricDrawer';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router';
 import {
   Users, AlertTriangle, Zap,
@@ -194,6 +195,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [focusMode]);
+
+  const slideOverRoot = typeof document === 'undefined' ? null : document.body;
 
   /* ── render ────────────────────────────────────────────── */
   return (
@@ -470,7 +473,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
 
       {/* ═══ SLIDE-OVER PANELS ═══ */}
       {/* Selected cluster */}
-      {selectedCluster && topology === 'clusters' && (
+      {slideOverRoot && selectedCluster && topology === 'clusters' && createPortal(
         <>
           <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedCluster(null)} />
           <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
@@ -519,11 +522,12 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
               );
             })()}
           </div>
-        </>
+        </>,
+        slideOverRoot
       )}
 
       {/* Selected node */}
-      {selectedNode && (() => {
+      {slideOverRoot && selectedNode && (() => {
         const cMap = findClusters(filteredNodes, filteredEdges);
         const bridges = findBridges(filteredEdges, cMap);
         const cid = cMap.get(selectedNode.id) ?? -1;
@@ -532,7 +536,7 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
         const isBridge = bridges.has(selectedNode.id);
         const centrality = computeCentrality(selectedNode.id, filteredEdges);
         const cRole = cid === -1 ? ('isolated' as const) : isBridge ? ('bridge' as const) : centrality > 0.5 ? ('core' as const) : ('periphery' as const);
-        return (
+        return createPortal(
           <>
             <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={() => setSelectedNode(null)} />
             <div className="fixed inset-y-0 right-0 z-[70] w-96 overflow-y-auto" style={{ background: 'var(--bg-card)', borderLeft: '1px solid var(--border-color)' }}>
@@ -556,7 +560,8 @@ export default function LeaderConnections({ darkMode = true }: { darkMode?: bool
                 })()}
               />
             </div>
-          </>
+          </>,
+          slideOverRoot
         );
       })()}
     </div>
