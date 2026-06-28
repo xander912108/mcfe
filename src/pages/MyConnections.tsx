@@ -256,7 +256,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     <div className={`${focusMode ? 'h-screen' : 'min-h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
-        <div className="shrink-0 px-5 pt-4 pb-3 lg:pr-[305px]">
+        <div className="shrink-0 pt-4 pb-3 lg:pr-[260px]">
           <PageHero
             breadcrumbs={['IT технологии', 'Мои связи']}
             title="Мои связи"
@@ -267,7 +267,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 ${focusMode ? 'h-full overflow-hidden p-4' : 'overflow-visible px-5 pb-4'}`}>
+      <div className={`flex-1 flex min-h-0 ${focusMode ? 'h-full overflow-hidden p-4 gap-4' : 'overflow-visible pb-4 gap-5'}`}>
         {/* Left: Canvas area */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Toolbar: tabs + filter + focus + search */}
