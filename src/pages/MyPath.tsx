@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { ArrowRight, Check, HandHeart, Heart, RefreshCw, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, Check, HandHeart, Heart, Sparkles, Target } from 'lucide-react';
+import { AdvisorSidebar } from '@/components/advisor/AdvisorSidebar';
+import { PageFrame } from '@/components/layout/PageFrame';
+import { PageHero } from '@/components/layout/PageHero';
+import { SummaryCards } from '@/components/layout/SummaryCards';
 import {
   Dialog,
   DialogContent,
@@ -62,31 +66,27 @@ export default function MyPath() {
   const showStub = (message: string) => showToast(message, 'info');
 
   return (
-    <main className="flex-1 min-w-0 space-y-5 pb-8">
-      <section className="rounded-3xl border bg-[var(--bg-card)] p-5 md:p-7 shadow-[0_18px_50px_rgba(0,0,0,0.06)]" style={{ borderColor: 'var(--border-color)' }}>
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]">
-              <span>IT технологии</span><span className="text-[var(--gold)]">›</span><span className="text-[var(--text-secondary)]">Мой путь</span>
-            </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Мой путь</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">Здесь видно, где вы сейчас в сообществе, какой следующий шаг лучше сделать и как рядом появляются люди, поддержка и ваш Вклад.</p>
+    <PageFrame
+      sidebar={(
+        <AdvisorSidebar title="Советник пути">
+          <p>Сейчас лучше выбрать один маленький шаг и не пытаться закрыть весь маршрут сразу.</p>
+          <div className="rounded-xl border p-3" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--hover-bg)' }}>
+            <p className="font-semibold text-[var(--text-primary)]">Мягкий следующий шаг</p>
+            <p className="mt-1">Подготовьте один экран для разбора и короткий вопрос к нему.</p>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)]" style={{ borderColor: 'var(--border-color)' }}>
-            Обновлено 4 минуты назад · <RefreshCw className="h-3.5 w-3.5" /> Обновить
-          </button>
-        </div>
-      </section>
+          <button onClick={() => setHelpOpen(true)} className="w-full rounded-xl border px-3 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--hover-bg)]" style={{ borderColor: 'var(--border-color)' }}>Попросить помощь</button>
+        </AdvisorSidebar>
+      )}
+    >
+      <PageHero
+        breadcrumbs={['IT технологии', 'Мой путь']}
+        title="Мой путь"
+        description="Здесь видно, где вы сейчас в сообществе, какой следующий шаг лучше сделать и как рядом появляются люди, поддержка и ваш Вклад."
+        updatedLabel="Обновлено 4 минуты назад"
+        onRefresh={() => showToast('Данные пути обновлены.', 'info')}
+      />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {summaryCards.map((card) => (
-          <article key={card.label} className="rounded-2xl border bg-[var(--bg-card)] p-4" style={{ borderColor: 'var(--border-color)' }}>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">{card.label}</p>
-            <h2 className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{card.value}</h2>
-            <p className="mt-2 text-sm leading-5 text-[var(--text-secondary)]">{card.text}</p>
-          </article>
-        ))}
-      </section>
+      <SummaryCards cards={summaryCards} />
 
       <section className="rounded-[28px] border p-5 md:p-7" style={{ borderColor: 'rgba(201,169,110,0.35)', background: 'linear-gradient(135deg, rgba(201,169,110,0.16), var(--bg-card) 42%, var(--bg-card))' }}>
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -154,6 +154,6 @@ export default function MyPath() {
           <DialogFooter><SoftButton variant="quiet" onClick={() => setGoalOpen(false)}>Оставить как есть</SoftButton><SoftButton variant="primary" onClick={() => { setGoalOpen(false); showToast('Цель можно будет отредактировать в следующей итерации.', 'info'); }}>Уточнить позже</SoftButton></DialogFooter>
         </DialogContent>
       </Dialog>
-    </main>
+    </PageFrame>
   );
 }
