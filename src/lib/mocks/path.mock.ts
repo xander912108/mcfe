@@ -1,0 +1,24 @@
+import type { PathProgress, PathStep, DailyStep } from '../types';
+import { mockId } from './helpers';
+
+export const pathProgressMap: Record<string, PathProgress> = {
+  [mockId('u', 13)]: { user_id: mockId('u', 13), stage: 'onboarding', stage_label: 'Первые шаги', stage_description: 'Вы только начали. Давайте разберёмся вместе.', goal_title: 'Провести первую встречу', goal_description: 'Познакомиться с сообществом и найти свою роль.', first_connection: { exists: false, user_id: null, name: null, avatar_url: null }, contribution_count: 0, contribution_goal: 3, completed_at: null },
+  [mockId('u', 8)]: { user_id: mockId('u', 8), stage: 'active', stage_label: 'Активный участник', stage_description: 'Вы в потоке! Продолжайте расти.', goal_title: 'Стать ментором', goal_description: 'Помогите 3 новичкам пройти онбординг.', first_connection: { exists: true, user_id: mockId('u', 1), name: 'Александр Воронов', avatar_url: null }, contribution_count: 7, contribution_goal: 10, completed_at: null },
+  [mockId('u', 1)]: { user_id: mockId('u', 1), stage: 'leader', stage_label: 'Лидер', stage_description: 'Вы ведёте сообщество. Ваша миссия — растить других лидеров.', goal_title: 'Вырастить 2 новых менторов', goal_description: 'Найдите и подготовьте участников, готовых взять на себя менторство.', first_connection: { exists: true, user_id: mockId('u', 4), name: 'Елена Петрова', avatar_url: null }, contribution_count: 42, contribution_goal: 50, completed_at: null },
+};
+
+export const pathSteps: PathStep[] = [
+  { id: 'step_1', label: 'Регистрация', description: 'Создание профиля', status: 'completed', icon_name: 'UserPlus', order: 1 },
+  { id: 'step_2', label: 'Цель', description: 'Определение цели в сообществе', status: 'completed', icon_name: 'Target', order: 2 },
+  { id: 'step_3', label: 'Первый шаг', description: 'Первое действие в сообществе', status: 'active', icon_name: 'Footprints', order: 3 },
+  { id: 'step_4', label: 'Первая связь', description: 'Знакомство с наставником или участником', status: 'locked', icon_name: 'Handshake', order: 4 },
+  { id: 'step_5', label: 'Первый вклад', description: 'Помощь другому участнику', status: 'locked', icon_name: 'Heart', order: 5 },
+  { id: 'step_6', label: 'Разбор', description: 'Рефлексия и оценка прогресса', status: 'locked', icon_name: 'BarChart3', order: 6 },
+  { id: 'step_7', label: 'Менторство', description: 'Вы становитесь наставником', status: 'locked', icon_name: 'GraduationCap', order: 7 },
+  { id: 'step_8', label: 'Лидерство', description: 'Вы ведёте своё направление', status: 'locked', icon_name: 'Crown', order: 8 },
+];
+
+export const dailySteps: Record<string, DailyStep> = {
+  [mockId('u', 13)]: { id: 'ds_1', title: 'Первый шаг на сегодня', description: 'Выберите один экран в Консоли Лидера и изучите его 10 минут.', benefits: ['Вы поймёте, как устроено сообщество изнутри', 'Это займёт всего 10 минут', 'Можно прийти без подготовки'], checklist: [{ id: 'chk_1', text: 'Открыть Консоль Лидера', done: false }, { id: 'chk_2', text: 'Выбрать один раздел', done: false }, { id: 'chk_3', text: 'Изучить 10 минут', done: false }], cta_label: 'Открыть Консоль Лидера', cta_href: '/leader' },
+  [mockId('u', 8)]: { id: 'ds_2', title: 'Шаг на сегодня', description: 'Напишите отзыв о встрече, которую вы провели на этой неделе.', benefits: ['Участники увидят, что их мнение важно', 'Это занимает 5 минут'], checklist: [{ id: 'chk_4', text: 'Открыть список встреч', done: true }, { id: 'chk_5', text: 'Выбрать последнюю встречу', done: false }, { id: 'chk_6', text: 'Написать 2-3 предложения', done: false }], cta_label: 'Написать отзыв', cta_href: '/meetings' },
+};
