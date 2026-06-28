@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, BookOpen, Check, ChevronDown, HandHeart, Layers, RefreshCw, Send, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronDown, HandHeart, Layers, Send, Sparkles, Users } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/ToastContext';
+import { PageHero } from '@/components/layout/PageHero';
 
 type LearningState =
   | 'no_track'
@@ -115,20 +116,19 @@ export default function LearningPage() {
 
   return (
     <main className="flex-1 min-w-0 space-y-5 pb-8">
-      <section className="rounded-3xl border bg-[var(--bg-card)] p-5 shadow-[var(--card-shadow)] md:p-7" style={{ borderColor: 'var(--border-color)' }}>
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]"><span>IT технологии</span><span className="text-[var(--gold)]">›</span><span className="text-[var(--text-secondary)]">Обучение</span></div>
-            <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Обучение</h1>
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-[var(--text-secondary)]">Треки, потоки, материалы и практика, которые помогают двигаться по цели не в одиночку: с поддержкой, вопросами, разборами и людьми рядом.</p>
-          </div>
-          <button className="inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)]" style={{ borderColor: 'var(--border-color)' }}>Обновлено 5 минут назад · <RefreshCw className="h-3.5 w-3.5" /> Обновить</button>
-        </div>
-      </section>
+      <div className="space-y-5 lg:mr-[260px]">
+        <PageHero
+          breadcrumbs={['IT технологии', 'Обучение']}
+          title="Обучение"
+          description="Треки, потоки, материалы и практика, которые помогают двигаться по цели не в одиночку: с поддержкой, вопросами, разборами и людьми рядом."
+          updatedLabel="Обновлено 5 минут назад"
+          onRefresh={() => showToast('Данные обучения обновлены.', 'info')}
+        />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((card) => <article key={card.label} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">{card.label}</p><h2 className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{card.value}</h2><p className="mt-2 text-sm text-[var(--text-secondary)]">{card.text}</p></article>)}
-      </section>
+        </section>
+      </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
         <div className="space-y-5">
@@ -149,7 +149,7 @@ export default function LearningPage() {
           <section className="rounded-3xl border bg-[var(--bg-card)] p-5" style={{ borderColor: 'var(--border-color)' }}><h2 className="text-xl font-semibold text-[var(--text-primary)]">Материалы к текущему шагу</h2><div className="mt-4 flex flex-wrap gap-2">{materialFilters.map((filter) => <button key={filter} onClick={() => setMaterialFilter(filter)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${materialFilter === filter ? 'border-transparent bg-[var(--gold)] text-white' : 'border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]'}`}>{filter}</button>)}</div><div className="mt-4 grid gap-3 md:grid-cols-2">{materials.map((item) => <article key={item.title} className="rounded-2xl border p-4" style={{ borderColor: 'var(--border-color)' }}><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--gold)]">{item.type}</p><h3 className="mt-2 font-semibold text-[var(--text-primary)]">{item.title}</h3><p className="mt-2 text-sm text-[var(--text-secondary)]">Связано с шагом: {activeTrack.currentStep}.</p></article>)}</div></section>
         </div>
 
-        <aside className="space-y-4 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto right-scrollbar">
+        <aside className="space-y-4 lg:sticky lg:top-[88px]">
           <section className="rounded-3xl border bg-[var(--bg-card)] p-5" style={{ borderColor: 'var(--border-color)' }}><h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)]"><HandHeart className="h-5 w-5 text-[var(--gold)]" /> Если застряли</h2><p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">Можно попросить помощь по текущему шагу. Вопрос не обязан быть идеальным — достаточно описать, где стало непонятно.</p><div className="mt-4 flex flex-col gap-2"><SoftButton variant="primary" onClick={() => setModal('ask-help')}>Попросить помощь</SoftButton><SoftButton variant="quiet">Найти человека рядом</SoftButton></div></section>
           <section className="rounded-3xl border bg-[var(--bg-card)] p-5" style={{ borderColor: 'var(--border-color)' }}><h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)]"><Users className="h-5 w-5 text-[var(--gold)]" /> Люди рядом</h2><div className="mt-4 space-y-3">{[{ name: 'Анна Морозова', text: 'Проходила похожий frontend-путь.', action: 'Попросить совет' }, { name: 'Сергей Волков', text: 'Помощник на старте, помогает с первыми шагами.', action: 'Связаться' }].map((person) => <article key={person.name} className="rounded-2xl border p-4" style={{ borderColor: 'var(--border-color)' }}><h3 className="font-semibold text-[var(--text-primary)]">{person.name}</h3><p className="mt-2 text-sm text-[var(--text-secondary)]">{person.text}</p><div className="mt-3"><SoftButton variant="quiet" onClick={() => setModal('ask-help')}>{person.action}</SoftButton></div></article>)}</div></section>
           <section className="rounded-3xl border bg-[var(--bg-card)] p-5" style={{ borderColor: 'var(--border-color)' }}><h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)]"><BookOpen className="h-5 w-5 text-[var(--gold)]" /> Ближайший разбор</h2><h3 className="mt-3 font-semibold text-[var(--text-primary)]">Разбор pet-проектов</h3><p className="mt-1 text-sm text-[var(--gold)]">Завтра · 19:00</p><p className="mt-2 text-sm text-[var(--text-secondary)]">Можно прийти просто послушать.</p><div className="mt-4"><SoftButton variant="quiet">Посмотреть встречу</SoftButton></div></section>

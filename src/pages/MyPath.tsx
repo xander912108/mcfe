@@ -18,7 +18,7 @@ const summaryCards = [
   { label: 'Этап', value: 'Движусь', text: 'Вы уже вошли в ритм: есть цель, первый шаг и первые связи.' },
   { label: 'Цель', value: 'Frontend pet-проект', text: 'Цель можно уточнить в любой момент.' },
   { label: 'Первая связь', value: 'Появилась', text: 'Есть живой отклик от участника рядом.' },
-  { label: 'Вклад', value: '3 полезных действия', text: 'Ваши ответы, благодарности и помощь начинают складываться в полезный след.' },
+  { label: 'Вклад', value: '3 полезных действия', text: 'Ваш вклад уже заметен рядом.' },
 ];
 
 const pathStages = ['Новичок', 'Принятый', 'Движущийся', 'Получающий поддержку', 'Помогающий', 'Признанный', 'Носитель ценности'];
@@ -77,6 +77,7 @@ export default function MyPath() {
           <button onClick={() => setHelpOpen(true)} className="w-full rounded-xl border px-3 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--hover-bg)]" style={{ borderColor: 'var(--border-color)' }}>Попросить помощь</button>
         </AdvisorSidebar>
       )}
+      sidebarClassName="lg:pt-[450px]"
     >
       <PageHero
         breadcrumbs={['IT технологии', 'Мой путь']}
