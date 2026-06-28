@@ -1,0 +1,2 @@
+import { Link } from 'react-router-dom';
+export default function NotFoundPage() { return <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center"><h1 className="text-4xl font-bold text-foreground">Страница не найдена</h1><p className="mt-3 max-w-md text-muted-foreground">Похоже, этот маршрут пока не ведёт к живому действию.</p><Link to="/my-path" className="mt-6 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-accent-foreground">Вернуться к пути</Link></div>; }
