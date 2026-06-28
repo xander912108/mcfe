@@ -1,2 +1,0 @@
-import { Link } from 'react-router-dom';
-export default function LoginPage() { return <div className="space-y-6"><div><h2 className="text-2xl font-semibold text-foreground">Вход</h2><p className="mt-2 text-sm text-muted-foreground">Мягкое возвращение в пространство сообщества.</p></div><button className="w-full rounded-xl bg-accent px-4 py-3 text-sm font-medium text-accent-foreground">Продолжить</button><p className="text-center text-sm text-muted-foreground">Нет аккаунта? <Link to="/register" className="text-accent hover:underline">Создать профиль</Link></p></div>; }

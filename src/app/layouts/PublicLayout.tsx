@@ -1,5 +1,0 @@
-import { Link, Outlet } from 'react-router-dom';
-
-export default function PublicLayout() {
-  return <div className="min-h-screen bg-background"><header className="border-b border-border"><div className="container mx-auto flex items-center justify-between px-4 py-4"><Link to="/" className="flex items-center gap-2"><div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent"><span className="text-sm font-bold text-accent-foreground">M</span></div><span className="font-semibold text-foreground">Mentori Club</span></Link><nav className="flex items-center gap-6"><Link to="/about" className="text-sm text-muted-foreground transition-colors hover:text-foreground">О проекте</Link><Link to="/login" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90">Войти</Link></nav></div></header><main><Outlet /></main><footer className="mt-20 border-t border-border"><div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">© 2026 Mentori Club. Все права защищены.</div></footer></div>;
-}

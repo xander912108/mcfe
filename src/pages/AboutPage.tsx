@@ -1,1 +1,0 @@
-export default function AboutPage() { return <section className="container mx-auto max-w-4xl px-4 py-16"><h1 className="text-4xl font-bold text-foreground">О Mentori Club</h1><p className="mt-4 text-lg text-muted-foreground">Премиальная система поддержки образовательных сообществ: путь, связи, вклад и бережная роль каждого участника.</p></section>; }
