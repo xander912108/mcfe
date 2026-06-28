@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Calendar, Check, Clock, HandHeart, MessageCircleQuestion, RefreshCw, Send, Sparkles, Users } from 'lucide-react';
+import { Calendar, Check, Clock, HandHeart, MessageCircleQuestion, Send, Sparkles, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/ToastContext';
+import { PageHero } from '@/components/layout/PageHero';
 
 type MeetingType = 'welcome' | 'review' | 'qa' | 'office_hours' | 'live' | 'ritual';
 
@@ -84,16 +85,13 @@ export default function MeetingsPage() {
 
   return (
     <main className="flex-1 min-w-0 space-y-5 pb-8">
-      <section className="rounded-3xl border bg-[var(--bg-card)] p-5 shadow-[var(--card-shadow)] md:p-7" style={{ borderColor: 'var(--border-color)' }}>
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]"><span>IT технологии</span><span className="text-[var(--gold)]">›</span><span className="text-[var(--text-secondary)]">Встречи</span></div>
-            <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Встречи</h1>
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-[var(--text-secondary)]">Живые форматы сообщества: welcome-встречи, эфиры, Q&A, разборы, office hours и ритуалы, где можно получить поддержку, показать работу или просто послушать.</p>
-          </div>
-          <button className="inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)]" style={{ borderColor: 'var(--border-color)' }}>Обновлено 5 минут назад · <RefreshCw className="h-3.5 w-3.5" /> Обновить</button>
-        </div>
-      </section>
+      <PageHero
+        breadcrumbs={['IT технологии', 'Встречи']}
+        title="Встречи"
+        description="Живые форматы сообщества: welcome-встречи, эфиры, Q&A, разборы, office hours и ритуалы, где можно получить поддержку, показать работу или просто послушать."
+        updatedLabel="Обновлено 5 минут назад"
+        onRefresh={() => showToast('Данные встреч обновлены.', 'info')}
+      />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((card) => <article key={card.label} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">{card.label}</p><h2 className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{card.value}</h2><p className="mt-2 text-sm text-[var(--text-secondary)]">{card.text}</p></article>)}
