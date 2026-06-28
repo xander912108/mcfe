@@ -99,7 +99,7 @@ export default function MeetingsPage() {
         {summaryCards.map((card) => <article key={card.label} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">{card.label}</p><h2 className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{card.value}</h2><p className="mt-2 text-sm text-[var(--text-secondary)]">{card.text}</p></article>)}
       </section>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
         <div className="space-y-5">
           <section className="rounded-[28px] border p-5 md:p-7" style={{ borderColor: 'rgba(201,169,110,0.42)', background: 'linear-gradient(135deg, rgba(201,169,110,0.18), var(--bg-card) 45%, var(--bg-card))' }}>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-[var(--gold)]"><Sparkles className="h-3.5 w-3.5" /> Можно прийти без выступления</div>
@@ -123,7 +123,7 @@ export default function MeetingsPage() {
           </section>
         </div>
 
-        <aside className="space-y-4 xl:sticky xl:top-[104px] xl:self-start">
+        <aside className="space-y-4 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto right-scrollbar">
           <SideCard icon={<Calendar className="h-5 w-5 text-[var(--gold)]" />} title="Подходит вашему шагу"><h3 className="font-semibold text-[var(--text-primary)]">Разбор pet-проектов</h3><p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">Вы готовите frontend pet-проект. На разборе можно показать один экран или просто послушать.</p><div className="mt-4"><SoftButton variant="quiet" onClick={() => openModal('details')}>Посмотреть</SoftButton></div></SideCard>
           <SideCard icon={<Clock className="h-5 w-5 text-[var(--gold)]" />} title="Можно без подготовки"><ul className="space-y-2 text-sm text-[var(--text-secondary)]"><li>Welcome-встреча</li><li>Эфир про первый проект</li><li>День помощи</li></ul><p className="mt-3 text-xs text-[var(--text-muted)]">На эти встречи можно прийти просто послушать.</p></SideCard>
           <SideCard icon={<Users className="h-5 w-5 text-[var(--gold)]" />} title="Для первой связи"><p className="text-sm leading-6 text-[var(--text-secondary)]">Если вы недавно вошли в сообщество, welcome-встреча и день помощи помогут быстрее получить первый живой отклик.</p><div className="mt-4"><SoftButton variant="quiet" onClick={() => setActiveFilter('Welcome')}>Найти встречу</SoftButton></div></SideCard>

@@ -224,7 +224,7 @@ export default function CommunityFeed() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-5">
         <div className="space-y-4">
           <section className="rounded-2xl p-4 md:p-5" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
             <button onClick={() => setNewMessageOpen(true)} className="w-full text-left rounded-2xl px-4 py-3 text-sm" style={{ color: 'var(--text-muted)', backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>Что хотите написать сообществу?</button>
@@ -276,7 +276,7 @@ export default function CommunityFeed() {
           })}
         </div>
 
-        <aside className="space-y-4 xl:sticky xl:top-[88px] xl:self-start">
+        <aside className="space-y-4 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto right-scrollbar">
           <SideCard title="Можно помочь" icon={<HandIcon />}> 
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Есть 2 вопроса, где ваш опыт может быть полезен.</p>
             <HelpRow name="Артём" text="первый API на Go" action="Ответить" onClick={() => setReplyTo(feedPosts[0])} />
