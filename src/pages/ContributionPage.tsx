@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Check, ChevronDown, HandHeart, Heart, MessageCircle, PauseCircle, RefreshCw, Send, Settings, Sparkles } from 'lucide-react';
+import { Check, ChevronDown, HandHeart, Heart, MessageCircle, PauseCircle, Send, Settings, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/ToastContext';
+import { PageHero } from '@/components/layout/PageHero';
 
 type ContributionState =
   | 'empty'
@@ -112,15 +113,19 @@ export default function ContributionPage() {
   };
 
   return <main className="flex-1 min-w-0 space-y-5">
-    <section className="rounded-3xl border bg-[var(--bg-card)] p-6 shadow-[var(--card-shadow)]" style={{ borderColor: 'var(--border-color)' }}>
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">Сообщество · Вклад</p><h1 className="mt-2 text-3xl font-bold text-[var(--text-primary)]">Вклад</h1><p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--text-secondary)]">Ваш полезный след в сообществе: ответы, благодарности, разборы, инсайты и помощь людям, которые помогли кому-то сделать следующий шаг.</p></div>
-        <button onClick={() => showToast('Данные обновлены.', 'info')} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--hover-bg)]" style={{ borderColor: 'var(--border-color)' }}><RefreshCw className="h-4 w-4" />Обновлено 4 минуты назад · Обновить</button>
-      </div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[
+    <div className="space-y-5 lg:mr-[260px]">
+      <PageHero
+        breadcrumbs={['IT технологии', 'Вклад']}
+        title="Вклад"
+        description="Ваш полезный след в сообществе: ответы, благодарности, разборы, инсайты и помощь людям, которые помогли кому-то сделать следующий шаг."
+        updatedLabel="Обновлено 4 минуты назад"
+        onRefresh={() => showToast('Данные обновлены.', 'info')}
+      />
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[
         ['Уровень', `${contributionMock.level} из 9`, 'Вы начинаете помогать другим'], ['Полезные действия', String(contributionMock.usefulActions), 'За последние 30 дней'], ['Благодарности', String(contributionMock.thanks), 'Польза подтверждена'], ['Можно помочь', `${contributionMock.opportunities} возможности`, 'Без обязательств']
-      ].map(([label, value, text]) => <div key={label} className="rounded-2xl border p-4" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--hover-bg)' }}><p className="text-xs text-[var(--text-muted)]">{label}</p><p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">{value}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{text}</p></div>)}</div>
-    </section>
+      ].map(([label, value, text]) => <article key={label} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}><p className="text-xs text-[var(--text-muted)]">{label}</p><p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">{value}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{text}</p></article>)}</section>
+    </div>
 
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
       <div className="space-y-5">
