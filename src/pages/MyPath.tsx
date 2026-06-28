@@ -77,7 +77,7 @@ export default function MyPath() {
           <button onClick={() => setHelpOpen(true)} className="w-full rounded-xl border px-3 py-2 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--hover-bg)]" style={{ borderColor: 'var(--border-color)' }}>Попросить помощь</button>
         </AdvisorSidebar>
       )}
-      sidebarClassName="lg:pt-[290px]"
+      sidebarClassName="lg:pt-[450px]"
     >
       <PageHero
         breadcrumbs={['IT технологии', 'Мой путь']}
