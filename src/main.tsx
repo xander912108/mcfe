@@ -1,5 +1,31 @@
-import { createRoot } from 'react-dom/client';
-import App from '@/App';
-import '@/index.css';
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { HashRouter, Routes, Route } from 'react-router-dom'
+import './index.css'
+import App from './App.tsx'
+import CommunityLanding from './CommunityLanding.tsx'
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/community" element={<App communityFeedPage />} />
+        <Route path="/community/about" element={<CommunityLanding />} />
+        <Route path="/connections" element={<App connectionsPage />} />
+        <Route path="/contribution" element={<App contributionPage />} />
+        <Route path="/insights" element={<App insightsPage />} />
+        <Route path="/learning" element={<App learningPage />} />
+        <Route path="/meetings" element={<App meetingsPage />} />
+        <Route path="/my-path" element={<App myPathPage />} />
+        <Route path="/leader" element={<App leaderMode />} />
+        <Route path="/leader/entry" element={<App leaderMode leaderTab="entry" />} />
+        <Route path="/leader/requests" element={<App leaderMode leaderTab="requests" />} />
+        <Route path="/leader/connections" element={<App leaderMode leaderTab="connections" />} />
+        <Route path="/leader/contribution" element={<App leaderMode leaderTab="contribution" />} />
+        <Route path="/leader/monetization" element={<App leaderMode leaderTab="monetization" />} />
+        <Route path="/leader/settings" element={<App leaderMode leaderTab="settings" />} />
+      </Routes>
+    </HashRouter>
+  </StrictMode>,
+)
