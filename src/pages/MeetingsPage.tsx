@@ -123,7 +123,7 @@ export default function MeetingsPage() {
           </section>
         </div>
 
-        <aside className="space-y-4 lg:sticky lg:top-[88px] lg:h-[calc(100vh-104px)] lg:overflow-y-auto right-scrollbar">
+        <aside className="space-y-4 lg:sticky lg:top-[88px]">
           <SideCard icon={<Calendar className="h-5 w-5 text-[var(--gold)]" />} title="Подходит вашему шагу"><h3 className="font-semibold text-[var(--text-primary)]">Разбор pet-проектов</h3><p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">Вы готовите frontend pet-проект. На разборе можно показать один экран или просто послушать.</p><div className="mt-4"><SoftButton variant="quiet" onClick={() => openModal('details')}>Посмотреть</SoftButton></div></SideCard>
           <SideCard icon={<Clock className="h-5 w-5 text-[var(--gold)]" />} title="Можно без подготовки"><ul className="space-y-2 text-sm text-[var(--text-secondary)]"><li>Welcome-встреча</li><li>Эфир про первый проект</li><li>День помощи</li></ul><p className="mt-3 text-xs text-[var(--text-muted)]">На эти встречи можно прийти просто послушать.</p></SideCard>
           <SideCard icon={<Users className="h-5 w-5 text-[var(--gold)]" />} title="Для первой связи"><p className="text-sm leading-6 text-[var(--text-secondary)]">Если вы недавно вошли в сообщество, welcome-встреча и день помощи помогут быстрее получить первый живой отклик.</p><div className="mt-4"><SoftButton variant="quiet" onClick={() => setActiveFilter('Welcome')}>Найти встречу</SoftButton></div></SideCard>
