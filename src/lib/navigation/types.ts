@@ -28,6 +28,12 @@ export interface ExistingRouteBinding {
   leaderTab?: 'main' | 'entry' | 'requests' | 'connections' | 'contribution' | 'monetization' | 'settings';
 }
 
+export type NavigationFeatureFlag =
+  | 'command_palette'
+  | 'insights_v2'
+  | 'leader_console_v2'
+  | 'navigation_config_v2';
+
 export interface NavigationItem {
   id: string;
   path: string;
@@ -39,6 +45,6 @@ export interface NavigationItem {
   binding: ExistingRouteBinding;
   badge?: NavigationBadge;
   shortcut?: string;
-  featureFlag?: string;
+  featureFlag?: NavigationFeatureFlag;
   preserveExistingRoute: true;
 }
