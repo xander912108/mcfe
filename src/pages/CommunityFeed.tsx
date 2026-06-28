@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { BookOpen, CheckCircle2, Heart, Lightbulb, MessageCircle, PenLine, Sparkles, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/ToastContext';
+import { PageHero } from '@/components/layout/PageHero';
 
 type FeedPostType =
   | 'question'
@@ -205,24 +206,24 @@ export default function CommunityFeed() {
 
   return (
     <main className="flex-1 min-w-0 space-y-5">
-      <section className="rounded-2xl p-5 md:p-7" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] mb-2" style={{ color: 'var(--text-muted)' }}>IT технологии · участник</p>
-            <h1 className="text-3xl md:text-4xl font-bold heading-accent" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--text-primary)' }}>Сообщество</h1>
-            <p className="mt-3 max-w-3xl text-sm md:text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>Живая лента сообщений участников: вопросы, шаги, разборы, благодарности и инсайты, которые помогают двигаться вместе.</p>
-          </div>
-          <button className="self-start px-4 py-2 rounded-xl text-sm font-medium" style={{ color: 'var(--gold)', border: '1px solid var(--border-color)', backgroundColor: 'var(--hover-bg)' }}>Обновлено 3 минуты назад · Обновить</button>
-        </div>
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mt-6">
-          {[['7 новых сообщений', 'За сегодня'], ['3 вопроса ждут отклика', 'Можно помочь'], ['4 благодарности', 'Польза замечена'], ['2 инсайта', 'Сохранены из обсуждений']].map(([value, label]) => (
-            <div key={value} className="rounded-2xl p-4" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-              <p className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{value}</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="space-y-5 lg:mr-[260px]">
+        <PageHero
+          breadcrumbs={['IT технологии', 'Сообщество']}
+          title="Сообщество"
+          description="Живая лента сообщений участников: вопросы, шаги, разборы, благодарности и инсайты, которые помогают двигаться вместе."
+          updatedLabel="Обновлено 3 минуты назад"
+          onRefresh={() => showToast('Лента сообщества обновлена.', 'info')}
+        />
+
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[['7 новых сообщений', 'За сегодня'], ['3 вопроса ждут отклика', 'Можно помочь'], ['4 благодарности', 'Польза замечена'], ['2 инсайта', 'Сохранены из обсуждений']].map(([value, label]) => (
+          <article key={value} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">{value}</h2>
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">{label}</p>
+          </article>
+        ))}
+        </section>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-5">
         <div className="space-y-4">
