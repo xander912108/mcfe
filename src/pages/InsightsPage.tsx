@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { BookOpen, Check, FileText, HandHeart, Lightbulb, MessageCircleQuestion, RefreshCw, Sparkles } from 'lucide-react';
+import { BookOpen, Check, FileText, HandHeart, Lightbulb, MessageCircleQuestion, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/ToastContext';
+import { PageHero } from '@/components/layout/PageHero';
 
 type InsightType =
   | 'from_question'
@@ -138,9 +139,13 @@ export default function InsightsPage() {
   const addToStep = () => showToast('Инсайт добавлен к текущему шагу.', 'success');
 
   return <main className="flex-1 min-w-0 space-y-5 pb-8">
-    <section className="rounded-3xl border bg-[var(--bg-card)] p-5 shadow-[var(--card-shadow)] md:p-7" style={{ borderColor: 'var(--border-color)' }}>
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"><div><div className="mb-2 flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]"><span>IT технологии</span><span className="text-[var(--gold)]">›</span><span className="text-[var(--text-secondary)]">Инсайты</span></div><h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Инсайты</h1><p className="mt-3 max-w-4xl text-sm leading-6 text-[var(--text-secondary)]">Живые выводы сообщества: полезные ответы, находки из разборов, вопросы участников и практические советы, которые помогают другим двигаться быстрее и спокойнее.</p></div><button className="inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--hover-bg)]" style={{ borderColor: 'var(--border-color)' }}>Обновлено 6 минут назад · <RefreshCw className="h-3.5 w-3.5" /> Обновить</button></div>
-    </section>
+    <PageHero
+      breadcrumbs={['IT технологии', 'Инсайты']}
+      title="Инсайты"
+      description="Живые выводы сообщества: полезные ответы, находки из разборов, вопросы участников и практические советы, которые помогают другим двигаться быстрее и спокойнее."
+      updatedLabel="Обновлено 6 минут назад"
+      onRefresh={() => showToast('Инсайты обновлены.', 'info')}
+    />
 
     <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[
       ['18 Инсайтов', 'Сохранено в сообществе'], ['4 для моего шага', 'Можно применить сейчас'], ['3 из разборов', 'Родились из работ участников'], ['2 моих следа', 'Ваши вопросы помогли другим'],
