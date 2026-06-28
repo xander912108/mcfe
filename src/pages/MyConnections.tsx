@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router';
-import { Sparkles, ArrowRight, UserPlus, Maximize2, Minimize2, Lightbulb, Users, Zap, MessageCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, UserPlus, Maximize2, Minimize2, Lightbulb } from 'lucide-react';
 import { useCamera } from '@/hooks/useCamera';
 import { currentUser, participantNodes, participantEdges, recommendations, bridgeContexts } from '@/data/graphData';
 import { PremiumStarGraph } from '@/components/social-fabric/PremiumStarGraph';
@@ -16,6 +16,7 @@ import { RingCard } from '@/components/social-fabric/RingCard';
 import { NodeTooltip } from '@/components/social-fabric/NodeTooltip';
 import { ConnectionList } from '@/components/social-fabric/ConnectionList';
 import { EmptyStateCanvas } from '@/components/social-fabric/EmptyStateCanvas';
+import { PageHero } from '@/components/layout/PageHero';
 import { SkeletonList, SkeletonCanvas } from '@/components/social-fabric/SkeletonLoader';
 import { ZoomButton } from '@/components/social-fabric/ZoomButton';
 import type { GraphNode, GraphEdge, BridgeContext } from '@/data/graphData';
@@ -255,43 +256,18 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     <div className={`${focusMode ? 'h-screen' : 'min-h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
-        <div className="shrink-0 px-5 pt-4 pb-3">
-          {/* Breadcrumbs */}
-          <div className="flex items-center gap-2 text-xs mb-2">
-            <span className="text-[var(--text-muted)]">IT технологии</span>
-            <span className="text-[var(--gold)]">{'>'}</span>
-            <span className="text-[var(--text-secondary)] font-medium">Мои связи</span>
-          </div>
-          {/* Title + description */}
-          <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-1 tracking-tight heading-accent inline-block">{tabDescriptions[topology]?.title}</h1>
-          <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-2xl">{tabDescriptions[topology]?.text}</p>
-          {/* Micro-stats */}
-          <div className="flex items-center gap-4 mt-2">
-            <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-              <Users className="w-3.5 h-3.5" /> <strong style={{ color: 'var(--text-primary)' }}>{filteredNodes.length}</strong> связей
-            </span>
-            <span className="w-px h-3" style={{ background: 'var(--border-color)' }} />
-            <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--success)' }} /> <strong style={{ color: 'var(--success)' }}>{filteredNodes.filter((n) => n.isOnline).length}</strong> онлайн
-            </span>
-            <span className="w-px h-3" style={{ background: 'var(--border-color)' }} />
-            <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-              <Zap className="w-3.5 h-3.5" /> <strong style={{ color: 'var(--gold)' }}>{recommendations.length}</strong> рекомендаций
-            </span>
-            {activeFilterCount > 0 && (
-              <>
-                <span className="w-px h-3" style={{ background: 'var(--border-color)' }} />
-                <span className="text-xs flex items-center gap-1.5" style={{ color: 'var(--gold)' }}>
-                  <MessageCircle className="w-3.5 h-3.5" /> <strong>{activeFilterCount}</strong> фильтров
-                </span>
-              </>
-            )}
-          </div>
+        <div className="shrink-0 pt-4 pb-3 lg:pr-[260px]">
+          <PageHero
+            breadcrumbs={['IT технологии', 'Мои связи']}
+            title="Мои связи"
+            description={tabDescriptions[topology]?.text}
+            updatedLabel={`${filteredNodes.length} связей · ${filteredNodes.filter((n) => n.isOnline).length} онлайн · ${recommendations.length} рекомендаций${activeFilterCount > 0 ? ` · ${activeFilterCount} фильтров` : ''}`}
+          />
         </div>
       )}
 
       {/* ═══ CONTENT: Canvas + Right Sidebar ═══ */}
-      <div className={`flex-1 flex gap-4 min-h-0 ${focusMode ? 'h-full overflow-hidden p-4' : 'overflow-visible px-5 pb-4'}`}>
+      <div className={`flex-1 flex min-h-0 ${focusMode ? 'h-full overflow-hidden p-4 gap-4' : 'overflow-visible pb-4 gap-5'}`}>
         {/* Left: Canvas area */}
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Toolbar: tabs + filter + focus + search */}
