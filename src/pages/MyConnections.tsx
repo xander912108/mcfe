@@ -471,7 +471,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
 
         {/* Right sidebar: recommendations + advisor */}
         {!focusMode && (
-          <aside className="hidden lg:flex w-[240px] shrink-0 flex-col gap-3 self-start lg:mt-[61px]">
+          <aside className="hidden lg:flex w-[240px] shrink-0 flex-col gap-3 self-start lg:mt-[49px]">
             {/* ===== РЕКОМЕНДАЦИИ ===== */}
             <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--card-shadow)' }}>
               <div className="flex items-center gap-2 mb-3">
