@@ -256,7 +256,7 @@ export default function MyConnections({ darkMode = true }: { darkMode?: boolean 
     <div className={`${focusMode ? 'h-screen' : 'min-h-full'} flex flex-col ${focusMode ? 'bg-[var(--bg-main)]' : ''}`}>
       {/* ═══ PAGE HEADER ═══ */}
       {!focusMode && (
-        <div className="shrink-0 px-5 pt-4 pb-3">
+        <div className="shrink-0 px-5 pt-4 pb-3 lg:pr-[305px]">
           <PageHero
             breadcrumbs={['IT технологии', 'Мои связи']}
             title="Мои связи"

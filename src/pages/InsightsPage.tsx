@@ -139,17 +139,19 @@ export default function InsightsPage() {
   const addToStep = () => showToast('Инсайт добавлен к текущему шагу.', 'success');
 
   return <main className="flex-1 min-w-0 space-y-5 pb-8">
-    <PageHero
-      breadcrumbs={['IT технологии', 'Инсайты']}
-      title="Инсайты"
-      description="Живые выводы сообщества: полезные ответы, находки из разборов, вопросы участников и практические советы, которые помогают другим двигаться быстрее и спокойнее."
-      updatedLabel="Обновлено 6 минут назад"
-      onRefresh={() => showToast('Инсайты обновлены.', 'info')}
-    />
+    <div className="space-y-5 lg:mr-[260px]">
+      <PageHero
+        breadcrumbs={['IT технологии', 'Инсайты']}
+        title="Инсайты"
+        description="Живые выводы сообщества: полезные ответы, находки из разборов, вопросы участников и практические советы, которые помогают другим двигаться быстрее и спокойнее."
+        updatedLabel="Обновлено 6 минут назад"
+        onRefresh={() => showToast('Инсайты обновлены.', 'info')}
+      />
 
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[
       ['18 Инсайтов', 'Сохранено в сообществе'], ['4 для моего шага', 'Можно применить сейчас'], ['3 из разборов', 'Родились из работ участников'], ['2 моих следа', 'Ваши вопросы помогли другим'],
     ].map(([value, text]) => <article key={value} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}><h2 className="text-lg font-semibold text-[var(--text-primary)]">{value}</h2><p className="mt-2 text-sm text-[var(--text-secondary)]">{text}</p></article>)}</section>
+    </div>
 
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]"><div className="space-y-5">
       <section className="rounded-[28px] border p-5 md:p-7" style={{ borderColor: 'rgba(201,169,110,0.42)', background: 'linear-gradient(135deg, rgba(201,169,110,0.18), var(--bg-card) 45%, var(--bg-card))' }}>

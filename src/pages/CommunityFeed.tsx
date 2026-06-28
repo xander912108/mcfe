@@ -206,22 +206,24 @@ export default function CommunityFeed() {
 
   return (
     <main className="flex-1 min-w-0 space-y-5">
-      <PageHero
-        breadcrumbs={['IT технологии', 'Сообщество']}
-        title="Сообщество"
-        description="Живая лента сообщений участников: вопросы, шаги, разборы, благодарности и инсайты, которые помогают двигаться вместе."
-        updatedLabel="Обновлено 3 минуты назад"
-        onRefresh={() => showToast('Лента сообщества обновлена.', 'info')}
-      />
+      <div className="space-y-5 lg:mr-[260px]">
+        <PageHero
+          breadcrumbs={['IT технологии', 'Сообщество']}
+          title="Сообщество"
+          description="Живая лента сообщений участников: вопросы, шаги, разборы, благодарности и инсайты, которые помогают двигаться вместе."
+          updatedLabel="Обновлено 3 минуты назад"
+          onRefresh={() => showToast('Лента сообщества обновлена.', 'info')}
+        />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[['7 новых сообщений', 'За сегодня'], ['3 вопроса ждут отклика', 'Можно помочь'], ['4 благодарности', 'Польза замечена'], ['2 инсайта', 'Сохранены из обсуждений']].map(([value, label]) => (
           <article key={value} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}>
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">{value}</h2>
             <p className="mt-2 text-sm text-[var(--text-secondary)]">{label}</p>
           </article>
         ))}
-      </section>
+        </section>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-5">
         <div className="space-y-4">

@@ -113,17 +113,19 @@ export default function ContributionPage() {
   };
 
   return <main className="flex-1 min-w-0 space-y-5">
-    <PageHero
-      breadcrumbs={['IT технологии', 'Вклад']}
-      title="Вклад"
-      description="Ваш полезный след в сообществе: ответы, благодарности, разборы, инсайты и помощь людям, которые помогли кому-то сделать следующий шаг."
-      updatedLabel="Обновлено 4 минуты назад"
-      onRefresh={() => showToast('Данные обновлены.', 'info')}
-    />
+    <div className="space-y-5 lg:mr-[260px]">
+      <PageHero
+        breadcrumbs={['IT технологии', 'Вклад']}
+        title="Вклад"
+        description="Ваш полезный след в сообществе: ответы, благодарности, разборы, инсайты и помощь людям, которые помогли кому-то сделать следующий шаг."
+        updatedLabel="Обновлено 4 минуты назад"
+        onRefresh={() => showToast('Данные обновлены.', 'info')}
+      />
 
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[
         ['Уровень', `${contributionMock.level} из 9`, 'Вы начинаете помогать другим'], ['Полезные действия', String(contributionMock.usefulActions), 'За последние 30 дней'], ['Благодарности', String(contributionMock.thanks), 'Польза подтверждена'], ['Можно помочь', `${contributionMock.opportunities} возможности`, 'Без обязательств']
       ].map(([label, value, text]) => <article key={label} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}><p className="text-xs text-[var(--text-muted)]">{label}</p><p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">{value}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{text}</p></article>)}</section>
+    </div>
 
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
       <div className="space-y-5">

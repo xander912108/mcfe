@@ -116,17 +116,19 @@ export default function LearningPage() {
 
   return (
     <main className="flex-1 min-w-0 space-y-5 pb-8">
-      <PageHero
-        breadcrumbs={['IT технологии', 'Обучение']}
-        title="Обучение"
-        description="Треки, потоки, материалы и практика, которые помогают двигаться по цели не в одиночку: с поддержкой, вопросами, разборами и людьми рядом."
-        updatedLabel="Обновлено 5 минут назад"
-        onRefresh={() => showToast('Данные обучения обновлены.', 'info')}
-      />
+      <div className="space-y-5 lg:mr-[260px]">
+        <PageHero
+          breadcrumbs={['IT технологии', 'Обучение']}
+          title="Обучение"
+          description="Треки, потоки, материалы и практика, которые помогают двигаться по цели не в одиночку: с поддержкой, вопросами, разборами и людьми рядом."
+          updatedLabel="Обновлено 5 минут назад"
+          onRefresh={() => showToast('Данные обучения обновлены.', 'info')}
+        />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {summaryCards.map((card) => <article key={card.label} className="rounded-2xl border bg-[var(--bg-card)] p-4 shadow-[0_10px_26px_rgba(0,0,0,0.035)]" style={{ borderColor: 'var(--border-color)' }}><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">{card.label}</p><h2 className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{card.value}</h2><p className="mt-2 text-sm text-[var(--text-secondary)]">{card.text}</p></article>)}
-      </section>
+        </section>
+      </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
         <div className="space-y-5">
