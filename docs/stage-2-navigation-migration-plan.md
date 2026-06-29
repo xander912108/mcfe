@@ -22,11 +22,11 @@
 - Добавлен `RouteErrorBoundary`.
 - Добавлен первый layout-шаг: `AppWorkspaceFrame`.
 - Desktop sidebars участника/лидера и mobile bottom nav уже читают данные из `navigationConfig`.
+- Header вынесен из `App.tsx` в отдельный компонент `AppHeader`.
 
 ## Что пока НЕ сделано
 
 - Роль и feature flags централизованы в `NavigationAccessProvider`, но пока используют demo defaults до подключения реального auth/store.
-- Header ещё находится внутри `App.tsx`.
 - Выбор страниц и leader tabs ещё находится внутри `App.tsx`.
 - Жёстких route guards пока нет, и это намеренно.
 
@@ -191,6 +191,10 @@
 ---
 
 ## Шаг 3.5 — вынести Header из `App.tsx`
+
+### Статус
+
+Базовый вынос выполнен: `AppHeader` содержит прежний header UI, dropdown состояния и avatar/community refs.
 
 ### Цель
 
