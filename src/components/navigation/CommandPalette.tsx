@@ -51,8 +51,12 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       title="Быстрый переход"
       description="Найдите раздел Mentori Club и перейдите к нему без лишних шагов."
       className="max-w-xl rounded-2xl border shadow-2xl"
+      showCloseButton={false}
     >
-      <CommandInput placeholder="Найти раздел или действие..." />
+      <CommandInput
+        placeholder="Найти раздел или действие..."
+        className="cursor-default outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+      />
       <CommandList className="max-h-[420px]">
         <CommandEmpty>Ничего не найдено</CommandEmpty>
         {visibleGroups.map((group) => (
