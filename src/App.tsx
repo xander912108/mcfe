@@ -26,19 +26,15 @@ const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 const ContributionPage = lazy(() => import('./pages/ContributionPage'));
 import { AppWorkspaceFrame } from '@/components/layout/AppWorkspaceFrame';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
+import { navigationConfig } from '@/lib/navigation/config';
+import { getNavigationLabel } from '@/lib/navigation/labels';
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
 /* ===== DATA ===== */
-const navItems = [
-  { icon: Map, label: 'Мой путь', active: false, path: '/my-path' },
-  { icon: Users, label: 'Сообщество', active: false, path: '/community' },
-  { icon: BookOpen, label: 'Обучение', active: false, path: '/learning' },
-  { icon: Calendar, label: 'Встречи', active: false, path: '/meetings' },
-  { icon: Link2, label: 'Мои связи', active: false, path: '/connections' },
-  { icon: Lightbulb, label: 'Инсайты', active: false, path: '/insights' },
-  { icon: Heart, label: 'Вклад', active: false, path: '/contribution' },
-];
+const participantSidebarItems = navigationConfig.filter(
+  (item) => item.surface === 'participant' && item.binding.owner === 'app-shell',
+);
 
 
 
@@ -302,16 +298,18 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
               {!leaderConsoleMode && (
                 <div className="flex flex-col h-full">
                   <nav className="space-y-1 flex-1">
-                    {navItems.map((item, i) => {
-                      const isActive = Boolean(item.path && item.path === location.pathname);
+                    {participantSidebarItems.map((item) => {
+                      const isActive = item.path === location.pathname;
+                      const Icon = item.icon;
+
                       return (
                         <div
-                          key={i}
-                          className={`nav-item ${item.active || isActive ? 'active' : ''}`}
-                          onClick={() => item.path ? navigate(item.path) : undefined}
-                          style={{ cursor: item.path ? 'pointer' : 'default' }}
+                          key={item.id}
+                          className={`nav-item ${isActive ? 'active' : ''}`}
+                          onClick={() => navigate(item.path)}
+                          style={{ cursor: 'pointer' }}
                         >
-                          <item.icon className="nav-icon" /><span>{item.label}</span>
+                          <Icon className="nav-icon" /><span>{getNavigationLabel(item)}</span>
                         </div>
                       );
                     })}
