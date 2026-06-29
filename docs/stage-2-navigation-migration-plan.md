@@ -24,11 +24,12 @@
 - Desktop sidebars участника/лидера и mobile bottom nav уже читают данные из `navigationConfig`.
 - Header вынесен из `App.tsx` в отдельный компонент `AppHeader`.
 - Участнический и лидерский sidebar вынесены в отдельные компоненты `ParticipantSidebar` и `LeaderSidebar`.
+- Route surface / page switch вынесен в `AppRouteSurface` без изменения текущих route bindings.
 
 ## Что пока НЕ сделано
 
 - Роль и feature flags централизованы в `NavigationAccessProvider`, но пока используют demo defaults до подключения реального auth/store.
-- Выбор страниц и leader tabs ещё находится внутри `App.tsx`.
+- `App.tsx` всё ещё отвечает за верхний shell, режим лидера и mobile bottom nav; это намеренно до отдельного layout/router решения.
 - Жёстких route guards пока нет, и это намеренно.
 
 ---
@@ -264,6 +265,10 @@
 
 ## Шаг 3.7 — вынести route surface / page switch
 
+### Статус
+
+Базовый вынос выполнен: выбор текущей рабочей поверхности и lazy-loaded страниц перенесён в `AppRouteSurface`; `HashRouter`, route bindings и живые страницы сохранены.
+
 ### Цель
 
 Вынести из `App.tsx` выбор текущей страницы и leader tab в отдельный компонент.
@@ -337,8 +342,8 @@
 
 ## Рекомендуемый ближайший PR
 
-Следующий рабочий PR после этого плана:
+Следующий рабочий PR после шага 3.7:
 
-> Подключить `navigationConfig` к desktop sidebar участника без визуальных изменений.
+> Обсудить route guards и сценарии доступа без немедленной смены роутинга.
 
-Это самый безопасный способ начать перевод логики на новые рельсы.
+Это безопасный следующий шаг перед любыми изменениями `HashRouter`, guards или layout/router структуры.
