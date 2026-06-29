@@ -2,7 +2,7 @@ import { Suspense, lazy, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Users, BookOpen, Calendar, Link2, Heart,
-  Crown, Star,
+  Star,
   ChevronDown, Check, BookMarked, Sparkles, Gem, Eye, TrendingUp,
   ArrowRight, Target, Lightbulb, HandHeart, MessageSquareQuote,
   Award, UserPlus, Workflow, Repeat,
@@ -24,6 +24,8 @@ const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 const ContributionPage = lazy(() => import('./pages/ContributionPage'));
 import { AppHeader } from '@/components/layout/AppHeader';
 import { AppWorkspaceFrame } from '@/components/layout/AppWorkspaceFrame';
+import { LeaderSidebar } from '@/components/layout/LeaderSidebar';
+import { ParticipantSidebar } from '@/components/layout/ParticipantSidebar';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import { navigationConfig, type NavigationItemId } from '@/lib/navigation/config';
 import { NavigationAccessProvider } from '@/lib/navigation/NavigationAccessProvider';
@@ -32,29 +34,6 @@ import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
 /* ===== DATA ===== */
-type NavigationConfigItem = (typeof navigationConfig)[number];
-type LeaderSidebarItem = Extract<NavigationConfigItem, { surface: 'leader' }>;
-
-const participantSidebarItems = navigationConfig.filter(
-  (item) => item.surface === 'participant' && item.binding.owner === 'app-shell',
-);
-
-const leaderSidebarItems = navigationConfig.filter(
-  (item): item is LeaderSidebarItem => item.surface === 'leader' && item.binding.owner === 'leader-shell',
-);
-
-const leaderSidebarLabels: Partial<Record<NavigationItemId, string>> = {
-  'leader-console': 'Главное сейчас',
-  'leader-contribution': 'Вклад',
-};
-
-const leaderSidebarCounts: Partial<Record<NavigationItemId, number>> = {
-  'leader-entry': 5,
-  'leader-requests': 0,
-  'leader-contribution': 9,
-  'leader-monetization': 1,
-};
-
 const mobileBottomNavItemIds = new Set<NavigationItemId>([
   'my-path',
   'community',
@@ -70,9 +49,6 @@ const mobileBottomNavLabels: Partial<Record<NavigationItemId, string>> = {
   connections: 'Связи',
 };
 
-function getLeaderSidebarLabel(item: LeaderSidebarItem): string {
-  return leaderSidebarLabels[item.id] ?? getNavigationLabel(item);
-}
 
 function getMobileBottomNavLabel(item: (typeof mobileBottomNavItems)[number]): string {
   return mobileBottomNavLabels[item.id] ?? getNavigationLabel(item);
@@ -176,18 +152,6 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
     return () => window.removeEventListener('keydown', handleCommandShortcut);
   }, []);
 
-  useEffect(() => {
-    const handleCommandShortcut = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setCommandPaletteOpen(true);
-      }
-    };
-
-    window.addEventListener('keydown', handleCommandShortcut);
-    return () => window.removeEventListener('keydown', handleCommandShortcut);
-  }, []);
-
   const sectionDivider = <div className="mx-[-20px] md:mx-[-32px] h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />;
   const sectionSpacing = "py-6 md:py-8";
 
@@ -213,91 +177,10 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
             {/* LEFT SIDEBAR — TWO LAYERS */}
             <aside className="hidden lg:flex flex-col w-[240px] shrink-0 sticky top-[88px] h-[calc(100vh-104px)]">
               {/* Layer 1: Community navigation */}
-              {!leaderConsoleMode && (
-                <div className="flex flex-col h-full">
-                  <nav className="space-y-1 flex-1">
-                    {participantSidebarItems.map((item) => {
-                      const isActive = item.path === location.pathname;
-                      const Icon = item.icon;
-
-                      return (
-                        <div
-                          key={item.id}
-                          className={`nav-item ${isActive ? 'active' : ''}`}
-                          onClick={() => navigate(item.path)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <Icon className="nav-icon" /><span>{getNavigationLabel(item)}</span>
-                        </div>
-                      );
-                    })}
-                  </nav>
-                  {/* Leader Console CTA */}
-                  <div className="pt-4 pb-2 px-1">
-                    <div className="h-px mb-4" style={{ backgroundColor: 'var(--border-color)' }} />
-                    <button
-                      onClick={() => navigate('/leader')}
-                      className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group"
-                      style={{
-                        background: 'linear-gradient(135deg, var(--gold-dark), var(--gold))',
-                        boxShadow: '0 4px 20px rgba(212, 175, 55, 0.2)',
-                        color: '#fff',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 6px 28px rgba(212, 175, 55, 0.35)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(212, 175, 55, 0.2)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                    >
-                      <Crown className="w-4 h-4" />
-                      <span>Консоль лидера</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+              {!leaderConsoleMode && <ParticipantSidebar />}
 
               {/* Layer 2: Leader Console navigation */}
-              {leaderConsoleMode && (
-                <div className="flex flex-col h-full">
-                  <nav className="space-y-1 flex-1 pt-2">
-                    {leaderSidebarItems.map((item) => {
-                      const Icon = item.icon;
-                      const tab = item.binding.leaderTab ?? 'main';
-                      const count = leaderSidebarCounts[item.id];
-
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => navigate(item.path)}
-                          className={`nav-item ${activeConsoleTab === tab ? 'active' : ''} justify-between w-full text-left`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <Icon className="nav-icon" /><span>{getLeaderSidebarLabel(item)}</span>
-                          </div>
-                          {count !== undefined && (
-                            <span
-                              className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold"
-                              style={{
-                                backgroundColor: count > 5 ? 'rgba(201, 112, 106, 0.15)' : 'rgba(212, 175, 55, 0.12)',
-                                color: count > 5 ? '#C9706A' : 'var(--gold)',
-                              }}
-                            >{count}</span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </nav>
-                  {/* Back to community */}
-                  <div className="pt-4 pb-2 px-1">
-                    <div className="h-px mb-4" style={{ backgroundColor: 'var(--border-color)' }} />
-                    <button
-                      onClick={() => navigate('/')}
-                      className="hover-text-primary w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium"
-                      style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}
-                    >
-                      <ArrowRight className="w-4 h-4 rotate-180" />
-                      <span>Вернуться в сообщество</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+              {leaderConsoleMode && <LeaderSidebar activeConsoleTab={activeConsoleTab} />}
             </aside>
 
             <AppWorkspaceFrame routeName={location.pathname}>
