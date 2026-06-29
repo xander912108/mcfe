@@ -21,14 +21,11 @@
 - Добавлена Command Palette поверх текущего интерфейса.
 - Добавлен `RouteErrorBoundary`.
 - Добавлен первый layout-шаг: `AppWorkspaceFrame`.
+- Desktop sidebars участника/лидера и mobile bottom nav уже читают данные из `navigationConfig`.
 
 ## Что пока НЕ сделано
 
-- Sidebar участника ещё не использует `navigationConfig` как источник данных.
-- Sidebar лидера ещё не использует `navigationConfig` как источник данных.
-- Mobile bottom nav ещё ручной.
-- Роль пользователя пока mock в navigation context.
-- Feature flags пока mock.
+- Роль и feature flags централизованы в `NavigationAccessProvider`, но пока используют demo defaults до подключения реального auth/store.
 - Header ещё находится внутри `App.tsx`.
 - Выбор страниц и leader tabs ещё находится внутри `App.tsx`.
 - Жёстких route guards пока нет, и это намеренно.
@@ -160,9 +157,13 @@
 
 ## Шаг 3.4 — заменить mock роли и flags на централизованный контекст
 
+### Статус
+
+Базовый `NavigationAccessProvider` добавлен. Следующий подшаг — подключить его к реальному auth/store, когда источник роли будет согласован.
+
 ### Цель
 
-Перестать держать role/feature flags как локальный mock внутри navigation hook.
+Не держать role/feature flags локальным mock внутри navigation hook.
 
 ### Что меняем
 

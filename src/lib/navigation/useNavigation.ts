@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { navigationConfig } from '@/lib/navigation/config';
+import { useNavigationAccess } from '@/lib/navigation/accessContext';
 import type { NavigationFeatureFlag, NavigationGroup, NavigationItem, UserRole } from '@/lib/navigation/types';
 
 export const roleHierarchy: Record<UserRole, number> = {
@@ -11,25 +12,9 @@ export const roleHierarchy: Record<UserRole, number> = {
   leader: 4,
 };
 
-export interface NavigationFeatureFlags {
-  isEnabled: (flag: NavigationFeatureFlag) => boolean;
-}
-
 export interface NavigationContext {
   role?: UserRole;
-  featureFlags: NavigationFeatureFlags;
-}
-
-const enabledFeatureFlags: NavigationFeatureFlags = {
-  isEnabled: () => true,
-};
-
-function useNavigationContext(): NavigationContext {
-  // TODO: заменить на реальные auth/store и feature flags, когда появится единый источник пользователя.
-  return {
-    role: 'leader',
-    featureFlags: enabledFeatureFlags,
-  };
+  isFeatureEnabled: (flag: NavigationFeatureFlag) => boolean;
 }
 
 export function hasMinRole(userRole: UserRole | undefined, minRole: UserRole): boolean {
@@ -40,7 +25,7 @@ export function hasMinRole(userRole: UserRole | undefined, minRole: UserRole): b
 
 export function isNavigationItemVisible(item: NavigationItem, context: NavigationContext): boolean {
   if (!hasMinRole(context.role, item.minRole)) return false;
-  if (item.featureFlag && !context.featureFlags.isEnabled(item.featureFlag)) return false;
+  if (item.featureFlag && !context.isFeatureEnabled(item.featureFlag)) return false;
 
   return true;
 }
@@ -68,11 +53,11 @@ export function groupNavigationItems(items: readonly NavigationItem[]): Record<N
 }
 
 export function useNavigation(): NavigationItem[] {
-  const { role, featureFlags } = useNavigationContext();
+  const { role, isFeatureEnabled } = useNavigationAccess();
 
   return useMemo(
-    () => filterNavigationItems(navigationConfig, { role, featureFlags }),
-    [role, featureFlags],
+    () => filterNavigationItems(navigationConfig, { role, isFeatureEnabled }),
+    [isFeatureEnabled, role],
   );
 }
 

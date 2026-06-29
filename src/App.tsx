@@ -27,6 +27,7 @@ const ContributionPage = lazy(() => import('./pages/ContributionPage'));
 import { AppWorkspaceFrame } from '@/components/layout/AppWorkspaceFrame';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import { navigationConfig, type NavigationItemId } from '@/lib/navigation/config';
+import { NavigationAccessProvider } from '@/lib/navigation/NavigationAccessProvider';
 import { getNavigationLabel } from '@/lib/navigation/labels';
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
@@ -199,6 +200,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
 
   return (
     <ToastProvider>
+    <NavigationAccessProvider>
     <div className={darkMode ? 'dark' : ''}>
       <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-main)' }}>
         <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
@@ -979,6 +981,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
         <div className="lg:hidden h-20" />
       </div>
     </div>
+    </NavigationAccessProvider>
     </ToastProvider>
   );
 }
