@@ -7,6 +7,7 @@
 - Это policy-документ, а не реализация guards.
 - Текущий прямой доступ к route не меняется.
 - Навигационная видимость уже может зависеть от роли и feature flags, но это не считается полноценной защитой route.
+- Pure access helpers добавлены без подключения runtime redirects к router.
 - Любой guard должен внедряться отдельным PR после согласования источника auth и fallback-сценариев.
 
 ## Цели
@@ -153,13 +154,15 @@ Feature flags могут скрывать пункты навигации и в 
 
 ### 3.8B — access helpers без подключения к router
 
-Создать pure helpers, например:
+Статус: выполнено. Добавлены pure helpers в `src/lib/access/routeAccess.ts`:
 
 - `canAccessNavigationItem(...)`
 - `canAccessRoute(...)`
 - `getRouteAccessFallback(...)`
+- `findNavigationItemByPath(...)`
+- `hasRouteMinRole(...)`
 
-Эти helpers можно покрыть unit-тестами и пока не включать в runtime redirects.
+Эти helpers пока не включены в runtime redirects и не меняют прямой доступ к route.
 
 ### 3.8C — мягкий guard для лидерских route
 
@@ -178,6 +181,7 @@ Feature flags могут скрывать пункты навигации и в 
 
 - Policy зафиксирована документом.
 - В документе указано, что guards пока не реализуются.
+- Pure access helpers добавлены без подключения к router.
 - Зафиксированы public, participant и leader routes.
 - Зафиксировано, что leader routes нельзя схлопывать.
 - Зафиксирован бережный fallback UX.

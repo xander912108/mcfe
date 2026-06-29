@@ -26,6 +26,7 @@
 - Участнический и лидерский sidebar вынесены в отдельные компоненты `ParticipantSidebar` и `LeaderSidebar`.
 - Route surface / page switch вынесен в `AppRouteSurface` без изменения текущих route bindings.
 - Route access policy зафиксирована в `docs/route-access-policy.md` без включения runtime guards.
+- Access helpers добавлены в `src/lib/access/routeAccess.ts` без подключения runtime redirects к router.
 
 ## Что пока НЕ сделано
 
@@ -302,7 +303,7 @@
 
 ### Статус
 
-Шаг 3.8A выполнен: route access policy зафиксирована документом `docs/route-access-policy.md`; runtime guards пока не реализуются.
+Шаги 3.8A–3.8B выполнены: route access policy зафиксирована документом `docs/route-access-policy.md`, pure access helpers добавлены в `src/lib/access/routeAccess.ts`; runtime guards пока не реализуются.
 
 ### Цель
 
@@ -347,8 +348,8 @@
 
 ## Рекомендуемый ближайший PR
 
-Следующий рабочий PR после шага 3.8A:
+Следующий рабочий PR после шага 3.8B:
 
-> Добавить access helpers без подключения runtime redirects к router.
+> Обсудить и подготовить мягкий guard для лидерских route без изменения `HashRouter`.
 
-Это безопасный следующий шаг перед любыми guards: сначала pure helpers и тестируемая политика доступа, потом мягкое подключение к runtime.
+Это безопасный следующий шаг: helpers уже есть, но runtime redirects включать только после согласования auth source и fallback UX.
