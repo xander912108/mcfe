@@ -24,19 +24,17 @@ const MeetingsPage = lazy(() => import('./pages/MeetingsPage'));
 const CommunityFeed = lazy(() => import('./pages/CommunityFeed'));
 const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 const ContributionPage = lazy(() => import('./pages/ContributionPage'));
+import { AppWorkspaceFrame } from '@/components/layout/AppWorkspaceFrame';
+import { CommandPalette } from '@/components/navigation/CommandPalette';
+import { navigationConfig } from '@/lib/navigation/config';
+import { getNavigationLabel } from '@/lib/navigation/labels';
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
 /* ===== DATA ===== */
-const navItems = [
-  { icon: Map, label: 'Мой путь', active: false, path: '/my-path' },
-  { icon: Users, label: 'Сообщество', active: false, path: '/community' },
-  { icon: BookOpen, label: 'Обучение', active: false, path: '/learning' },
-  { icon: Calendar, label: 'Встречи', active: false, path: '/meetings' },
-  { icon: Link2, label: 'Мои связи', active: false, path: '/connections' },
-  { icon: Lightbulb, label: 'Инсайты', active: false, path: '/insights' },
-  { icon: Heart, label: 'Вклад', active: false, path: '/contribution' },
-];
+const participantSidebarItems = navigationConfig.filter(
+  (item) => item.surface === 'participant' && item.binding.owner === 'app-shell',
+);
 
 
 
@@ -128,6 +126,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
   useEffect(() => { localStorage.setItem('theme', darkMode ? 'dark' : 'light'); }, [darkMode]);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const [communityDropdownOpen, setCommunityDropdownOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
   const communityRef = useRef<HTMLDivElement>(null);
@@ -141,6 +140,18 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  useEffect(() => {
+    const handleCommandShortcut = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleCommandShortcut);
+    return () => window.removeEventListener('keydown', handleCommandShortcut);
+  }, []);
+
   const sectionDivider = <div className="mx-[-20px] md:mx-[-32px] h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />;
   const sectionSpacing = "py-6 md:py-8";
 
@@ -148,6 +159,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
     <ToastProvider>
     <div className={darkMode ? 'dark' : ''}>
       <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-main)' }}>
+        <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
 
         {/* ===== HEADER ===== */}
         <header className="sticky top-0 z-50 backdrop-blur-xl" style={{ backgroundColor: 'var(--bg-header)', borderBottom: '1px solid var(--border-color)' }}>
@@ -215,10 +227,17 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
 
             {/* Search Bar */}
             <div className="hidden md:flex items-center flex-1 max-w-lg mx-8">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl w-full" style={{ backgroundColor: darkMode ? '#1A1A1E' : '#F5F4F0', border: '1px solid var(--border-color)' }}>
+              <button
+                type="button"
+                onClick={() => setCommandPaletteOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl w-full text-left transition-all duration-200"
+                style={{ backgroundColor: darkMode ? '#1A1A1E' : '#F5F4F0', border: '1px solid var(--border-color)', color: 'var(--text-muted)' }}
+                aria-label="Открыть быстрый переход"
+              >
                 <Search className="w-4 h-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
-                <input type="text" placeholder="Поиск по сообществу..." className="bg-transparent text-sm outline-none w-full" style={{ color: 'var(--text-primary)' }} />
-              </div>
+                <span className="text-sm flex-1">Поиск по сообществу...</span>
+                <kbd className="hidden lg:inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>⌘K</kbd>
+              </button>
             </div>
 
             {/* Right Actions */}
@@ -279,16 +298,18 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
               {!leaderConsoleMode && (
                 <div className="flex flex-col h-full">
                   <nav className="space-y-1 flex-1">
-                    {navItems.map((item, i) => {
-                      const isActive = Boolean(item.path && item.path === location.pathname);
+                    {participantSidebarItems.map((item) => {
+                      const isActive = item.path === location.pathname;
+                      const Icon = item.icon;
+
                       return (
                         <div
-                          key={i}
-                          className={`nav-item ${item.active || isActive ? 'active' : ''}`}
-                          onClick={() => item.path ? navigate(item.path) : undefined}
-                          style={{ cursor: item.path ? 'pointer' : 'default' }}
+                          key={item.id}
+                          className={`nav-item ${isActive ? 'active' : ''}`}
+                          onClick={() => navigate(item.path)}
+                          style={{ cursor: 'pointer' }}
                         >
-                          <item.icon className="nav-icon" /><span>{item.label}</span>
+                          <Icon className="nav-icon" /><span>{getNavigationLabel(item)}</span>
                         </div>
                       );
                     })}
@@ -363,7 +384,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
               )}
             </aside>
 
-            <div className="flex-1 min-w-0 flex flex-col lg:flex-row gap-4 md:gap-6">
+            <AppWorkspaceFrame routeName={location.pathname}>
               {/* ===== LEADER CONSOLE ===== */}
               {leaderConsoleMode && (
                 (() => {
@@ -890,7 +911,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
               </aside>
             </>
             )}
-            </div>
+            </AppWorkspaceFrame>
             </Suspense>
             </div>
           </div>
