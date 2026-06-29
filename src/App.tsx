@@ -8,7 +8,7 @@ import {
   TrendingUp, Check, BookMarked, Sparkles, Gem, Eye,
   ArrowRight, Target, Lightbulb, HandHeart, MessageSquareQuote,
   Award, UserPlus, Workflow, Repeat,
-  Lock, Wallet, CreditCard, Crown as CrownIcon, Plus, MoreHorizontal, Zap
+  Lock, Wallet, Crown as CrownIcon, Plus, MoreHorizontal
 } from 'lucide-react';
 const LeaderConsoleMain = lazy(() => import('./LeaderConsoleMain'));
 const LeaderConsoleEntry = lazy(() => import('./LeaderConsoleEntry'));
@@ -26,15 +26,38 @@ const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 const ContributionPage = lazy(() => import('./pages/ContributionPage'));
 import { AppWorkspaceFrame } from '@/components/layout/AppWorkspaceFrame';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
-import { navigationConfig } from '@/lib/navigation/config';
+import { navigationConfig, type NavigationItemId } from '@/lib/navigation/config';
 import { getNavigationLabel } from '@/lib/navigation/labels';
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
 /* ===== DATA ===== */
+type NavigationConfigItem = (typeof navigationConfig)[number];
+type LeaderSidebarItem = Extract<NavigationConfigItem, { surface: 'leader' }>;
+
 const participantSidebarItems = navigationConfig.filter(
   (item) => item.surface === 'participant' && item.binding.owner === 'app-shell',
 );
+
+const leaderSidebarItems = navigationConfig.filter(
+  (item): item is LeaderSidebarItem => item.surface === 'leader' && item.binding.owner === 'leader-shell',
+);
+
+const leaderSidebarLabels: Partial<Record<NavigationItemId, string>> = {
+  'leader-console': 'Главное сейчас',
+  'leader-contribution': 'Вклад',
+};
+
+const leaderSidebarCounts: Partial<Record<NavigationItemId, number>> = {
+  'leader-entry': 5,
+  'leader-requests': 0,
+  'leader-contribution': 9,
+  'leader-monetization': 1,
+};
+
+function getLeaderSidebarLabel(item: LeaderSidebarItem): string {
+  return leaderSidebarLabels[item.id] ?? getNavigationLabel(item);
+}
 
 
 
@@ -339,34 +362,32 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
               {leaderConsoleMode && (
                 <div className="flex flex-col h-full">
                   <nav className="space-y-1 flex-1 pt-2">
-                    {[
-                      { label: 'Главное сейчас', icon: Zap, count: undefined, tab: 'main' as const },
-                      { label: 'Вступление', icon: UserPlus, count: 5, tab: 'entry' as const },
-                      { label: 'Запросы', icon: HelpCircle, count: 0, tab: 'requests' as const },
-                      { label: 'Связи', icon: Link2, count: undefined, tab: 'connections' as const },
-                      { label: 'Вклад', icon: Heart, count: 9, tab: 'contribution' as const },
-                      { label: 'Монетизация', icon: CreditCard, count: 1, tab: 'monetization' as const },
-                      { label: 'Настройки', icon: Settings, count: undefined, tab: 'settings' as const },
-                    ].map((item) => (
-                      <button
-                        key={item.tab}
-                        onClick={() => navigate(`/leader${item.tab === 'main' ? '' : `/${item.tab}`}`)}
-                        className={`nav-item ${activeConsoleTab === item.tab ? 'active' : ''} justify-between w-full text-left`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <item.icon className="nav-icon" /><span>{item.label}</span>
-                        </div>
-                        {item.count !== undefined && (
-                          <span
-                            className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold"
-                            style={{
-                              backgroundColor: item.count > 5 ? 'rgba(201, 112, 106, 0.15)' : 'rgba(212, 175, 55, 0.12)',
-                              color: item.count > 5 ? '#C9706A' : 'var(--gold)',
-                            }}
-                          >{item.count}</span>
-                        )}
-                      </button>
-                    ))}
+                    {leaderSidebarItems.map((item) => {
+                      const Icon = item.icon;
+                      const tab = item.binding.leaderTab ?? 'main';
+                      const count = leaderSidebarCounts[item.id];
+
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => navigate(item.path)}
+                          className={`nav-item ${activeConsoleTab === tab ? 'active' : ''} justify-between w-full text-left`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon className="nav-icon" /><span>{getLeaderSidebarLabel(item)}</span>
+                          </div>
+                          {count !== undefined && (
+                            <span
+                              className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold"
+                              style={{
+                                backgroundColor: count > 5 ? 'rgba(201, 112, 106, 0.15)' : 'rgba(212, 175, 55, 0.12)',
+                                color: count > 5 ? '#C9706A' : 'var(--gold)',
+                              }}
+                            >{count}</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </nav>
                   {/* Back to community */}
                   <div className="pt-4 pb-2 px-1">
