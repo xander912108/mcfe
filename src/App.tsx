@@ -176,6 +176,18 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
     return () => window.removeEventListener('keydown', handleCommandShortcut);
   }, []);
 
+  useEffect(() => {
+    const handleCommandShortcut = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleCommandShortcut);
+    return () => window.removeEventListener('keydown', handleCommandShortcut);
+  }, []);
+
   const sectionDivider = <div className="mx-[-20px] md:mx-[-32px] h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />;
   const sectionSpacing = "py-6 md:py-8";
 
