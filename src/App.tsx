@@ -24,7 +24,7 @@ const MeetingsPage = lazy(() => import('./pages/MeetingsPage'));
 const CommunityFeed = lazy(() => import('./pages/CommunityFeed'));
 const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 const ContributionPage = lazy(() => import('./pages/ContributionPage'));
-import { RouteErrorBoundary } from '@/components/errors/RouteErrorBoundary';
+import { AppWorkspaceFrame } from '@/components/layout/AppWorkspaceFrame';
 import { CommandPalette } from '@/components/navigation/CommandPalette';
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
@@ -386,8 +386,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
               )}
             </aside>
 
-            <RouteErrorBoundary routeName={location.pathname}>
-            <div className="flex-1 min-w-0 flex flex-col lg:flex-row gap-4 md:gap-6">
+            <AppWorkspaceFrame routeName={location.pathname}>
               {/* ===== LEADER CONSOLE ===== */}
               {leaderConsoleMode && (
                 (() => {
@@ -914,8 +913,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
               </aside>
             </>
             )}
-            </div>
-            </RouteErrorBoundary>
+            </AppWorkspaceFrame>
             </Suspense>
             </div>
           </div>
