@@ -1,7 +1,7 @@
 import { Suspense, lazy, useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Map, Users, BookOpen, Calendar, Link2, Heart,
+  Users, BookOpen, Calendar, Link2, Heart,
   Sun, Moon, Search, Bell, MessageCircle, Crown,
   Star, Settings, HelpCircle, LogOut,
   User, Shield, ChevronDown, Compass,
@@ -55,8 +55,27 @@ const leaderSidebarCounts: Partial<Record<NavigationItemId, number>> = {
   'leader-monetization': 1,
 };
 
+const mobileBottomNavItemIds = new Set<NavigationItemId>([
+  'my-path',
+  'community',
+  'learning',
+  'meetings',
+  'connections',
+]);
+
+const mobileBottomNavItems = navigationConfig.filter((item) => mobileBottomNavItemIds.has(item.id));
+
+const mobileBottomNavLabels: Partial<Record<NavigationItemId, string>> = {
+  'my-path': 'Путь',
+  connections: 'Связи',
+};
+
 function getLeaderSidebarLabel(item: LeaderSidebarItem): string {
   return leaderSidebarLabels[item.id] ?? getNavigationLabel(item);
+}
+
+function getMobileBottomNavLabel(item: (typeof mobileBottomNavItems)[number]): string {
+  return mobileBottomNavLabels[item.id] ?? getNavigationLabel(item);
 }
 
 
@@ -940,12 +959,21 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
         {/* MOBILE BOTTOM NAV */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)]" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-color)', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center justify-around py-2 px-4">
-            {[{ icon: Map, label: 'Путь', path: '/my-path' }, { icon: Users, label: 'Сообщество', path: '/community' }, { icon: BookOpen, label: 'Обучение', path: '/learning' }, { icon: Calendar, label: 'Встречи', path: '/meetings' }, { icon: Link2, label: 'Связи', path: '/connections' }, { icon: MoreHorizontal, label: 'Ещё', path: null }].map((item, i) => (
-              <button key={i} onClick={() => item.path ? navigate(item.path) : undefined} className="flex flex-col items-center gap-1 py-1 px-2">
-                <item.icon className="w-5 h-5" style={{ color: item.path === location.pathname ? 'var(--gold)' : 'var(--text-muted)' }} />
-                <span className="text-[10px]" style={{ color: item.path === location.pathname ? 'var(--gold)' : 'var(--text-muted)' }}>{item.label}</span>
-              </button>
-            ))}
+            {mobileBottomNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = item.path === location.pathname;
+
+              return (
+                <button key={item.id} onClick={() => navigate(item.path)} className="flex flex-col items-center gap-1 py-1 px-2">
+                  <Icon className="w-5 h-5" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }} />
+                  <span className="text-[10px]" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }}>{getMobileBottomNavLabel(item)}</span>
+                </button>
+              );
+            })}
+            <button className="flex flex-col items-center gap-1 py-1 px-2">
+              <MoreHorizontal className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+              <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Ещё</span>
+            </button>
           </div>
         </nav>
         <div className="lg:hidden h-20" />
