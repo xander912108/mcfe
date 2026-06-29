@@ -1,14 +1,12 @@
-import { Suspense, lazy, useState, useRef, useEffect } from 'react';
+import { Suspense, lazy, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Map, Users, BookOpen, Calendar, Link2, Heart,
-  Sun, Moon, Search, Bell, MessageCircle, Crown,
-  Star, Settings, HelpCircle, LogOut,
-  User, Shield, ChevronDown, Compass,
-  TrendingUp, Check, BookMarked, Sparkles, Gem, Eye,
+  Users, BookOpen, Calendar, Link2, Heart,
+  Star,
+  ChevronDown, Check, BookMarked, Sparkles, Gem, Eye, TrendingUp,
   ArrowRight, Target, Lightbulb, HandHeart, MessageSquareQuote,
   Award, UserPlus, Workflow, Repeat,
-  Lock, Wallet, CreditCard, Crown as CrownIcon, Plus, MoreHorizontal, Zap
+  Lock, Wallet, Crown as CrownIcon, MoreHorizontal
 } from 'lucide-react';
 const LeaderConsoleMain = lazy(() => import('./LeaderConsoleMain'));
 const LeaderConsoleEntry = lazy(() => import('./LeaderConsoleEntry'));
@@ -24,27 +22,41 @@ const MeetingsPage = lazy(() => import('./pages/MeetingsPage'));
 const CommunityFeed = lazy(() => import('./pages/CommunityFeed'));
 const InsightsPage = lazy(() => import('./pages/InsightsPage'));
 const ContributionPage = lazy(() => import('./pages/ContributionPage'));
+import { AppHeader } from '@/components/layout/AppHeader';
+import { AppWorkspaceFrame } from '@/components/layout/AppWorkspaceFrame';
+import { LeaderSidebar } from '@/components/layout/LeaderSidebar';
+import { ParticipantSidebar } from '@/components/layout/ParticipantSidebar';
+import { CommandPalette } from '@/components/navigation/CommandPalette';
+import { navigationConfig, type NavigationItemId } from '@/lib/navigation/config';
+import { NavigationAccessProvider } from '@/lib/navigation/NavigationAccessProvider';
+import { getNavigationLabel } from '@/lib/navigation/labels';
 import { ToastProvider } from './ToastContext';
 import { images, avatars, previews, teams } from './assets/images';
 
 /* ===== DATA ===== */
-const navItems = [
-  { icon: Map, label: 'Мой путь', active: false, path: '/my-path' },
-  { icon: Users, label: 'Сообщество', active: false, path: '/community' },
-  { icon: BookOpen, label: 'Обучение', active: false, path: '/learning' },
-  { icon: Calendar, label: 'Встречи', active: false, path: '/meetings' },
-  { icon: Link2, label: 'Мои связи', active: false, path: '/connections' },
-  { icon: Lightbulb, label: 'Инсайты', active: false, path: '/insights' },
-  { icon: Heart, label: 'Вклад', active: false, path: '/contribution' },
-];
+const mobileBottomNavItemIds = new Set<NavigationItemId>([
+  'my-path',
+  'community',
+  'learning',
+  'meetings',
+  'connections',
+]);
+
+const mobileBottomNavItems = navigationConfig.filter((item) => mobileBottomNavItemIds.has(item.id));
+
+const mobileBottomNavLabels: Partial<Record<NavigationItemId, string>> = {
+  'my-path': 'Путь',
+  connections: 'Связи',
+};
+
+
+function getMobileBottomNavLabel(item: (typeof mobileBottomNavItems)[number]): string {
+  return mobileBottomNavLabels[item.id] ?? getNavigationLabel(item);
+}
 
 
 
-const myCommunitiesList = [
-  { name: 'AI & ML', icon: Sparkles, members: '1,203', role: 'участник' },
-  { name: 'Финтех', icon: TrendingUp, members: '856', role: 'лидер' },
-  { name: 'DevOps', icon: Workflow, members: '634', role: 'участник' },
-];
+
 
 const teamAvatars = teams;
 const memberAvatars = avatars;
@@ -126,19 +138,18 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
   const activeConsoleTab = leaderMode ? leaderTab : 'main';
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') !== 'light');
   useEffect(() => { localStorage.setItem('theme', darkMode ? 'dark' : 'light'); }, [darkMode]);
-  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
-  const [communityDropdownOpen, setCommunityDropdownOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const avatarRef = useRef<HTMLDivElement>(null);
-  const communityRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) setAvatarMenuOpen(false);
-      if (communityRef.current && !communityRef.current.contains(e.target as Node)) setCommunityDropdownOpen(false);
+    const handleCommandShortcut = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+
+    window.addEventListener('keydown', handleCommandShortcut);
+    return () => window.removeEventListener('keydown', handleCommandShortcut);
   }, []);
 
   const sectionDivider = <div className="mx-[-20px] md:mx-[-32px] h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--border-color), transparent)' }} />;
@@ -146,127 +157,17 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
 
   return (
     <ToastProvider>
+    <NavigationAccessProvider>
     <div className={darkMode ? 'dark' : ''}>
       <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-main)' }}>
+        <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
 
         {/* ===== HEADER ===== */}
-        <header className="sticky top-0 z-50 backdrop-blur-xl" style={{ backgroundColor: 'var(--bg-header)', borderBottom: '1px solid var(--border-color)' }}>
-          <div className="max-w-[1440px] mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-
-            {/* Community Selector — UPDATED */}
-            <div className="relative" ref={communityRef}>
-              <div className="flex items-center gap-2 cursor-pointer px-2.5 md:px-3 py-2 rounded-xl transition-all duration-200" style={{ border: '1px solid var(--border-color)' }} onClick={() => setCommunityDropdownOpen(!communityDropdownOpen)}>
-                <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--gold-dark), var(--gold))' }}>
-                  <Shield className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
-                </div>
-                <span className="text-sm font-semibold hidden sm:block" style={{ color: 'var(--text-primary)' }}>IT технологии</span>
-                <ChevronDown className="w-4 h-4 transition-transform duration-200" style={{ color: 'var(--text-muted)', transform: communityDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-              </div>
-
-              {communityDropdownOpen && (
-                <div className="absolute top-14 left-0 w-72 md:w-80 rounded-2xl py-2 z-50" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: darkMode ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 32px rgba(0,0,0,0.12)' }}>
-                  {/* Search */}
-                  <div className="px-3 pb-2">
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: 'var(--hover-bg)', border: '1px solid var(--border-color)' }}>
-                      <Search className="w-4 h-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
-                      <input type="text" placeholder="Поиск сообществ..." className="bg-transparent text-sm outline-none w-full" style={{ color: 'var(--text-primary)' }} />
-                    </div>
-                  </div>
-                  {/* Actions */}
-                  <div className="px-3 pb-2 space-y-1">
-                    <button className="hover-bg w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm" style={{ color: 'var(--text-primary)' }}>
-                      <Plus className="w-4 h-4" style={{ color: 'var(--gold)' }} /> Создать сообщество
-                    </button>
-                    <button className="hover-bg w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm" style={{ color: 'var(--text-primary)' }}>
-                      <Compass className="w-4 h-4" style={{ color: 'var(--gold)' }} /> Поиск сообществ
-                    </button>
-                  </div>
-                  {/* Single divider + all communities */}
-                  <div className="mx-3 h-px" style={{ backgroundColor: 'var(--border-color)' }} />
-                  <div className="px-3 py-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 px-1" style={{ color: 'var(--text-muted)' }}>Мои сообщества</p>
-                    {/* IT технологии — no crown, moved here */}
-                    <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-150 mb-1" style={{ backgroundColor: 'var(--hover-bg)' }}>
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--gold-dark), var(--gold))' }}>
-                        <Shield className="w-4.5 h-4.5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>IT технологии</p>
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>2,847 участников · Вы участник</p>
-                      </div>
-                    </button>
-                    {/* Other communities */}
-                    {myCommunitiesList.map((comm, i) => (
-                      <button key={i} className="hover-text-primary w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm" style={{ color: 'var(--text-secondary)' }}>
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--hover-bg)' }}>
-                          <comm.icon className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-                        </div>
-                        <div className="flex-1 text-left">
-                          <p className="text-sm">{comm.name}</p>
-                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{comm.members} участников · Вы {comm.role}</p>
-                        </div>
-                        {comm.name === 'Финтех' && <Crown className="w-4 h-4 shrink-0" style={{ color: 'var(--gold)' }} />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Search Bar */}
-            <div className="hidden md:flex items-center flex-1 max-w-lg mx-8">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl w-full" style={{ backgroundColor: darkMode ? '#1A1A1E' : '#F5F4F0', border: '1px solid var(--border-color)' }}>
-                <Search className="w-4 h-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
-                <input type="text" placeholder="Поиск по сообществу..." className="bg-transparent text-sm outline-none w-full" style={{ color: 'var(--text-primary)' }} />
-              </div>
-            </div>
-
-            {/* Right Actions */}
-            <div className="flex items-center gap-1.5 md:gap-2">
-              <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>{darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}</button>
-              <button className="theme-toggle relative"><Bell className="w-5 h-5" /><span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1" style={{ background: 'linear-gradient(135deg, #B85C57, #C9706A)' }}>3</span></button>
-              <button className="theme-toggle relative hidden sm:flex"><MessageCircle className="w-5 h-5" /><span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1" style={{ background: 'linear-gradient(135deg, var(--gold-dark), var(--gold))' }}>7</span></button>
-              <div className="relative ml-1" ref={avatarRef}>
-                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden cursor-pointer" style={{ border: '2px solid var(--gold)' }} onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}>
-                  <img src={images.avatarFounder} alt="Profile" className="w-full h-full object-cover" />
-                </div>
-                {avatarMenuOpen && (
-                  <div className="absolute right-0 top-11 md:top-12 w-56 rounded-2xl py-2 z-50" style={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: darkMode ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 32px rgba(0,0,0,0.12)' }}>
-                    <div className="px-4 py-3 mb-1" style={{ borderBottom: '1px solid var(--border-color)' }}>
-                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Александр Шилов</p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--gold)' }}>Уровень: Пламя</p>
-                    </div>
-                    <button className="hover-text-primary w-full flex items-center gap-3 px-4 py-2.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      <User className="w-4 h-4" /><span>Мой профиль</span>
-                    </button>
-                    <button className="hover-text-primary w-full flex items-center gap-3 px-4 py-2.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      <Settings className="w-4 h-4" /><span>Настройки участия</span>
-                    </button>
-                    {/* NEW: Пригласить участника */}
-                    <button className="hover-bg w-full flex items-center gap-3 px-4 py-2.5 text-sm" style={{ color: 'var(--gold)', fontWeight: 500 }}>
-                      <UserPlus className="w-4 h-4" /><span>Пригласить участника</span>
-                    </button>
-                    {/* Divider */}
-                    <div className="mx-4 my-1 h-px" style={{ backgroundColor: 'var(--border-color)' }} />
-                    {/* Dimmed items */}
-                    <button className="hover-text-primary w-full flex items-center gap-3 px-4 py-2.5 text-sm" style={{ color: 'var(--text-muted)' }}>
-                      <HelpCircle className="w-4 h-4" /><span>Служба поддержки</span>
-                    </button>
-                    <button className="hover-text-primary w-full flex items-center gap-3 px-4 py-2.5 text-sm" style={{ color: 'var(--text-muted)' }}>
-                      <Plus className="w-4 h-4" /><span>Создать сообщество</span>
-                    </button>
-                    <button className="hover-text-primary w-full flex items-center gap-3 px-4 py-2.5 text-sm" style={{ color: 'var(--text-muted)' }}>
-                      <Compass className="w-4 h-4" /><span>Поиск сообществ</span>
-                    </button>
-                    <button className="hover-bg w-full flex items-center gap-3 px-4 py-2.5 text-sm" style={{ color: '#C9706A' }}>
-                      <LogOut className="w-4 h-4" /><span>Выйти</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+        <AppHeader
+          darkMode={darkMode}
+          onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+          onToggleDarkMode={() => setDarkMode(!darkMode)}
+        />
 
         {/* ===== MAIN LAYOUT ===== */}
         <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-4 md:py-6">
@@ -276,94 +177,13 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
             {/* LEFT SIDEBAR — TWO LAYERS */}
             <aside className="hidden lg:flex flex-col w-[240px] shrink-0 sticky top-[88px] h-[calc(100vh-104px)]">
               {/* Layer 1: Community navigation */}
-              {!leaderConsoleMode && (
-                <div className="flex flex-col h-full">
-                  <nav className="space-y-1 flex-1">
-                    {navItems.map((item, i) => {
-                      const isActive = Boolean(item.path && item.path === location.pathname);
-                      return (
-                        <div
-                          key={i}
-                          className={`nav-item ${item.active || isActive ? 'active' : ''}`}
-                          onClick={() => item.path ? navigate(item.path) : undefined}
-                          style={{ cursor: item.path ? 'pointer' : 'default' }}
-                        >
-                          <item.icon className="nav-icon" /><span>{item.label}</span>
-                        </div>
-                      );
-                    })}
-                  </nav>
-                  {/* Leader Console CTA */}
-                  <div className="pt-4 pb-2 px-1">
-                    <div className="h-px mb-4" style={{ backgroundColor: 'var(--border-color)' }} />
-                    <button
-                      onClick={() => navigate('/leader')}
-                      className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group"
-                      style={{
-                        background: 'linear-gradient(135deg, var(--gold-dark), var(--gold))',
-                        boxShadow: '0 4px 20px rgba(212, 175, 55, 0.2)',
-                        color: '#fff',
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 6px 28px rgba(212, 175, 55, 0.35)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(212, 175, 55, 0.2)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                    >
-                      <Crown className="w-4 h-4" />
-                      <span>Консоль лидера</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+              {!leaderConsoleMode && <ParticipantSidebar />}
 
               {/* Layer 2: Leader Console navigation */}
-              {leaderConsoleMode && (
-                <div className="flex flex-col h-full">
-                  <nav className="space-y-1 flex-1 pt-2">
-                    {[
-                      { label: 'Главное сейчас', icon: Zap, count: undefined, tab: 'main' as const },
-                      { label: 'Вступление', icon: UserPlus, count: 5, tab: 'entry' as const },
-                      { label: 'Запросы', icon: HelpCircle, count: 0, tab: 'requests' as const },
-                      { label: 'Связи', icon: Link2, count: undefined, tab: 'connections' as const },
-                      { label: 'Вклад', icon: Heart, count: 9, tab: 'contribution' as const },
-                      { label: 'Монетизация', icon: CreditCard, count: 1, tab: 'monetization' as const },
-                      { label: 'Настройки', icon: Settings, count: undefined, tab: 'settings' as const },
-                    ].map((item) => (
-                      <button
-                        key={item.tab}
-                        onClick={() => navigate(`/leader${item.tab === 'main' ? '' : `/${item.tab}`}`)}
-                        className={`nav-item ${activeConsoleTab === item.tab ? 'active' : ''} justify-between w-full text-left`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <item.icon className="nav-icon" /><span>{item.label}</span>
-                        </div>
-                        {item.count !== undefined && (
-                          <span
-                            className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold"
-                            style={{
-                              backgroundColor: item.count > 5 ? 'rgba(201, 112, 106, 0.15)' : 'rgba(212, 175, 55, 0.12)',
-                              color: item.count > 5 ? '#C9706A' : 'var(--gold)',
-                            }}
-                          >{item.count}</span>
-                        )}
-                      </button>
-                    ))}
-                  </nav>
-                  {/* Back to community */}
-                  <div className="pt-4 pb-2 px-1">
-                    <div className="h-px mb-4" style={{ backgroundColor: 'var(--border-color)' }} />
-                    <button
-                      onClick={() => navigate('/')}
-                      className="hover-text-primary w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium"
-                      style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}
-                    >
-                      <ArrowRight className="w-4 h-4 rotate-180" />
-                      <span>Вернуться в сообщество</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+              {leaderConsoleMode && <LeaderSidebar activeConsoleTab={activeConsoleTab} />}
             </aside>
 
-            <div className="flex-1 min-w-0 flex flex-col lg:flex-row gap-4 md:gap-6">
+            <AppWorkspaceFrame routeName={location.pathname}>
               {/* ===== LEADER CONSOLE ===== */}
               {leaderConsoleMode && (
                 (() => {
@@ -890,7 +710,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
               </aside>
             </>
             )}
-            </div>
+            </AppWorkspaceFrame>
             </Suspense>
             </div>
           </div>
@@ -898,17 +718,27 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
         {/* MOBILE BOTTOM NAV */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)]" style={{ backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-color)', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center justify-around py-2 px-4">
-            {[{ icon: Map, label: 'Путь', path: '/my-path' }, { icon: Users, label: 'Сообщество', path: '/community' }, { icon: BookOpen, label: 'Обучение', path: '/learning' }, { icon: Calendar, label: 'Встречи', path: '/meetings' }, { icon: Link2, label: 'Связи', path: '/connections' }, { icon: MoreHorizontal, label: 'Ещё', path: null }].map((item, i) => (
-              <button key={i} onClick={() => item.path ? navigate(item.path) : undefined} className="flex flex-col items-center gap-1 py-1 px-2">
-                <item.icon className="w-5 h-5" style={{ color: item.path === location.pathname ? 'var(--gold)' : 'var(--text-muted)' }} />
-                <span className="text-[10px]" style={{ color: item.path === location.pathname ? 'var(--gold)' : 'var(--text-muted)' }}>{item.label}</span>
-              </button>
-            ))}
+            {mobileBottomNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = item.path === location.pathname;
+
+              return (
+                <button key={item.id} onClick={() => navigate(item.path)} className="flex flex-col items-center gap-1 py-1 px-2">
+                  <Icon className="w-5 h-5" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }} />
+                  <span className="text-[10px]" style={{ color: isActive ? 'var(--gold)' : 'var(--text-muted)' }}>{getMobileBottomNavLabel(item)}</span>
+                </button>
+              );
+            })}
+            <button className="flex flex-col items-center gap-1 py-1 px-2">
+              <MoreHorizontal className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+              <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Ещё</span>
+            </button>
           </div>
         </nav>
         <div className="lg:hidden h-20" />
       </div>
     </div>
+    </NavigationAccessProvider>
     </ToastProvider>
   );
 }
