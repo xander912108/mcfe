@@ -25,6 +25,7 @@
 - Header вынесен из `App.tsx` в отдельный компонент `AppHeader`.
 - Участнический и лидерский sidebar вынесены в отдельные компоненты `ParticipantSidebar` и `LeaderSidebar`.
 - Route surface / page switch вынесен в `AppRouteSurface` без изменения текущих route bindings.
+- Route access policy зафиксирована в `docs/route-access-policy.md` без включения runtime guards.
 
 ## Что пока НЕ сделано
 
@@ -299,6 +300,10 @@
 
 ## Шаг 3.8 — обсудить route guards
 
+### Статус
+
+Шаг 3.8A выполнен: route access policy зафиксирована документом `docs/route-access-policy.md`; runtime guards пока не реализуются.
+
 ### Цель
 
 Понять, когда можно безопасно закрывать route по роли, а не только скрывать пункты меню.
@@ -342,8 +347,8 @@
 
 ## Рекомендуемый ближайший PR
 
-Следующий рабочий PR после шага 3.7:
+Следующий рабочий PR после шага 3.8A:
 
-> Обсудить route guards и сценарии доступа без немедленной смены роутинга.
+> Добавить access helpers без подключения runtime redirects к router.
 
-Это безопасный следующий шаг перед любыми изменениями `HashRouter`, guards или layout/router структуры.
+Это безопасный следующий шаг перед любыми guards: сначала pure helpers и тестируемая политика доступа, потом мягкое подключение к runtime.
