@@ -1,5 +1,7 @@
 import type { Community, CommunitySummary } from '../types';
+import type { PaginatedResponse, PaginationParams } from '@/lib/pagination';
 import { communities } from '../mocks/communities.mock';
+import { paginateArray } from '@/lib/pagination';
 import { simulateLatency } from './client';
 
 // TODO: Заменить чтение моков на вызовы Tarantool: callTarantool('communities.get_*', args).
@@ -7,6 +9,11 @@ export const communitiesApi = {
   async getAll(): Promise<Community[]> {
     await simulateLatency();
     return communities;
+  },
+
+  async getAllPaginated(params: PaginationParams = {}): Promise<PaginatedResponse<Community>> {
+    await simulateLatency();
+    return paginateArray(communities, params);
   },
 
   async getById(id: string): Promise<Community | undefined> {

@@ -1,3 +1,62 @@
+const mentoriTokens = {
+  gold: {
+    50: '#FFF9E6',
+    100: '#FFEDB3',
+    200: '#FFE080',
+    300: '#FFD24D',
+    400: '#E8C030',
+    500: '#D4AF37',
+    600: '#B8941F',
+    700: '#8C7015',
+    800: '#604C0E',
+    900: '#3D2E0F',
+  },
+  terracotta: {
+    50: '#FDF2F0',
+    100: '#F9D8D3',
+    200: '#F3B5AB',
+    300: '#EB8E7F',
+    400: '#E26B58',
+    500: '#C8513D',
+    600: '#A73F2E',
+    700: '#863023',
+    800: '#5F2219',
+    900: '#3D1610',
+  },
+  sage: {
+    50: '#F2F5F2',
+    100: '#DAE3DB',
+    200: '#B5C7B7',
+    300: '#8EAA92',
+    400: '#6B8E70',
+    500: '#527257',
+    600: '#415A44',
+    700: '#324435',
+    800: '#232F25',
+    900: '#161E18',
+  },
+  neutral: {
+    0: '#FFFFFF',
+    50: '#FAFAF9',
+    100: '#F5F5F4',
+    200: '#E7E5E4',
+    300: '#D6D3D1',
+    400: '#A8A29E',
+    500: '#78716C',
+    600: '#57534E',
+    700: '#44403C',
+    800: '#292524',
+    900: '#1C1917',
+    950: '#0C0A09',
+  },
+  semantic: {
+    success: { light: '#D1FAE5', main: '#10B981', dark: '#065F46' },
+    warning: { light: '#FEF3C7', main: '#F59E0B', dark: '#92400E' },
+    error: { light: '#FEE2E2', main: '#EF4444', dark: '#991B1B' },
+    info: { light: '#DBEAFE', main: '#3B82F6', dark: '#1E40AF' },
+  },
+}
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -5,6 +64,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        gold: mentoriTokens.gold,
+        terracotta: mentoriTokens.terracotta,
+        sage: mentoriTokens.sage,
+        neutral: mentoriTokens.neutral,
+        success: mentoriTokens.semantic.success,
+        warning: mentoriTokens.semantic.warning,
+        error: mentoriTokens.semantic.error,
+        info: mentoriTokens.semantic.info,
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

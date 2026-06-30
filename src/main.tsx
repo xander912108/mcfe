@@ -4,9 +4,11 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import CommunityLanding from './CommunityLanding.tsx'
+import { QueryProvider } from '@/lib/query/QueryProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <QueryProvider>
     <HashRouter>
       <Routes>
         <Route path="/" element={<App />} />
@@ -27,5 +29,6 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/leader/settings" element={<App leaderMode leaderTab="settings" />} />
       </Routes>
     </HashRouter>
+    </QueryProvider>
   </StrictMode>,
 )
