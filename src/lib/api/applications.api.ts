@@ -1,5 +1,7 @@
 import type { Application, ApplicationStatus } from '../types';
+import type { PaginatedResponse, PaginationParams } from '@/lib/pagination';
 import { applications } from '../mocks/applications.mock';
+import { paginateArray } from '@/lib/pagination';
 import { simulateLatency } from './client';
 
 // TODO: Заменить чтение и обновление моков на Tarantool: callTarantool('applications.*', args).
@@ -9,9 +11,25 @@ export const applicationsApi = {
     return applications;
   },
 
+  async getAllPaginated(params: PaginationParams = {}): Promise<PaginatedResponse<Application>> {
+    await simulateLatency();
+    return paginateArray(applications, params);
+  },
+
   async getByCommunity(communityId: string): Promise<Application[]> {
     await simulateLatency();
     return applications.filter((a) => a.community_id === communityId);
+  },
+
+  async getByCommunityPaginated(
+    communityId: string,
+    params: PaginationParams = {},
+  ): Promise<PaginatedResponse<Application>> {
+    await simulateLatency();
+    return paginateArray(
+      applications.filter((a) => a.community_id === communityId),
+      params,
+    );
   },
 
   async getByStatus(status: ApplicationStatus): Promise<Application[]> {

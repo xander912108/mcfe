@@ -1,5 +1,7 @@
 import type { User, UserSummary } from '../types';
+import type { PaginatedResponse, PaginationParams } from '@/lib/pagination';
 import { users } from '../mocks/users.mock';
+import { paginateArray } from '@/lib/pagination';
 import { simulateLatency } from './client';
 
 // TODO: Заменить чтение моков на вызовы Tarantool: callTarantool('users.get_*', args).
@@ -7,6 +9,11 @@ export const usersApi = {
   async getAll(): Promise<User[]> {
     await simulateLatency();
     return users;
+  },
+
+  async getAllPaginated(params: PaginationParams = {}): Promise<PaginatedResponse<User>> {
+    await simulateLatency();
+    return paginateArray(users, params);
   },
 
   async getById(id: string): Promise<User | undefined> {
