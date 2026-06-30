@@ -5,4 +5,4 @@ export { pulseMetrics, pulseHistory } from './pulse.mock';
 export { socialConnections } from './social-fabric.mock';
 export { recommendations } from './recommendations.mock';
 export { pathProgressMap, pathSteps, dailySteps } from './path.mock';
-export { mockId, daysAgo, hoursAgo, randomBetween } from './helpers';
+export { mockId, stableMockId, daysAgo, hoursAgo, randomBetween } from './helpers';
