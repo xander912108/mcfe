@@ -11,6 +11,7 @@ import { navigationConfig, type NavigationItemId } from '@/lib/navigation/config
 import { NavigationAccessProvider } from '@/lib/navigation/NavigationAccessProvider';
 import { getNavigationLabel } from '@/lib/navigation/labels';
 import { ToastProvider } from './ToastContext';
+import { useTheme } from '@/lib/theme/useTheme';
 
 /* ===== DATA ===== */
 const mobileBottomNavItemIds = new Set<NavigationItemId>([
@@ -43,8 +44,8 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
   const location = useLocation();
   const leaderConsoleMode = !connectionsPage && !myPathPage && !learningPage && !meetingsPage && !communityFeedPage && !insightsPage && !contributionPage && (leaderMode || location.pathname === '/leader' || location.pathname === '/leader/entry');
   const activeConsoleTab = leaderMode ? leaderTab : 'main';
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') !== 'light');
-  useEffect(() => { localStorage.setItem('theme', darkMode ? 'dark' : 'light'); }, [darkMode]);
+  const { effectiveTheme, toggleTheme } = useTheme();
+  const darkMode = effectiveTheme === 'dark';
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   useEffect(() => {
@@ -71,7 +72,7 @@ function App({ leaderMode = false, leaderTab = 'main', connectionsPage = false, 
         <AppHeader
           darkMode={darkMode}
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
-          onToggleDarkMode={() => setDarkMode(!darkMode)}
+          onToggleDarkMode={toggleTheme}
         />
 
         {/* ===== MAIN LAYOUT ===== */}
